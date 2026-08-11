@@ -2,6 +2,14 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-11] Staging doc enlarged; restraint doctrine scoped to the distributed product
+
+- **The staging doc is now a review surface with its own, larger target.** Previously the docs carried a single "5–8 items per edition" rule that applied to everything, which produced only 2–3 items per section on the Monday draft — 5–8 spread across three content sections is 2–3 each by arithmetic. **Staging target is now ~5–6 per content section, ~15–18 total.**
+- **"Restraint is the product" now explicitly governs the DISTRIBUTED product only.** The Thursday finished report stays at **5–8 items total**. The count narrows through the week, and that funnel is the stated intent rather than slippage. This ambiguity is corrected in `cti/pnd.md`, `cti/mandate.md`, `cti/codex.md` and the README tenet.
+- **Standards are unchanged.** The additional staging entries are the next-lower-ranked items from the *same* sorted queue — lower tier and/or fewer elevation signals, not weaker sourcing. Extending the cut line down a ranked list is not relaxing the bar. Every staging entry still carries its scoring reasoning (tier + which multipliers fired) so the analyst can audit where the cut falls.
+- **Config keys renamed for the distinction:** `production.item_target` → `production.staging_item_target` `[15, 18]`, `production.staging_per_section` `[5, 6]`, `production.distributed_item_target` `[5, 8]`. Safe because no engine reads them — `arbites.py` takes only `report_title` from this block.
+- **No engine or scoring change.** `scoring.settings.surface_n` stays at 55, already ~3× the new staging target. Verified: scorer parity **514/514 PASS**, recency gate **PASS**, config loads, 50 sensors intact. The only edit under `core/` is a docstring in `pnd.py` naming the renamed keys.
+
 ## [2026-08-11] Sensor audit — AOR sources loaded, dead sensors pruned
 
 - **Four curated AOR/official sensors added and verified live** against host egress: a state emergency-management newsroom, a state technology-department newsroom, an SLTT government-technology trade feed, and the CIS/MS-ISAC alert feed (companion to the advisories feed already loaded). All four confirmed producing on the first production cycle. Closes the standing "curated AOR trusted sources" direction.

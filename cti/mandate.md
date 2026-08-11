@@ -55,7 +55,11 @@
 - **Arbites (pre-filter) known limits the analyst must catch:** keyword scoring can mis-tag on proximity (e.g., a national article discussing California near an incident word looks tier-1 — check the title), and national threat-landscape roundups score mid-pack. These are expected; the human gate catches them.
 
 ### Production
-- **"Restraint is the product": 5–8 items per edition** (15 acceptable only for an inaugural catch-up).
+- **"Restraint is the product" governs the DISTRIBUTED product, not the staging doc.** These are two different targets and conflating them was a real ambiguity in this document until 2026-08-11.
+  - **Staging doc (Monday, Vox draft) — generous: ~5–6 items per content section, ~15–18 total.** It is a *review surface*, not a product. Its job is to give the analyst and the cyber team enough material to review, cut down, and use to tune Planning & Direction. Per-section targets apply to NEWS, CTA TTPs, and LATEST ATTACKS OR RISKS; KEYWORDS is wave-tops and carries no target.
+  - **Distributed product (Thursday) — restrained: 5–8 items total.** This is where restraint applies.
+  - **The count narrows through the week. That funnel is the intent**, not slippage.
+- **Extending the staging cut line does not lower the standard.** The added entries are the next-lower-ranked items from the *same* sorted queue — lower tier and/or fewer elevation signals, not lower-quality sourcing. Every staging entry must still show its scoring reasoning (tier + which multipliers fired) so the analyst can audit where the cut falls.
 - **Every item needs a "why an SLTT org cares" clause** tied to the low-maturity California SLTT audience. Items without SLTT relevance get cut.
 - **Plain language, minimal-tooling recommendations** (IG1 CIS controls preferred). Audience consumes vendor software; they don't write code. Emphasis on vendor accountability and procurement governance.
 - **Staging (Vox draft) = content only, no handling markings.** Distribution product is a separate template with TLP:CLEAR, deeper analysis, and presentation polish. Never conflate the two.

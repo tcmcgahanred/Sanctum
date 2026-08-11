@@ -63,7 +63,7 @@ Eleven tenets govern every decision in this build. The first five are how it is 
 3. **Config over code.** Steer by editing `pnd.md` (feeds, weights, rules, output shape), never by editing Python. Requirements, scoring, and sensors are data, not logic.
 4. **Planning & Direction is the single control surface.** Set the domain there; it drives Collection, Processing & Exploitation, and Analysis & Production. One place to configure.
 5. **Portable & decoupled.** Git is the source of truth; the repo is standalone; the host and corpus store are configuration, not code. It moves anywhere via env/manifest — no code changes.
-6. **Restraint is the product.** 5–8 items per edition. Quality over quantity on sensors, generous on items. Coverage emerges from good sensors well-operated, not from piling on feeds.
+6. **Restraint is the product.** 5–8 items in the *distributed* report; the Monday staging draft is a deliberately larger review surface that narrows through the week. Quality over quantity on sensors, generous on items. Coverage emerges from good sensors well-operated, not from piling on feeds.
 7. **The human gate is absolute.** The score orders the queue; the analyst always decides and overrides. Synthesis stays manual (no API/tokens) by deliberate choice.
 8. **Transparent and fail-safe.** Every surfaced item shows its scoring reasoning; nothing is hidden (mandatory drop list). Prefer false positives to false negatives — flag, don't drop.
 9. **Stops at the staging document.** Sanctum triages and stages; it does not build the finished product. That final step diverges hardest by domain and stays a human job.

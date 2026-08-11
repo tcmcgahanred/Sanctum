@@ -240,16 +240,43 @@ scoring:
 
 Shapes the staging output and the human synthesis stage: the pre-filter report
 title, the section taxonomy the analyst arranges items into, and the item-count
-target. "Restraint is the product": 5–8 items per edition.
+targets.
+
+**Two different targets — do not conflate them.** The staging doc is a *review
+surface*; the distributed report is the *product*. The count narrows through the
+week, and that funnel is the intent:
+
+| Artifact | When | Target |
+|---|---|---|
+| **Staging doc** (Vox draft) | Monday | **~5–6 per content section, ~15–18 total** — generous, so the analyst and the cyber team have material to review, cut, and use to tune P&D |
+| **Distributed report** | Thursday | **5–8 items total** — "restraint is the product" applies here |
+
+Per-section targets cover the three content sections (NEWS, CTA TTPs, LATEST
+ATTACKS OR RISKS). KEYWORDS is wave-tops, not items, and carries no target.
+
+The extra staging entries are the **next-lower-ranked items from the same sorted
+queue** — lower tier and/or fewer elevation signals. This extends the cut line
+down an already-ranked list; it does not lower the standard. Every entry still
+shows its scoring reasoning (tier + which multipliers fired) so the analyst can
+audit where the cut falls.
+
+*Both targets are advisory — no engine reads them (verified 2026-08-11: `arbites.py`
+reads only `report_title` from this block). The only code-enforced production knob is
+`scoring.settings.surface_n`, which sets candidate-queue depth. At 55 it already
+supplies roughly 3× the new staging target, so no scoring change is required.*
 
 ```yaml
 production:
   report_title: "WCTI — Pre-Filtered Candidate Queue"
-  item_target: [5, 8]
+  staging_item_target: [15, 18]        # Monday review surface — total across content sections
+  staging_per_section: [5, 6]          # NEWS / CTA TTPs / LATEST ATTACKS OR RISKS
+  distributed_item_target: [5, 8]      # Thursday finished report — "restraint is the product"
   sections: ["NEWS", "CTA TTPs", "LATEST ATTACKS OR RISKS", "KEYWORDS"]
   deliverable_name: "WCTI_v[YYYYMMDD]_STAGING"   # date = distribution (Thu)
   notes: >
-    Staging = content only, no handling markings. Three dates on the distribution
-    product: title = distribution (Thursday); ICOD line = collection cutoff
-    (Monday 0900); LTIOV planning-only, never printed.
+    Staging = content only, no handling markings, generous item count (review
+    surface). The distributed product narrows to 5-8 and adds handling markings.
+    KEYWORDS is wave-tops, not items - no target applies. Three dates on the
+    distribution product: title = distribution (Thursday); ICOD line = collection
+    cutoff (Monday 0900); LTIOV planning-only, never printed.
 ```
