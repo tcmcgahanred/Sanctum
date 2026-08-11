@@ -108,7 +108,8 @@
 
 ### 2026-08-11 — Read what production already records before building a tool
 - A candidate-feed validator script and a proposed `--check` flag on Acolyte were both drafted, then discarded unbuilt. `acolyte.py` already logs per-URL yield and per-URL failures every cycle, so a `grep` and an `awk` over `collector.log` answered feed liveness, lifetime yield, and dead-vs-quiet completely.
-- The same log also disambiguated a suspected dead feed: a sensor showing 0 new across 9 runs was not dead but stuck in the `process_page` URL-dedupe path.
+- The log also caught a wrong explanation. Two sensors showing 0 new across 9 runs were first written up as "collected once, then URL-deduped into silence." The log said otherwise: both logged `WARNING no text` on **every** cycle, meaning they yielded neither feed entries nor extractable page text and were re-fetched in full each run. The corrected reason was pushed to `cti/pnd.md`, the changelog and this file.
+- **Lesson within the lesson:** a plausible mechanism is not evidence. The dedupe story fit the symptom and was wrong; one `grep` for the `no text` warning settled it. Check the log before writing a cause into three documents.
 - **Lesson:** the collector's own log is the sensor-health instrument. Query it before writing anything.
 
 ### 2026-08-11 — `production` config is advisory, not enforced

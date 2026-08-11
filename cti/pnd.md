@@ -47,10 +47,17 @@ it against the host's egress first; drop noisy sources. Do not reintroduce the d
 Also dropped 2026-08-11, verified against 9 cycles of `collector.log` — do not reintroduce
 without new evidence:
 
-- `thecyberwire.com/feeds/rss.xml` — 0 new in 9 runs. Returns no entries, so Acolyte falls
-  through to the page-extract path, collects the URL once, and URL-hash-dedupes it into
-  silence thereafter.
-- Google-News query `("CISA Region 9" OR "CISA California")` — 0 new in 9 runs; too narrow.
+- `thecyberwire.com/feeds/rss.xml` — 0 new in 9 runs, and **0 lifetime**. Returns no parseable
+  feed entries, so Acolyte falls through to `process_page`, which then extracts no text either.
+  Logs `WARNING no text` on every single cycle from 2026-08-05 onward. The publisher (now N2K
+  CyberWire) no longer advertises any RSS feed on its site; this path appears retired.
+- Google-News query `("CISA Region 9" OR "CISA California")` — 0 new in 9 runs, 0 lifetime, and
+  the identical `no text` failure every cycle. The query matches nothing, so Google returns an
+  empty feed, which falls to the page path and yields nothing extractable. Too narrow.
+
+Note: a source that returns neither feed entries nor extractable text is **retried in full every
+cycle** — `process_page` returns before recording the URL in `seen.txt`, so there is no
+suppression. Both of the above burned a fetch per cycle for nine cycles.
 
 On notice: `packetstormsecurity.com/feeds/news/` (1 new in 9 runs).
 
