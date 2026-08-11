@@ -129,7 +129,7 @@ sanctum/
 │   ├── README.md            # effort overview
 │   └── editions/            # brief editions
 │                            # (references/ kept local, git-ignored)
-├── s2/                      # Effort 2 — Aviation S2 — CONFIG (stub)
+├── s2/                      # Effort 2 — [REDACTED] S2 — CONFIG (stub)
 │   ├── pnd.md
 │   └── README.md
 ├── diagrams/                # domain-neutral diagrams
