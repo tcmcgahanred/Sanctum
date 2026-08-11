@@ -25,7 +25,7 @@ A human always reviews before anything is published. The score orders the queue;
 ## Two efforts (example domains)
 
 - **Effort 1 — CTI (operational).** A weekly OSINT cyber-threat-intelligence cycle for low-maturity **State/Local/Tribal/Territorial (SLTT)** partners, tuned for a regional Area of Responsibility. Produces a weekly **TLP:CLEAR** brief. See `cti/`.
-- **Effort 2 — S2 (future stub).** A weekly cycle for a military aviation intelligence (S2) role, sharing the same machinery but its own doctrine (IPB frameworks: MCOO, OAKOC, METT-TC, ASCOPE, PMESII-PT). See `s2/`.
+- **Effort 2 — S2 (future stub).** A weekly cycle for [REDACTED] role, sharing the same machinery but its own doctrine (IPB frameworks: MCOO, OAKOC, METT-TC, ASCOPE, PMESII-PT). See `s2/`.
 
 The point of Sanctum is that both run on the **same engine** — only their `pnd.md` differs.
 
