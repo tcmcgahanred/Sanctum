@@ -1,0 +1,32 @@
+# Sanctum — CTI Effort (Effort 1)
+
+*The operational weekly OSINT cyber-threat-intelligence cycle — an example Sanctum domain, tuned for a State/Local/Tribal/Territorial (SLTT) audience across a regional Area of Responsibility (AOR).*
+
+**BLUF:** This folder is a **domain instance** — configuration and outputs, no engine code. The generic engines live in `../core/` and are pointed at this domain with `../run.sh cti`. Everything CTI-specific — feeds included — is in the single `pnd.md`.
+
+## What's here
+
+| File | Role |
+|------|------|
+| `pnd.md` | **Planning & Direction** — the single config file the engines read: `manifest` + the `sensors` feed list + `scoring` model + `production`. Config is in fenced blocks; prose is for humans. |
+| `codex.md` | Intelligence requirements & doctrine (prose). Documents what `pnd.md`'s scoring block encodes (KIQ / PIRs / scoring / cut doctrine). |
+| `mandate.md` | Standing planning & direction record (directives + lessons log) — and the per-domain status/backlog tracker. |
+| `editions/vox_v*.md` | The brief (Vox) — keyed to the distribution date. |
+
+## How P&D drives the cycle
+
+`pnd.md` holds the config blocks, one per working stage:
+
+- **`manifest`** → Collection: where the corpus lives, the feed list, the collection window.
+- **`scoring`** → Processing & Exploitation: tiers (8/4/2/1), keyword groups, elevation multipliers, and the "geo-subject-of-an-incident" rule — all as data.
+- **`production`** → Analysis & Production: the staging report title, section taxonomy, and the 5–8 item target.
+
+Change what lands first by editing `scoring` in `pnd.md` (keep `codex.md`'s prose in sync). Change what's collected by editing the `sensors` block in `pnd.md`.
+
+## Tuning it for another AOR
+
+This example is tuned for a California SLTT AOR (the `geo` keyword group is California geography). To adapt it to a different region, swap the `geo` group and the AOR-specific sensors in `pnd.md` — the engine and the rest of the doctrine are unchanged.
+
+## Deliverable naming
+
+The staging deliverable is `WCTI_v[YYYYMMDD]_STAGING`, date = the **distribution (Thursday)** date. "Vox" stays the internal artifact concept.

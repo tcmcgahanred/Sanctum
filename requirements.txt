@@ -1,0 +1,5 @@
+# Sanctum — Python dependencies (install into the host venv)
+#   /opt/ravenor/venv/bin/pip install -r requirements.txt
+feedparser
+trafilatura
+pyyaml          # NEW: P&D config parsing (core/pnd.py). rclone stays a system binary.

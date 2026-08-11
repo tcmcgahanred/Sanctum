@@ -1,0 +1,45 @@
+# Sanctum — .gitignore
+# Secrets NEVER enter the repo (they live in a secrets manager). Runtime data is transient.
+# NOTE: a .gitignore cannot catch an inline IP or secret pasted into a tracked file —
+# any relay/VPN IP or credential must be scrubbed BY HAND from committed config.
+
+# --- Credentials / tokens ---
+rclone.conf
+.env
+.env.*
+*.key
+*.pem
+*_token*
+*token*.json
+*credentials*.json
+*service-account*.json
+*service_account*.json
+secrets/
+.secrets/
+
+# --- Runtime data (regenerates; transient 7-day corpus) ---
+corpus/
+seen.txt
+seen_titles.txt
+*.log
+logs/*.log
+staging_candidates.md
+
+# --- Python cruft ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# --- Reference material: kept LOCAL, never published ---
+# Working notes, feed candidate lists, and the effort briefing stay on your
+# machine but are not committed (they carry internal/host detail).
+*/references/
+references/
