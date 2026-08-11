@@ -52,7 +52,21 @@ Governed by the **Codex**. Mapped by the **Cogitator**. Everything domain-specif
 
 ## Doctrine
 
-*Restraint is the product.* 5–8 items per edition. Quality over quantity on sensors, generous on items; prefer false positives to false negatives; convergence-based multiplicative scoring (tier weights 8/4/2/1 × elevation multipliers); the human analyst always overrides the score.
+Eleven tenets govern every decision in this build. The first five are how it is engineered; the rest are how it is operated.
+
+1. **Simplicity & elegance.** Minimal, legible structure — one file per domain's P&D, references separated from production, no cruft. If it can be simpler, make it simpler.
+2. **Domain-agnostic engine.** `core/` holds zero domain knowledge. The intelligence cycle never changes by domain — only the config does. Standing up a new domain is dropping in one `pnd.md`.
+3. **Config over code.** Steer by editing `pnd.md` (feeds, weights, rules, output shape), never by editing Python. Requirements, scoring, and sensors are data, not logic.
+4. **Planning & Direction is the single control surface.** Set the domain there; it drives Collection, Processing & Exploitation, and Analysis & Production. One place to configure.
+5. **Portable & decoupled.** Git is the source of truth; the repo is standalone; the host and corpus store are configuration, not code. It moves anywhere via env/manifest — no code changes.
+6. **Restraint is the product.** 5–8 items per edition. Quality over quantity on sensors, generous on items. Coverage emerges from good sensors well-operated, not from piling on feeds.
+7. **The human gate is absolute.** The score orders the queue; the analyst always decides and overrides. Synthesis stays manual (no API/tokens) by deliberate choice.
+8. **Transparent and fail-safe.** Every surfaced item shows its scoring reasoning; nothing is hidden (mandatory drop list). Prefer false positives to false negatives — flag, don't drop.
+9. **Stops at the staging document.** Sanctum triages and stages; it does not build the finished product. That final step diverges hardest by domain and stays a human job.
+10. **Prove before you build.** Don't over-engineer; don't abstract before a second real use case exists; scale or migrate only after it earns it. Favor near-zero technical debt.
+11. **Scrubbed, secure, verified.** Secrets never enter the repo; the public face carries no identifying or infra detail. Verify, don't guess — behavior-changing edits are proven by tests.
+
+Scoring is convergence-based and multiplicative (tier weights 8/4/2/1 × elevation multipliers) by design: a heavily-elevated lower-tier item can outrank a bare higher-tier one.
 
 ## Cadence
 

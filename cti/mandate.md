@@ -72,9 +72,15 @@
 
 ## PENDING DIRECTION (act on these; move to Log when done)
 
-- Verify + load curated AOR trusted sources (MS-ISAC, Cal OES, CDT, CA regional press) — replaces the dropped county feeds. Category 3 (official CA) first; drop any that prove noisy after a cycle.
-- Build CA AG breach-registry scraper — authoritative AOR breach sensor (web portal, not RSS).
+- ~~**Verify + load curated AOR trusted sources**~~ — **DONE 2026-08-11.** Loaded and verified live against host egress: `news.caloes.ca.gov/feed/`, `cdt.ca.gov/newsroom/feed/`, `statescoop.com/feed/`, `cisecurity.org/feed/alert`. All four produced on the first cycle. Rejected: `cdt.ca.gov/feed/` (site-wide feed, last updated Apr 2025 — the newsroom sub-feed is the live one) and both GovTech feed paths (0 entries / 404). CA regional press deliberately **not** expanded — the statewide thematic queries already cover it, and individual outlets are largely paywalled. Re-check yield after several cycles; drop any that prove noisy.
+- **Fix `process_page` re-collection** (`core/acolyte.py:114`) — page-type sources are deduped on URL hash, so a page is collected once and never revisited. Blocks every portal source below. Small engine change; needs a test.
+- **Cal-CSIC cyber advisories** — `caloes.ca.gov/…/cyber-advisories/`. **Confirmed alive and publishing through August 2026.** PDF/DOCX links under month accordions that render out of chronological order; no RSS, no pagination, email-only subscription. Acolyte's existing page-collection path can take it once the dedupe fix above lands — extracting the index page may yield enough, since titles and dates are what the scorer consumes. Prove that before building PDF parsing.
+- Build CA AG breach-registry scraper — authoritative AOR breach sensor (web portal, not RSS). **Keep separate from Cal-CSIC**; do not build a shared "portal scraper" abstraction until a second use case forces it.
 - Add ransomware leak-site aggregator (e.g. Ransomware.live) filtered for California — early-warning AOR sensor (catches victims before local press).
+- **Set a collection timeout** — `core/acolyte.py` sets no timeout on `feedparser.parse` and no `socket.setdefaulttimeout`, so a stalled feed can block a sequential run indefinitely. A full cycle legitimately takes 15–30 min, so a real hang is hard to distinguish from normal slowness.
+- **Fix the `run.sh` mode bit** — committed as 644 in every commit, so `./run.sh <domain>` fails on a fresh clone or after `git reset --hard`. Hidden until now because the systemd unit invokes `bash` explicitly. Fix with `git update-index --chmod=+x run.sh`.
+- **Decide MSRC volume** — `api.msrc.microsoft.com/update-guide/rss` produced 3,561 of 6,757 lifetime articles (52.7%, ~396/cycle) against a next-largest sensor at 270 lifetime. Per-CVE Patch Tuesday enumeration, not intelligence. Directly contradicts "quality over quantity on sensors." Options: drop, filtered variant, or per-source intake cap.
+- **Decide county coverage approach** — direction is high-confidence county-specific sensors rather than keyword queries, but **which counties are in the AOR** must be settled before researching 58 county newsrooms. The dropped keyword set covered 34 of 58 and omitted the population centres.
 - ~~**Implement the Arbites recency flag**~~ — **DONE 2026-08-10.** Implemented in `core/arbites.py` (flag stale-by-publish-date vs the cycle window, never drop; configurable in `cti/pnd.md` → `scoring.settings.recency`). Verified by `tests/recency_test.py`; score parity preserved.
 - Build distribution template + TLP:CLEAR presentation layer.
 - Consider extending Arbites to scaffold a rough Vox draft (reduce chat tether without adding an API).
@@ -83,11 +89,37 @@
 - Consider widening the recency window — the current 7-day window flags many still-relevant 1–2-week-old items as STALE; a longer window may fit CTI better (tune empirically).
 - Host monitoring — deferred.
 
+### Repo hygiene — reviewed and closed 2026-08-11
+
+- **Edition publishing stays manual.** `cti/editions/WCTI_v20260813_STAGING.md` and `The_Seal.png` (commit `23b61f3`) were placed in the repo deliberately, by hand. **Do not automate edition publishing** and do not propose it. Editions reach the repo when the analyst puts them there.
+- **`CCIC` reference in `WCTI_v20260813_STAGING.md` — reviewed, left as-is.** Line 17 names the CCIC 34-county AOR. Raised as a possible scrub violation (the CCIC title was stripped from the Cogitator during scrubbing, per CHANGELOG 2026-08-11); reviewed by the analyst and accepted. **Do not re-raise.** Note for context: the AOR is 34 counties — this is why the dropped county keyword feeds numbered 34, not a partial rollout.
+
 *(Per-domain status/backlog lives here in the Mandate; the Cogitator is the shared, domain-neutral cycle map at `diagrams/cogitator.drawio`.)*
 
 ---
 
 ## LESSONS / DECISIONS LOG (dated; newest first)
+
+### 2026-08-11 — One sensor is over half the corpus
+- `api.msrc.microsoft.com/update-guide/rss` produced **3,561 of 6,757** lifetime articles across 9 runs — 52.7%, ~396 per cycle. The next largest sensor has produced 270 *lifetime*.
+- This is per-CVE Patch Tuesday enumeration arriving as individual articles. It is volume, not intelligence, and it directly contradicts the standing "quality over quantity on sensors" directive — coverage is not emerging from good sensors well-operated, it is being buried by one.
+- **Lesson:** a sensor's yield needs auditing as well as its liveness. A feed can be reliable, additive on paper, and still be wrong for the apparatus because of the *shape* of what it emits. Add intake volume to the criteria for admitting a feed.
+- Decision pending in Pending Direction.
+
+### 2026-08-11 — Read what production already records before building a tool
+- A candidate-feed validator script and a proposed `--check` flag on Acolyte were both drafted, then discarded unbuilt. `acolyte.py` already logs per-URL yield and per-URL failures every cycle, so a `grep` and an `awk` over `collector.log` answered feed liveness, lifetime yield, and dead-vs-quiet completely.
+- The same log also disambiguated a suspected dead feed: a sensor showing 0 new across 9 runs was not dead but stuck in the `process_page` URL-dedupe path.
+- **Lesson:** the collector's own log is the sensor-health instrument. Query it before writing anything.
+
+### 2026-08-11 — `production` config is advisory, not enforced
+- `core/arbites.py` loads the `production` block but reads only `report_title`. `item_target` and `sections` are referenced nowhere in `core/`. The sole code-enforced production knob is `scoring.settings.surface_n`.
+- **Consequence for the edition-size question:** editing `item_target` changes nothing mechanically. A bigger *review pool* means raising `surface_n`; a bigger *product* means changing doctrine in the Codex and this Mandate plus analyst behaviour. The two are separate levers and only one is code.
+- Consistent with "synthesis stays manual" — the production block is documentation for the human stage.
+
+### 2026-08-11 — When clones disagree, check commit dates before assuming
+- The collector host was found running 82 sensors against the repo's 48. This read as unpushed host drift; it was the opposite. The host had never pulled since publication (history was rewritten at first release, so a plain pull will not fast-forward) and was still running the pre-drop county-feed config. The repo was ahead the whole time.
+- A second check compounded it: a `grep -c` line count matched by coincidence and masked the mismatch.
+- **Lesson:** compare commit timestamps before deciding which clone is ahead, and verify *content* — a count can collide.
 
 ### Recency gate: enforce by publish-date, not collect-date
 - A June FortiBleed advisory (pub. 2026-06-18) surfaced in edition v20260810. Root cause: "current week" was effectively windowed on the *collection* date, and the score carries no recency term — so a feed re-serving an old item (advisory update, re-list, roundup, KEV resurfacing) lands it in the current corpus, where it ranks on relevance.
