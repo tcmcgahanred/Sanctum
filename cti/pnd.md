@@ -44,11 +44,22 @@ feed list** — edit feeds here. Add a feed only if it is reliable AND additive;
 it against the host's egress first; drop noisy sources. Do not reintroduce the dropped
 34 county Google-News keyword feeds.
 
+Also dropped 2026-08-11, verified against 9 cycles of `collector.log` — do not reintroduce
+without new evidence:
+
+- `thecyberwire.com/feeds/rss.xml` — 0 new in 9 runs. Returns no entries, so Acolyte falls
+  through to the page-extract path, collects the URL once, and URL-hash-dedupes it into
+  silence thereafter.
+- Google-News query `("CISA Region 9" OR "CISA California")` — 0 new in 9 runs; too narrow.
+
+On notice: `packetstormsecurity.com/feeds/news/` (1 new in 9 runs).
+
 ```sensors
 # --- National: government / CERT / SLTT ---
 https://www.cisa.gov/cybersecurity-advisories/all.xml
 https://us-cert.cisa.gov/ncas/current-activity.xml
 https://www.cisecurity.org/feed/advisories
+https://www.cisecurity.org/feed/alert
 https://www.kb.cert.org/vulfeed
 https://www.nist.gov/blogs/cybersecurity-insights/rss.xml
 https://jvn.jp/en/rss/jvn.rdf
@@ -80,7 +91,6 @@ https://www.tenable.com/blog/feed
 https://feeds.feedburner.com/hackread
 https://feeds.feedburner.com/TroyHunt
 https://www.infosecurity-magazine.com/rss/news/
-https://thecyberwire.com/feeds/rss.xml
 https://cybersecuritynews.com/feed/
 https://bartblaze.blogspot.com/feeds/posts/default
 https://packetstormsecurity.com/feeds/news/
@@ -88,10 +98,14 @@ https://seclists.org/rss/fulldisclosure.rss
 https://krebsonsecurity.com/feed/
 https://googleprojectzero.blogspot.com/feeds/posts/default
 https://www.bleepingcomputer.com/feed/
+https://statescoop.com/feed/
+
+# --- Regional AOR: official sources (example: California) ---
+https://www.news.caloes.ca.gov/feed/
+https://www.cdt.ca.gov/newsroom/feed/
 
 # --- Regional AOR: statewide / sector queries (example: California) ---
 https://news.google.com/rss/search?q=%22California%22%20(ransomware%20OR%20%22data%20breach%22%20OR%20cyberattack)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=(%22CISA%20Region%209%22%20OR%20%22CISA%20California%22)&hl=en-US&gl=US&ceid=US:en
 https://news.google.com/rss/search?q=California%20(%22community%20college%22%20OR%20university%20OR%20CSU%20OR%20UC)%20(ransomware%20OR%20%22data%20breach%22)&hl=en-US&gl=US&ceid=US:en
 https://news.google.com/rss/search?q=California%20%22school%20district%22%20(ransomware%20OR%20cyberattack%20OR%20%22data%20breach%22)&hl=en-US&gl=US&ceid=US:en
 https://news.google.com/rss/search?q=California%20(%22special%20district%22%20OR%20%22transit%20agency%22%20OR%20%22public%20works%22)%20(cyberattack%20OR%20ransomware%20OR%20breach)&hl=en-US&gl=US&ceid=US:en
