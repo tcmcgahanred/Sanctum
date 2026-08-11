@@ -1,7 +1,7 @@
 # S2 — Planning & Direction (P&D)  ·  TEMPLATE / STUB
 
 *Sanctum · S2 domain config. **NOT operational.** This is the empty P&D template
-for the future CANG Aviation S2 effort. The `core/` engines are already agnostic —
+for the future [REDACTED] S2 effort. The `core/` engines are already agnostic —
 fill in the blocks below with real S2 requirements and `run.sh s2` will run the
 same collect→score machinery for this domain. Do not build until S2 is a real,
 active requirement (see `../ROADMAP.md`).*
