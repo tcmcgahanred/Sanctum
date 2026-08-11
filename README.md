@@ -1,6 +1,10 @@
-# Sanctum
+<p align="center">
+  <img src="The_Seal.png" alt="Sanctum seal" width="220">
+</p>
 
-> *"Restraint is the product."*
+<h1 align="center">Sanctum</h1>
+
+<p align="center"><em>"Restraint is the product."</em></p>
 
 **Sanctum — the seat of detection.** A domain-agnostic, open-source-intelligence (OSINT) apparatus: you set the **Planning & Direction** for a domain, and Sanctum goes out and collects, triages against that direction, and stages the results for a human analyst to review. The intelligence cycle is the same whatever the domain; only the requirements and sensors change.
 
