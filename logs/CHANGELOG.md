@@ -31,5 +31,5 @@ A domain-agnostic OSINT collection-and-triage apparatus.
 - **Recency gate.** Flags items whose *publication* date falls outside the cycle window as "STALE — confirm current hook"; never drops them (preserves legitimately-current re-emergences).
 - **Single-file P&D.** A domain's entire configuration — feeds, scoring model, output shape — lives in one `pnd.md`. Adding a domain is: drop in `<domain>/pnd.md` and run `run.sh <domain>`.
 - **CTI effort (operational).** An SLTT cyber-threat-intelligence cycle: 48 trusted national/sector feeds at initial release, a convergence-based scoring model, and a staged weekly brief. Tuned as an example for a California SLTT AOR.
-- **S2 effort (stub).** An IPB-flavored P&D template, pre-wired for a future aviation-intelligence domain.
+- **S2 effort (stub).** An IPB-flavored P&D template, pre-wired for a future [REDACTED] domain.
 - **Verification.** A parity test proves the config-driven scorer reproduces the original hardcoded logic exactly; a recency test covers the publish-date gate.
