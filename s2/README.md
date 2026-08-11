@@ -1,4 +1,4 @@
-# Sanctum — Effort 2: CANG Aviation S2 (future stub)
+# Sanctum — Effort 2: [REDACTED] (future stub)
 
 *Sanctum · S2 effort · not built. Placeholder for the second intelligence effort under the Sanctum umbrella.*
 
@@ -6,7 +6,7 @@
 
 ## What this will be
 
-A weekly intelligence cycle supporting a California Army National Guard S2 (intelligence officer) role at an Aviation Brigade. It shares Sanctum's machinery — collection patterns, scoring discipline, the human-gate philosophy — but keeps its own doctrine.
+A weekly intelligence cycle supporting a [REDACTED]. It shares Sanctum's machinery — collection patterns, scoring discipline, the human-gate philosophy — but keeps its own doctrine.
 
 - **Frameworks (its own doctrine):** IPB — MCOO, OAKOC, METT-TC, ASCOPE, PMESII-PT.
 - **Classification:** all work **unclassified / open-source**, same as the CTI effort.
