@@ -50,3 +50,4 @@ references/
 
 # --- Second domain: kept out of the public repo entirely.
 s2/
+.githooks/
