@@ -10,6 +10,7 @@
 |------|------|
 | `pnd.md` | **Planning & Direction** — the single config file the engines read: `manifest` + the `sensors` feed list + `scoring` model + `production`. Config is in fenced blocks; prose is for humans. |
 | `codex.md` | Intelligence requirements & doctrine (prose). Documents what `pnd.md`'s scoring block encodes (KIQ / PIRs / scoring / cut doctrine). |
+| `decomposition.md` | **PIR → SIR → EEI decomposition.** Every EEI mapped to the sensor that collects it and the scoring signal that weights it. Drives the sensor-build roadmap and the rationale for each signal. **Requirements changes start here**, then the config, then the Codex. |
 | `mandate.md` | Standing planning & direction record (directives + lessons log) — and the per-domain status/backlog tracker. |
 | `editions/vox_v*.md` | The brief (Vox) — keyed to the distribution date. |
 

@@ -2,6 +2,16 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-11] Same-event grouping in the staging report
+
+- **Problem.** Collection dedup catches identical URLs and identical normalized titles. It cannot catch several outlets writing different headlines about one incident — those arrive as separate articles, and because scoring keys on terms rather than events they *scatter*. Measured on three realistic headlines for one incident: 8.0, 8.0 and 1.0, where the 1.0 was the only one naming the affected town. The best-sourced copy was the one below the cut.
+- **Built.** `core/arbites.py` now groups suspected same-event items under their highest-scoring sibling, marked `⧉`, with a group count in the report header. Any grouped copy that fell below the cut is pulled up and labelled *rescued from drop list*; it also stays listed in the drop list, cross-referenced.
+- **Display only.** No score is changed, no item merged, no item dropped — consistent with flag-don't-drop. The corroboration count stays visible because several independent outlets on one incident is itself a signal.
+- **Signal used:** shared rare tokens in titles, publisher suffix stripped. Two items sharing at least `min_shared_rare` distinctive tokens are treated as one event. Common words are excluded automatically by document frequency, so no per-domain stopword list is needed. Config: `scoring.settings.grouping` — `enabled`, `min_shared_rare`, `max_df_abs`, `max_df_frac`, `max_bucket`.
+- **Bug caught by the new test before release:** a fixed rarity threshold (`max_df: 3`) meant an incident covered by four outlets had the victim's name classified as too common to be distinctive, and nothing grouped at all. The threshold now scales with corpus size.
+- **Verification:** new `tests/grouping_test.py` (12 checks) covers clustering, anchoring on the top scorer, below-cut rescue, non-grouping of unrelated items, config disable, non-destructiveness, and publisher-suffix stripping. Scorer parity **514/514 PASS**, recency **PASS**. End-to-end on a 204-article synthetic corpus: one group found, two copies rescued, 200 templated fillers correctly untouched.
+- **Caveat:** thresholds are defaults tuned on synthetic data. Verify against a real corpus before trusting them.
+
 ## [2026-08-11] Staging doc enlarged; restraint doctrine scoped to the distributed product
 
 - **The staging doc is now a review surface with its own, larger target.** Previously the docs carried a single "5–8 items per edition" rule that applied to everything, which produced only 2–3 items per section on the Monday draft — 5–8 spread across three content sections is 2–3 each by arithmetic. **Staging target is now ~5–6 per content section, ~15–18 total.**
@@ -31,5 +41,5 @@ A domain-agnostic OSINT collection-and-triage apparatus.
 - **Recency gate.** Flags items whose *publication* date falls outside the cycle window as "STALE — confirm current hook"; never drops them (preserves legitimately-current re-emergences).
 - **Single-file P&D.** A domain's entire configuration — feeds, scoring model, output shape — lives in one `pnd.md`. Adding a domain is: drop in `<domain>/pnd.md` and run `run.sh <domain>`.
 - **CTI effort (operational).** An SLTT cyber-threat-intelligence cycle: 48 trusted national/sector feeds at initial release, a convergence-based scoring model, and a staged weekly brief. Tuned as an example for a California SLTT AOR.
-- **S2 effort (stub).** An IPB-flavored P&D template, pre-wired for a future [REDACTED] domain.
+- **Second-domain support.** The engine is domain-agnostic by construction; a second effort needs only its own `pnd.md`.
 - **Verification.** A parity test proves the config-driven scorer reproduces the original hardcoded logic exactly; a recency test covers the publish-date gate.

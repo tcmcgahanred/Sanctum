@@ -104,6 +104,15 @@
 
 ## LESSONS / DECISIONS LOG (dated; newest first)
 
+### 2026-08-11 — Same-event grouping built; the old deferral watched the wrong failure
+
+- Four outlets reporting one incident arrive as four articles. Collection dedup cannot see it — different URLs, different headlines — and scoring **scatters** them, because it keys on terms, not events. Demonstrated live: three realistic Suisun City headlines scored 8.0, 8.0 and **1.0**, and the 1.0 was the only one that named the town. The most useful copy was the one buried below the cut.
+- **The 2026-08 deferral of fuzzy dedup was conditioned on "a real false-*merge*."** The failure actually occurring is a false-*split* — one story wrongly kept apart. The revisit trigger was written for the opposite failure mode and would never have fired. **Lesson: when deferring a fix, state the trigger in terms of the failure you expect, and check that it is the failure the mechanism can actually produce.**
+- Two conditions changed since the deferral: the staging target grew from 5–8 to 15–18, so duplicate copies now consume a quarter of the review surface; and the scatter effect means they do not even sit next to each other.
+- **Built:** display-only grouping in `core/arbites.py`. Suspected same-event items nest under their highest-scoring sibling (`⧉`), and a grouped copy below the cut is pulled up and marked *rescued from drop list*. No score changes, no merging, no dropping — the corroboration count stays visible because convergence across outlets is a signal (EEI-2.3.a). Config at `scoring.settings.grouping`; disable with `enabled: false`.
+- **Design bug caught by its own test:** the first cut used a fixed `max_df: 3` — a token in ≤3 titles counts as distinctive. But an incident covered by four outlets puts the victim's name in four titles, so the single most distinctive token in the set was classified as too common and nothing grouped. Threshold now scales with corpus size. **A rarity threshold has to scale with the thing whose rarity it measures.**
+- **Thresholds are defaults tuned on synthetic data.** Verify against the real corpus before trusting them — run with `--out` to a scratch file and read the groups.
+
 ### 2026-08-11 — One sensor is over half the corpus
 - `api.msrc.microsoft.com/update-guide/rss` produced **3,561 of 6,757** lifetime articles across 9 runs — 52.7%, ~396 per cycle. The next largest sensor has produced 270 *lifetime*.
 - This is per-CVE Patch Tuesday enumeration arriving as individual articles. It is volume, not intelligence, and it directly contradicts the standing "quality over quantity on sensors" directive — coverage is not emerging from good sensors well-operated, it is being buried by one.
@@ -141,7 +150,7 @@
 ### 2026-08 — External review (Gemini) incorporated
 - **Accepted:** upstream pre-filter/staging script (built as Arbites); ransomware leak-site aggregator as a new AOR sensor; cross-section dedup discipline; primary-source elevation.
 - **Rejected:** additive 0–100 scoring model with tier floors — it would reverse the deliberate convergence-wins design. The valid sub-point (multiplicative scores look falsely precise) is handled by treating the score as an ordering aid, which is already doctrine.
-- **Deferred:** fuzzy dedup (Jaccard/Levenshtein) — over-engineered; revisit only if a real false-merge is observed.
+- **Deferred:** fuzzy dedup (Jaccard/Levenshtein) — over-engineered; revisit only if a real false-merge is observed. **Revisited 2026-08-11 — see below.**
 
 ### 2026-08 — County keyword feeds dropped
 - 34 county Google News query feeds returned local human-interest news, not cyber incidents. Root cause: keyword search on a general index treats cyber terms as soft hints, not hard filters. Architecturally wrong, not tunable. Rebuild AOR coverage via curated reliable sources + authoritative breach registry.

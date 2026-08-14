@@ -9,7 +9,7 @@
         <mxCell id="title" parent="1" vertex="1" style="text;html=1;align=left;fontSize=22;fontStyle=1;verticalAlign=middle;" value="Sanctum — Intelligence Cycle (domain-agnostic)">
           <mxGeometry x="60" y="30" width="1400" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="subtitle" parent="1" vertex="1" style="text;html=1;align=left;fontSize=13;fontColor=#5F5E5A;verticalAlign=middle;" value="The cycle EVERY Sanctum domain runs — the cycle does not change by domain. Engines in core/ are shared; each domain (cti/, s2/, …) supplies its own pnd.md. This map shows the stages, where you adjust each, and which files play each role. Per-domain STATUS, backlog &amp; lessons live in &lt;domain&gt;/mandate.md and logs/CHANGELOG.md — not here.">
+        <mxCell id="subtitle" parent="1" vertex="1" style="text;html=1;align=left;fontSize=13;fontColor=#5F5E5A;verticalAlign=middle;" value="The cycle EVERY Sanctum domain runs — the cycle does not change by domain. Engines in core/ are shared; each domain (cti/, …) supplies its own pnd.md. This map shows the stages, where you adjust each, and which files play each role. Per-domain STATUS, backlog &amp; lessons live in &lt;domain&gt;/mandate.md and logs/CHANGELOG.md — not here.">
           <mxGeometry x="60" y="70" width="2100" height="24" as="geometry" />
         </mxCell>
 
@@ -26,7 +26,7 @@
         <mxCell id="s1_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7E6;strokeColor=#C9820A;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;&lt;domain&gt;/pnd.md (manifest + scoring&#xa;+ production) + &lt;domain&gt;/codex.md&#xa;doctrine. Set the domain here.">
           <mxGeometry x="60" y="375" width="330" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="s1_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• P&amp;D config (pnd.md, yaml-in-md)&#xa;• Domain frameworks (e.g. IPB for S2)&#xa;• Threat convergence model (I×O×C)">
+        <mxCell id="s1_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• P&amp;D config (pnd.md, yaml-in-md)&#xa;• Domain frameworks (per-domain doctrine)&#xa;• Threat convergence model (I×O×C)">
           <mxGeometry x="60" y="525" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s1_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• &lt;domain&gt;/pnd.md (manifest+scoring+production)&#xa;• &lt;domain&gt;/codex.md · &lt;domain&gt;/mandate.md&#xa;• core/pnd.py (config loader)">
@@ -154,7 +154,7 @@
         <mxCell id="legend_box" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#888780;dashed=1;verticalAlign=top;align=left;fontStyle=1;fontSize=13;spacingLeft=10;spacingTop=8;" value="Legend">
           <mxGeometry x="60" y="750" width="700" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="leg_row_color" parent="1" vertex="1" style="text;html=1;align=left;fontSize=11;verticalAlign=top;" value="&lt;b&gt;Cell colors&lt;/b&gt;&#xa;• White border = Inputs / Outputs (data through the stage)&#xa;• Amber = Touchpoint — where YOU adjust this stage&#xa;• Grey = Technologies supporting the stage&#xa;• Purple = FILES — repo paths that play this role (&lt;domain&gt; = cti, s2, …)&#xa;• Header blue = cycle stage · purple header = feedback">
+        <mxCell id="leg_row_color" parent="1" vertex="1" style="text;html=1;align=left;fontSize=11;verticalAlign=top;" value="&lt;b&gt;Cell colors&lt;/b&gt;&#xa;• White border = Inputs / Outputs (data through the stage)&#xa;• Amber = Touchpoint — where YOU adjust this stage&#xa;• Grey = Technologies supporting the stage&#xa;• Purple = FILES — repo paths that play this role (&lt;domain&gt; = cti, …)&#xa;• Header blue = cycle stage · purple header = feedback">
           <mxGeometry x="80" y="785" width="660" height="110" as="geometry" />
         </mxCell>
 

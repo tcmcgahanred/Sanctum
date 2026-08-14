@@ -8,7 +8,7 @@ Collection, Processing & Exploitation, and Analysis & Production.*
 
 **BLUF:** Everything domain-specific about the CTI effort lives here. The `core/`
 engines are generic — swap this file (and `sensors.txt`) for another domain's and
-the same code runs S2 or anything else.
+the same code runs any other domain.
 
 ---
 
@@ -193,6 +193,12 @@ scoring:
       cutoff_weekday: monday       # ICOD day
       cutoff_time: "09:00"         # ICOD time
       timezone: America/Los_Angeles
+    grouping:                      # near-duplicate EVENT grouping — display only
+      enabled: true                # never merges, never drops, never re-scores
+      min_shared_rare: 2           # shared distinctive tokens needed to call it one event
+      max_df_abs: 8                # a token in <= this many titles is "rare" (small corpora)
+      max_df_frac: 0.02            # ...or <= this fraction of the corpus, whichever is larger
+      max_bucket: 60               # skip tokens shared by more titles than this (not distinctive)
 
   word_boundary_terms: ["hack", "ics", "scada", "grid", "leak", "ransom", "court", "uc", "csu", "cisco", "war"]
 

@@ -11,8 +11,10 @@ Expected top-level keys across the yaml blocks:
   manifest:   host/runtime + storage (base_dir, sensors_file, corpus{...},
               collection{...})
   scoring:    tiers[], multipliers[], groups{}, word_boundary_terms[], settings{}
-  production: report_title, sections[], item_target, notes (informs the
-              staging/analysis stage)
+  production: report_title, sections[], staging_item_target,
+              staging_per_section, distributed_item_target, notes.
+              Only report_title is read by any engine; the rest inform the
+              manual staging/analysis stage.
 
 Portability: base_dir resolves from $SANCTUM_BASE first, then manifest.base_dir,
 then the domain folder. Nothing is hardwired to a specific host.

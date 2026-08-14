@@ -12,10 +12,10 @@ Planning & Direction is the single configuration surface. You set the domain the
 - **Processing / Exploitation** — score the corpus against the requirements + weights.
 - **Analysis & Production** — human gate → staging document.
 
-**Scope boundary:** Sanctum stops at the **staging document** — valuable, requirement-relevant, transparently-scored reports for manual production. It does not build the finished product (a formatted brief, IPB overlays, etc.); that is the part that diverges hardest by domain and stays a human step.
+**Scope boundary:** Sanctum stops at the **staging document** — valuable, requirement-relevant, transparently-scored reports for manual production. It does not build the finished product (a formatted brief, domain-specific overlays, etc.); that is the part that diverges hardest by domain and stays a human step.
 
 **Success definition (the "keeper test"):**
-> A staging document full of valuable, requirement-relevant, transparently-scored reports, ready for manual production — the same sentence whether the domain is CTI or S2; only the requirements and sensors swap.
+> A staging document full of valuable, requirement-relevant, transparently-scored reports, ready for manual production — the same sentence whatever the domain; only the requirements and sensors swap.
 
 ## Near-term improvements
 

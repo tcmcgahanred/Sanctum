@@ -1,0 +1,54 @@
+# Sanctum — scrub denylist (EXAMPLE)
+#
+# Copy this to `.scrub-denylist` and replace the placeholders with your real
+# terms. `.scrub-denylist` is git-ignored and MUST stay that way — a denylist
+# committed to a public repo publishes exactly the strings you are hiding.
+#
+#     cp .scrub-denylist.example .scrub-denylist
+#
+# One POSIX extended regex per line. Matching is case-insensitive.
+# Blank lines and lines starting with '#' are ignored.
+# A line starting with '!' is a PATH PREFIX to exclude from scanning — use it
+# where a term is legitimate (a scoring keyword, an accepted reference).
+#
+# Use \b word boundaries on short or ambiguous terms to avoid false positives
+# (without \b, a three-letter term matches inside unrelated words).
+#
+# Keep THIS file generic. Placeholders only — the moment a real term appears
+# here, the example becomes the leak.
+#
+# Scope this to what is actually sensitive for YOUR repo. Over-broad lists get
+# bypassed with --no-verify within a week, which is worse than no guard.
+
+# --- Person ---
+# yourfirstname
+# yourlastname
+# you@example\.com
+# your-github-handle
+
+# --- Affiliation you must not disclose (service, parent body, unit) ---
+# \bPARENT-ORGANIZATION\b
+# \bSERVICE-BRANCH\b
+# \bUNIT-NAME\b
+# \bUNIT-TYPE\b
+#
+# Also deny the doctrine vocabulary unique to that affiliation — redacting the
+# name while leaving its jargon in place tells the reader what was removed.
+# \bFRAMEWORK-ACRONYM\b
+
+# --- Hosts, hostnames, lab names ---
+# \bprod-collector-01\b
+# \binternal\.example\.local\b
+
+# --- Private network space ---
+# \b10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\b
+# \b192\.168\.[0-9]{1,3}\.[0-9]{1,3}\b
+# \b172\.(1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3}\b
+
+# --- Credentials (belt and braces; .gitignore is the primary guard) ---
+# ghp_[A-Za-z0-9]{20,}
+# -----BEGIN [A-Z ]*PRIVATE KEY-----
+
+# --- Excluded paths (a term here is legitimate, not a leak) ---
+# !path/to/scoring-config.md
+# !path/to/accepted-reference.md

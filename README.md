@@ -25,7 +25,7 @@ A human always reviews before anything is published. The score orders the queue;
 ## Two efforts (example domains)
 
 - **Effort 1 — CTI (operational).** A weekly OSINT cyber-threat-intelligence cycle for low-maturity **State/Local/Tribal/Territorial (SLTT)** partners, tuned for a regional Area of Responsibility. Produces a weekly **TLP:CLEAR** brief. See `cti/`.
-- **Effort 2 — S2 (future stub).** A weekly cycle for [REDACTED] role, sharing the same machinery but its own doctrine (IPB frameworks: MCOO, OAKOC, METT-TC, ASCOPE, PMESII-PT). See `s2/`.
+- **Effort 2 — a second domain.** Configured and run separately, outside this repo. Sanctum is built so a second effort needs only its own `pnd.md`; nothing in `core/` changes.
 
 The point of Sanctum is that both run on the **same engine** — only their `pnd.md` differs.
 
@@ -94,7 +94,7 @@ The `core/` engines hold **no domain knowledge**. Everything specific to an effo
 
 ```
 ./run.sh cti          # collect + score the CTI domain
-./run.sh s2           # same engines, once s2/pnd.md is filled in
+./run.sh <domain>     # same engines, any domain with its own pnd.md
 ```
 
 **Portability:** the only host-coupled value is `base_dir` in each `pnd.md` manifest — override it per host with the `SANCTUM_BASE` env var. To stand Sanctum up elsewhere: clone, `pip install -r requirements.txt`, point the manifest at your corpus store, and run. No code changes.
@@ -129,9 +129,6 @@ sanctum/
 │   ├── README.md            # effort overview
 │   └── editions/            # brief editions
 │                            # (references/ kept local, git-ignored)
-├── s2/                      # Effort 2 — [REDACTED] S2 — CONFIG (stub)
-│   ├── pnd.md
-│   └── README.md
 ├── diagrams/                # domain-neutral diagrams
 │   ├── cogitator.drawio     # the intelligence-cycle map (shared by all domains)
 │   └── sanctum-topology.drawio

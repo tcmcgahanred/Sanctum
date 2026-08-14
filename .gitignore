@@ -43,3 +43,10 @@ Thumbs.db
 # machine but are not committed (they carry internal/host detail).
 */references/
 references/
+
+# --- Scrub guard: the denylist names what must never be published, so it
+# stays LOCAL. The .example template is committed; the real list is not.
+.scrub-denylist
+
+# --- Second domain: kept out of the public repo entirely.
+s2/

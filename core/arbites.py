@@ -68,6 +68,112 @@ def source_name(url):
     return re.sub(r"^https?://(www\.)?", "", str(url)).split("/")[0]
 
 
+# ------------------------------------------------------------------
+# Near-duplicate GROUPING (display only — never merges, never drops)
+#
+# Dedup at collection catches identical URLs and identical normalized titles.
+# It cannot catch four outlets writing four different headlines about ONE
+# incident. Those arrive as separate articles and — because scoring keys on
+# terms, not events — they scatter: the vaguest headline can outrank the one
+# that actually names the victim, which then dies below the cut.
+#
+# This groups them for the analyst. It changes NO score and removes NO item;
+# it only nests near-duplicates under their highest-scoring sibling so
+# "one event, one entry" is a glance instead of an archaeology exercise.
+# A grouped item that sits below the cut is pulled up and marked, because
+# rescuing the best-sourced copy is the whole point.
+#
+# Signal: shared RARE tokens. Two items sharing >= min_shared distinctive
+# tokens (each appearing in <= max_df articles across the scored set) are
+# almost always the same event. Common words ("ransomware", "california")
+# have high document frequency and are ignored automatically, so the
+# threshold does not need per-domain tuning of a stopword list.
+# ------------------------------------------------------------------
+_TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9'-]*")
+
+
+def _tokens(title, suffix_separators=(" - ", " | ", " — ")):
+    """Distinctive tokens from a title: publisher suffix stripped, short words out."""
+    t = str(title or "").strip()
+    for sep in suffix_separators:
+        if sep in t:
+            parts = t.split(sep)
+            if len(parts[-1]) <= 40:
+                t = sep.join(parts[:-1])
+    return {w for w in _TOKEN_RE.findall(t.lower()) if len(w) > 3}
+
+
+def group_near_duplicates(scored, settings, suffix_separators=(" - ", " | ", " — ")):
+    """
+    Cluster scored items that look like the same event.
+
+    `scored` is the sorted list of (score, tier, reasons, article, is_stale).
+    Returns {head_index: [member_index, ...]} keyed on the highest-scoring
+    member, plus a set of every index that belongs to some group.
+    Pure analysis — the caller decides how to render it.
+    """
+    gcfg = settings.get("grouping", {}) or {}
+    if not gcfg.get("enabled", True):
+        return {}, set()
+    min_shared = int(gcfg.get("min_shared_rare", 2))
+    # "Rare" must SCALE with the corpus. A fixed count breaks on the exact case
+    # this exists for: an incident covered by four outlets puts the victim's
+    # name in four titles, and an absolute max_df of 3 then classifies the most
+    # distinctive token in the set as too common to use.
+    max_df_abs = int(gcfg.get("max_df_abs", 8))
+    max_df_frac = float(gcfg.get("max_df_frac", 0.02))
+    # Buckets bigger than this are not distinctive enough to be worth the
+    # pairwise comparison; skipping them bounds the work on a large corpus.
+    max_bucket = int(gcfg.get("max_bucket", 60))
+
+    toks = [_tokens(rec[3].get("title", ""), suffix_separators) for rec in scored]
+
+    df = {}
+    for ts in toks:
+        for w in ts:
+            df[w] = df.get(w, 0) + 1
+    max_df = max(max_df_abs, int(len(scored) * max_df_frac))
+    rare = [{w for w in ts if df[w] <= max_df} for ts in toks]
+
+    # Union-find over items sharing enough rare tokens.
+    parent = list(range(len(scored)))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def union(i, j):
+        ri, rj = find(i), find(j)
+        if ri != rj:
+            parent[max(ri, rj)] = min(ri, rj)      # lower index = higher score
+
+    # Invert to a token -> items map so we only compare plausible pairs.
+    buckets = {}
+    for i, rs in enumerate(rare):
+        for w in rs:
+            buckets.setdefault(w, []).append(i)
+    for members in buckets.values():
+        if len(members) < 2 or len(members) > max_bucket:
+            continue
+        for a_i in range(len(members)):
+            for b_i in range(a_i + 1, len(members)):
+                i, j = members[a_i], members[b_i]
+                if find(i) == find(j):
+                    continue
+                if len(rare[i] & rare[j]) >= min_shared:
+                    union(i, j)
+
+    clusters = {}
+    for i in range(len(scored)):
+        clusters.setdefault(find(i), []).append(i)
+
+    groups = {h: sorted(m) for h, m in clusters.items() if len(m) > 1}
+    grouped = {i for m in groups.values() for i in m}
+    return groups, grouped
+
+
 def main():
     ap = argparse.ArgumentParser(description="Sanctum Arbites — domain-agnostic scorer")
     ap.add_argument("--domain", help="domain name (folder under repo, e.g. cti)")
@@ -108,15 +214,33 @@ def main():
         scored.append((s, tier, reasons, a, is_stale))
     scored.sort(key=lambda x: x[0], reverse=True)
 
-    surfaced = scored[:surface_n]
-    dropped = scored[surface_n:]
+    surfaced_n = min(surface_n, len(scored))
+    seps = tuple(cfg["manifest"].get("collection", {}).get(
+        "suffix_separators", (" - ", " | ", " — ")))
+    groups, grouped_idx = group_near_duplicates(scored, settings, seps)
+
+    # A group is anchored by its highest-scoring member. If that anchor is
+    # surfaced, every sibling rides along — including ones below the cut.
+    # Nothing is removed from the drop list count by grouping alone.
+    child_of = {}
+    rescued = set()
+    for head, members in groups.items():
+        if head >= surfaced_n:
+            continue                     # whole group is below the cut; leave it there
+        kids = [m for m in members if m != head]
+        child_of[head] = kids
+        rescued.update(m for m in kids if m >= surfaced_n)
+
+    surfaced = scored[:surfaced_n]
+    dropped = scored[surfaced_n:]
 
     lines = []
     recency_note = f" · {stale_count} flagged STALE" if recency_on else " · recency gate OFF"
     lines.append(f"# {report_title}")
     lines.append(f"*Generated {datetime.now(timezone.utc).isoformat()} · domain {cfg['domain']} · "
                  f"window {window_days}d · {len(arts)} articles scored · "
-                 f"top {len(surfaced)} surfaced, {len(dropped)} in drop list{recency_note}.*")
+                 f"top {len(surfaced)} surfaced, {len(dropped)} in drop list{recency_note}"
+                 f"{f' · {len(child_of)} event group(s)' if child_of else ''}.*")
     lines.append("")
     lines.append("> Score ORDERS the queue; it does not decide. Read the reasoning, "
                  "check the drop list, override freely. Prefer false positives.")
@@ -124,24 +248,43 @@ def main():
         lines.append("> ⚠ STALE = published outside the cycle window. NOT dropped — "
                      "confirm a fresh this-week hook (new KEV/exploitation/victim) or cut it.")
     lines.append("")
+    if child_of:
+        lines.append("> ⧉ = same event, reported separately. Grouped for review only — "
+                     "nothing merged, nothing dropped. Apply 'one event, one entry': "
+                     "pick the best-sourced copy, fold the rest in.")
+        lines.append("")
     lines.append("---")
     lines.append("## CANDIDATES (top-scored — review these first)")
     lines.append("")
-    for s, tier, reasons, a, is_stale in surfaced:
+    for idx, (s, tier, reasons, a, is_stale) in enumerate(surfaced):
+        if idx in grouped_idx and idx not in child_of:
+            continue                     # a sibling; printed under its group head
         mark = "⚠ STALE " if is_stale else ""
-        lines.append(f"### {mark}[{s}] {a.get('title','(no title)')}")
+        kids = child_of.get(idx, [])
+        tag = f" ⧉ {len(kids) + 1} reports" if kids else ""
+        lines.append(f"### {mark}[{s}] {a.get('title','(no title)')}{tag}")
         lines.append(f"- **Source:** {source_name(a.get('source',''))} · {a.get('published','?')}")
         lines.append(f"- **URL:** {a.get('url','')}")
         lines.append(f"- **Score reasoning:** {' | '.join(reasons)}")
+        for k in kids:
+            ks, _kt, kr, ka, k_stale = scored[k]
+            kmark = "⚠ STALE " if k_stale else ""
+            note = " · **rescued from drop list**" if k in rescued else ""
+            lines.append(f"  - ⧉ {kmark}[{ks}] {ka.get('title','(no title)')} "
+                         f"— {source_name(ka.get('source',''))}{note}")
+            lines.append(f"    - {ka.get('url','')}")
+            lines.append(f"    - *{' | '.join(kr)}*")
         lines.append("")
 
     lines.append("---")
     lines.append("## DROP LIST (below cut — scan for anything mis-scored, rescue freely)")
     lines.append("")
-    for s, tier, reasons, a, is_stale in dropped:
+    for off, (s, tier, reasons, a, is_stale) in enumerate(dropped):
+        idx = surfaced_n + off
         mark = "⚠ STALE " if is_stale else ""
+        note = "  ⧉ *(also shown grouped above)*" if idx in rescued else ""
         lines.append(f"- {mark}[{s}] {a.get('title','(no title)')} "
-                     f"— {source_name(a.get('source',''))} — {a.get('url','')}")
+                     f"— {source_name(a.get('source',''))} — {a.get('url','')}{note}")
     lines.append("")
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
