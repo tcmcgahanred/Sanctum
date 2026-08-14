@@ -195,10 +195,14 @@ scoring:
       timezone: America/Los_Angeles
     grouping:                      # near-duplicate EVENT grouping — display only
       enabled: true                # never merges, never drops, never re-scores
-      min_shared_rare: 2           # shared distinctive tokens needed to call it one event
-      max_df_abs: 8                # a token in <= this many titles is "rare" (small corpora)
-      max_df_frac: 0.02            # ...or <= this fraction of the corpus, whichever is larger
-      max_bucket: 60               # skip tokens shared by more titles than this (not distinctive)
+      similarity: 0.15             # IDF-weighted Jaccard on titles; >= this joins a group head
+      min_shared_tokens: 3         # ...and at least this many words in common, as a floor
+      min_evidence: 8.0            # ...and the shared words must carry this much information
+                                   #    (blocks formulaic advisory titles that overlap heavily
+                                   #     but say nothing distinctive in common)
+      max_group_size: 25           # a cluster bigger than this is template-matching, not an
+                                   #    event — dissolved, items shown normally, noted in header
+      max_group_display: 12        # cap children shown per group; the rest stay in the drop list
 
   word_boundary_terms: ["hack", "ics", "scada", "grid", "leak", "ransom", "court", "uc", "csu", "cisco", "war"]
 
