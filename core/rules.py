@@ -107,6 +107,25 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
     if "all" in atom:
         return all(_eval_atom(x, groups, matcher, scopes, text_l) for x in atom["all"])
 
+    # Exclusion. `not` inverts the atom beneath it, so "match X unless Y" is
+    # written  {all: [{group: X}, {not: {group: Y}}]}.
+    #
+    # WHY THIS EXISTS. Without it the only cure for a term that collides with an
+    # unrelated meaning is to delete the term — and deleting the term silently
+    # deletes the requirement it was standing for. Threat-actor names are the
+    # standing example: several are also ordinary products, places or common
+    # words, and they arrive through general feeds that are otherwise wanted, so
+    # dropping the source is not available either. Collisions have so far been
+    # resolved by finding a more precise synonym; where none exists the choice
+    # was accept the noise or lose the requirement. This is the third option.
+    #
+    # NARROW EXCEPTION TO TENET 8 ("prefer false positives — flag, don't drop").
+    # Exclusion removes nothing. It withholds a tier or a multiplier, so the
+    # item is still collected, still scored, still listed, still shown with its
+    # reasoning — just lower. Nothing leaves the corpus or the drop list.
+    if "not" in atom:
+        return not _eval_atom(atom["not"], groups, matcher, scopes, text_l)
+
     raise ValueError(f"unrecognized rule atom: {atom!r}")
 
 
@@ -125,6 +144,15 @@ def _rule_matched_terms(atom, groups, matcher, scopes, text_l):
         return " or ".join(_rule_matched_terms(x, groups, matcher, scopes, text_l) for x in atom["any"])
     if "all" in atom:
         return " and ".join(_rule_matched_terms(x, groups, matcher, scopes, text_l) for x in atom["all"])
+    if "not" in atom:
+        # This atom is only ever rendered because it was SATISFIED, and a
+        # satisfied `not` means the excluded thing was absent. Name what was
+        # ruled out — a reader auditing the score needs to see the exclusion
+        # fired, not just the terms that hit (tenet 8: show the reasoning).
+        inner = atom["not"]
+        if isinstance(inner, dict) and "group" in inner:
+            return f"not {inner['group']}"
+        return "not (…)"
     return "?"
 
 

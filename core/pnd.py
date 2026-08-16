@@ -29,7 +29,8 @@ try:
 except ImportError as e:  # pragma: no cover
     raise SystemExit(
         "Sanctum needs PyYAML to read P&D config. Install it:\n"
-        "  /opt/ravenor/venv/bin/pip install pyyaml   (or: pip install pyyaml)"
+        "  pip install pyyaml\n"
+        "If the collector runs inside a virtualenv, use that venv's pip."
     ) from e
 
 
@@ -108,6 +109,11 @@ def _validate(cfg, domain):
             if k in atom:
                 for x in atom[k]:
                     _walk(x)
+        # An excluded group must exist too. A typo inside `not` would otherwise
+        # never match anything, silently disabling the exclusion and letting the
+        # noise back in with nothing on the page to say so.
+        if "not" in atom:
+            _walk(atom["not"])
 
     for t in sc["tiers"]:
         _walk(t.get("require", "always"))

@@ -36,6 +36,7 @@ The point of Sanctum is that both run on the **same engine** — only their `pnd
 | **Sanctum** | The apparatus — the seat of detection | Project |
 | **Acolyte** (`acolyte.py`) | Collector — gathers signal from the sensors | Engine |
 | **Arbites** (`arbites.py`) | Pre-filter / scorer — provisional judgment on items | Engine |
+| **Lexicanum** (`lexicanum.py`) | Archivist — searches everything ever collected, and counts matches over time | Engine |
 | **Codex** | Intelligence requirements & doctrine (KIQ / PIRs / scoring) | Doc |
 | **Vox** | The brief itself — the product disseminated | Product |
 | **Cogitator** | The intelligence-cycle map (process + roles) | Diagram |
@@ -50,7 +51,16 @@ The point of Sanctum is that both run on the **same engine** — only their `pnd
       |                  + drop list)              override scores)
       v
  Corpus store (the handoff surface between collection and analysis)
+      |
+      v
+ [ Lexicanum ]  archive search + match-frequency over time
+                (asked on demand, reads the whole corpus, changes nothing)
 ```
+
+The top row is the weekly cycle. **Lexicanum** sits off to the side and runs
+only when asked: the cycle answers *"what matters this week?"*, Lexicanum
+answers *"where has this appeared, and is it rising?"* — a question about the
+whole archive rather than the current window.
 
 Governed by the **Codex**. Mapped by the **Cogitator**. Everything domain-specific lives in a domain's **Planning & Direction** file (`<domain>/pnd.md`); the engines hold no domain knowledge.
 
@@ -59,13 +69,13 @@ Governed by the **Codex**. Mapped by the **Cogitator**. Everything domain-specif
 Eleven tenets govern every decision in this build. The first five are how it is engineered; the rest are how it is operated.
 
 1. **Simplicity & elegance.** Minimal, legible structure — one file per domain's P&D, references separated from production, no cruft. If it can be simpler, make it simpler.
-2. **Domain-agnostic engine.** `core/` holds zero domain knowledge. The intelligence cycle never changes by domain — only the config does. Standing up a new domain is dropping in one `pnd.md`.
-3. **Config over code.** Steer by editing `pnd.md` (feeds, weights, rules, output shape), never by editing Python. Requirements, scoring, and sensors are data, not logic.
+2. **Domain-agnostic engine.** `core/` holds zero domain knowledge. The intelligence cycle never changes by domain. Standing up a new domain is dropping in one domain file — and the engine performs the same on it as on any other.
+3. **Domain files declare, they never behave.** A domain file holds settings and the explanation of those settings. Nothing else — no logic, no conditions, no scoring behavior. The moment a domain file can *act*, the engine has quietly stopped being shared. Enforced by `tests/domain_check.py`, not by discipline.
 4. **Planning & Direction is the single control surface.** Set the domain there; it drives Collection, Processing & Exploitation, and Analysis & Production. One place to configure.
 5. **Portable & decoupled.** Git is the source of truth; the repo is standalone; the host and corpus store are configuration, not code. It moves anywhere via env/manifest — no code changes.
 6. **Restraint is the product.** 5–8 items in the *distributed* report; the Monday staging draft is a deliberately larger review surface that narrows through the week. Quality over quantity on sensors, generous on items. Coverage emerges from good sensors well-operated, not from piling on feeds.
 7. **The human gate is absolute.** The score orders the queue; the analyst always decides and overrides. Synthesis stays manual (no API/tokens) by deliberate choice.
-8. **Transparent and fail-safe.** Every surfaced item shows its scoring reasoning; nothing is hidden (mandatory drop list). Prefer false positives to false negatives — flag, don't drop.
+8. **Transparent and fail-safe.** Every surfaced item shows its scoring reasoning; nothing is hidden (mandatory drop list). Prefer false positives to false negatives — flag, don't drop. Exclusion (`not`) is the one narrowing tool and it still drops nothing: it withholds a tier or a multiplier, so an excluded item is scored lower but remains collected, listed, and shown with its reasoning.
 9. **Stops at the staging document.** Sanctum triages and stages; it does not build the finished product. That final step diverges hardest by domain and stays a human job.
 10. **Prove before you build.** Don't over-engineer; don't abstract before a second real use case exists; scale or migrate only after it earns it. Favor near-zero technical debt.
 11. **Scrubbed, secure, verified.** Secrets never enter the repo; the public face carries no identifying or infra detail. Verify, don't guess — behavior-changing edits are proven by tests.
@@ -97,6 +107,26 @@ The `core/` engines hold **no domain knowledge**. Everything specific to an effo
 ./run.sh <domain>     # same engines, any domain with its own pnd.md
 ```
 
+**Searching the archive.** The weekly cycle looks at a window; Lexicanum looks
+at everything ever collected.
+
+```
+core/lexicanum.py cti --group ransom --by week      # where has this appeared, and when
+core/lexicanum.py cti --all-groups --counts --by month
+core/lexicanum.py cti --term "emotet"               # an ad-hoc term, not in the domain file
+core/lexicanum.py --pnd /path/to/pnd.md --group platform --since 2026-01-01
+```
+
+Matches are **recomputed on demand**, not stored at collection time. That is
+deliberate: a stored index can only answer questions you thought to ask on
+collection day, whereas re-running the live matcher lets a group invented this
+morning be run against everything collected last year. It also guarantees
+results agree with the scorer — same matcher, no second implementation to drift.
+
+Counts are bucketed by **collection date**, because publication dates are
+missing or malformed often enough that the scorer carries a recency gate to cope
+with it. `--by-published` switches axis where you accept the gaps.
+
 **Portability:** the only host-coupled value is `base_dir` in each `pnd.md` manifest — override it per host with the `SANCTUM_BASE` env var. To stand Sanctum up elsewhere: clone, `pip install -r requirements.txt`, point the manifest at your corpus store, and run. No code changes.
 
 **To add a domain:** drop in `<newdomain>/pnd.md` (+ `codex.md`, `mandate.md`) and run `./run.sh <newdomain>`. The cycle applies unchanged.
@@ -119,9 +149,10 @@ sanctum/
 ├── .gitignore
 ├── core/                    # DOMAIN-AGNOSTIC engines (the only code)
 │   ├── pnd.py               # loads a domain's P&D config (yaml-in-markdown)
-│   ├── rules.py             # matcher + scorer + recency gate
+│   ├── rules.py             # matcher + scorer + recency gate (+ the `not` operator)
 │   ├── acolyte.py           # collector engine
-│   └── arbites.py           # pre-filter / scorer engine
+│   ├── arbites.py           # pre-filter / scorer engine
+│   └── lexicanum.py         # archive search + match-frequency over time
 ├── cti/                     # Effort 1 — SLTT CTI (example domain) — CONFIG + outputs
 │   ├── pnd.md               # THE P&D file: manifest + sensors + scoring + production
 │   ├── codex.md             # intelligence requirements & doctrine (prose)
@@ -134,10 +165,24 @@ sanctum/
 │   └── sanctum-topology.drawio
 ├── logs/
 │   └── CHANGELOG.md
-└── tests/                   # parity + recency tests for the engine
+└── tests/                   # engine tests + the commit gate
+    ├── pre_commit.sh        # THE COMMIT GATE — runs both guards below
+    ├── scrub_check.sh       # tenet 11 — nothing identifying reaches the public repo
+    ├── domain_check.py      # tenet 3  — no domain file contains behavior
+    ├── domain_check_test.py
+    ├── upgrades_test.py     # exclusion operator + archive search
+    ├── grouping_test.py
     ├── diff_scores.py
     ├── recency_test.py
     └── old_arbites.py
+```
+
+**Install the commit gate (once per clone):**
+
+```
+git config core.hooksPath .githooks
+mkdir -p .githooks && ln -sf ../tests/pre_commit.sh .githooks/pre-commit
+cp .scrub-denylist.example .scrub-denylist   # then edit it
 ```
 
 ## License / use

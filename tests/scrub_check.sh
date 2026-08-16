@@ -8,14 +8,9 @@
 # which is git-ignored — publishing the list of things you are hiding defeats
 # the purpose. Copy `.scrub-denylist.example` and fill it in locally.
 #
-# INSTALL (once per clone):
-#     git config core.hooksPath .githooks
-#     mkdir -p .githooks && ln -sf ../tests/scrub_check.sh .githooks/pre-commit
-#     cp .scrub-denylist.example .scrub-denylist   # then edit it
-#
-#   Windows / Git-for-Windows: same commands in Git Bash. If symlinks are
-#   awkward, copy instead of link:
-#     cp tests/scrub_check.sh .githooks/pre-commit
+# INSTALL: not installed on its own. `tests/pre_commit.sh` is the commit gate
+# and runs this guard plus the domain-file guard — install that one instead.
+# You still need the denylist:  cp .scrub-denylist.example .scrub-denylist
 #
 # USAGE
 #     tests/scrub_check.sh          # scan STAGED content (what a commit would publish)
