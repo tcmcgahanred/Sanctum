@@ -2,6 +2,16 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-17] Topology diagram redrawn around the stage 3 / stage 4 boundary
+
+- **The diagram was describing a machine that no longer exists.** It showed a `feeds.txt` that was folded into `pnd.md` long ago, a "transient 7-day" corpus that is in fact permanent, no Lexicanum, and — the significant one — an arrow saying the human gate **reads the corpus**. It does not. It reads the staging document. That single wrong arrow is the ambiguity that had "vox" meaning two different things for weeks.
+- **Redrawn with the intelligence cycle as the spine.** Four labelled bands: Planning & Direction, Collection, Processing & Exploitation, and Analysis & Production. Each component sits in its stage, so the question "which stage does this belong to?" is answered by looking rather than reasoning.
+- **The two artifacts are now distinct objects.** Stage 3 emits the **staging document** — ~55 ranked candidates with their reasoning plus the mandatory drop list. Stage 4 emits the **vox**. Different boxes, different colours, different owners. Wednesday's review and everything after sit in a dashed box outside the stage 4 band, marked out of scope.
+- **Stage 4 is drawn as human by design**, not as a missing feature. Tenet 7 is cited on the band itself, because the manual gate is a choice and reads as a gap otherwise.
+- **The open gap is stated on the diagram**: stage 4 is the least portable part of the apparatus. Clone the repo and you get collection and triage; you do not get the method that turns 55 candidates into a vox. That method currently exists only as accumulated instruction in a chat — unversioned, and the single largest obstacle to anyone else standing Sanctum up.
+- Also corrected: the corpus is permanent, the host is pull-only from a public remote, and both the corpus *and* the dated staging document travel through the corpus store.
+- **Verification.** XML parses, 37 cells, no dangling source/target references, every component confirmed inside its intended band, and no overlapping boxes. The file has not been opened in draw.io by the author of this change — geometry was checked arithmetically instead.
+
 ## [2026-08-17] Staging document pushed to the corpus store
 
 - **The one artifact a human opens was the only one stranded on the collector.** The staging draft is written to a headless, outbound-only host; the analyst edits on a different machine. Every cycle it had to be copied across by hand — precisely the manual step that gets skipped on a busy Monday. Acolyte has pushed the corpus this way since the beginning; this extends the same mechanism to the draft.

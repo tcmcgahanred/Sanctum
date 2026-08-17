@@ -1,97 +1,99 @@
 <mxfile host="app.diagrams.net">
   <diagram name="Sanctum Architecture" id="sanctum-arch-1">
-    <mxGraphModel dx="1320" dy="720" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1340" pageHeight="640" math="0" shadow="0">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1480" pageHeight="820" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
         <mxCell id="title" parent="1" style="text;html=1;align=left;fontStyle=1;fontSize=15;" value="Sanctum — Apparatus Architecture (CTI effort)" vertex="1">
-          <mxGeometry height="34" width="560" x="40" y="16" as="geometry" />
+          <mxGeometry height="26" width="700" x="40" y="14" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;align=left;fontSize=11;fontColor=#5F5E5A;" value="Stage 3 makes the STAGING DOCUMENT. Stage 4 makes the VOX. Two artifacts, two owners — that boundary is the point of this diagram." vertex="1">
+          <mxGeometry height="20" width="980" x="40" y="44" as="geometry" />
         </mxCell>
 
-        <!-- Doctrine -->
-        <mxCell id="doctrine" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=6;dashed=1;fillColor=#FCF3D9;strokeColor=#B8860B;verticalAlign=top;fontStyle=1;fontSize=12;align=center;spacingTop=4;" value="Doctrine — governs collection, scoring &amp; synthesis" vertex="1">
-          <mxGeometry height="96" width="500" x="360" y="60" as="geometry" />
+        <mxCell id="band1" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=6;dashed=1;fillColor=#FBFAF7;strokeColor=#A9A79F;verticalAlign=top;fontStyle=1;fontSize=10;align=center;spacingTop=3;fontColor=#5F5E5A;" value="1 · PLANNING &amp; DIRECTION" vertex="1">
+          <mxGeometry height="120" width="180" x="52" y="222" as="geometry" />
         </mxCell>
-        <mxCell id="codex" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#FBEEC2;strokeColor=#B8860B;fontSize=11;align=left;spacingLeft=8;" value="Codex&#10;scoring model (KIQ, 4 PIRs, tier×elevation)" vertex="1">
-          <mxGeometry height="52" width="228" x="376" y="94" as="geometry" />
+        <mxCell id="band2" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=6;dashed=1;fillColor=#FBFAF7;strokeColor=#A9A79F;verticalAlign=top;fontStyle=1;fontSize=10;align=center;spacingTop=3;fontColor=#5F5E5A;" value="2 · COLLECTION" vertex="1">
+          <mxGeometry height="120" width="370" x="242" y="222" as="geometry" />
+        </mxCell>
+        <mxCell id="band3" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=6;dashed=1;fillColor=#FBFAF7;strokeColor=#A9A79F;verticalAlign=top;fontStyle=1;fontSize=10;align=center;spacingTop=3;fontColor=#5F5E5A;" value="3 · PROCESSING &amp; EXPLOITATION" vertex="1">
+          <mxGeometry height="120" width="392" x="622" y="222" as="geometry" />
+        </mxCell>
+        <mxCell id="band4" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=6;dashed=1;fillColor=#FDF6F3;strokeColor=#D85A30;verticalAlign=top;fontStyle=1;fontSize=10;align=center;spacingTop=3;fontColor=#D85A30;" value="4 · ANALYSIS &amp; PRODUCTION — HUMAN, BY DESIGN (tenet 7)" vertex="1">
+          <mxGeometry height="330" width="300" x="1120" y="222" as="geometry" />
+        </mxCell>
+
+        <mxCell id="doctrine" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=6;dashed=1;fillColor=#FCF3D9;strokeColor=#B8860B;verticalAlign=top;fontStyle=1;fontSize=12;align=center;spacingTop=4;" value="Doctrine — governs scoring and analysis alike" vertex="1">
+          <mxGeometry height="96" width="500" x="430" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="codex" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#FBEEC2;strokeColor=#B8860B;fontSize=11;align=left;spacingLeft=8;" value="Codex&#10;requirements &amp; scoring model&#10;(KIQ, PIRs, tier × elevation)" vertex="1">
+          <mxGeometry height="52" width="228" x="446" y="110" as="geometry" />
         </mxCell>
         <mxCell id="mandate" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#FBEEC2;strokeColor=#B8860B;fontSize=11;align=left;spacingLeft=8;" value="Mandate&#10;standing directives + lessons log" vertex="1">
-          <mxGeometry height="52" width="228" x="616" y="94" as="geometry" />
+          <mxGeometry height="52" width="228" x="686" y="110" as="geometry" />
         </mxCell>
 
-        <!-- Host container -->
-        <mxCell id="host" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=4;dashed=1;fillColor=none;strokeColor=#5F5E5A;verticalAlign=top;fontStyle=2;fontSize=12;align=left;spacingLeft=10;spacingTop=4;" value="Runs on a host — dedicated collector host (current)  →  hardened production node (planned)" vertex="1">
-          <mxGeometry height="150" width="900" x="40" y="190" as="geometry" />
-        </mxCell>
-        <mxCell id="feeds" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#F1EFE8;strokeColor=#888780;fontSize=11;" value="feeds.txt&#10;(config)" vertex="1">
-          <mxGeometry height="58" width="140" x="60" y="250" as="geometry" />
-        </mxCell>
-        <mxCell id="acolyte" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#E1F5EE;strokeColor=#0F6E56;fontSize=11;align=left;spacingLeft=8;" value="Acolyte (acolyte.py)&#10;collect · extract · dedupe" vertex="1">
-          <mxGeometry height="58" width="185" x="225" y="250" as="geometry" />
-        </mxCell>
-        <mxCell id="corpus" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontSize=11;align=left;spacingLeft=8;" value="corpus/&#10;dated JSON (7-day)" vertex="1">
-          <mxGeometry height="58" width="150" x="440" y="250" as="geometry" />
-        </mxCell>
-        <mxCell id="arbites" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#E1F5EE;strokeColor=#0F6E56;fontSize=11;align=left;spacingLeft=8;" value="Arbites (arbites.py)&#10;score → shortlist + drops" vertex="1">
-          <mxGeometry height="58" width="190" x="620" y="250" as="geometry" />
-        </mxCell>
-        <mxCell id="e_feeds_acolyte" edge="1" parent="1" source="feeds" style="endArrow=block;html=1;strokeColor=#5F5E5A;" target="acolyte">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_acolyte_corpus" edge="1" parent="1" source="acolyte" style="endArrow=block;html=1;strokeColor=#5F5E5A;" target="corpus">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_corpus_arbites" edge="1" parent="1" source="corpus" style="endArrow=block;html=1;strokeColor=#5F5E5A;" target="arbites">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="host" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=4;dashed=1;fillColor=none;strokeColor=#5F5E5A;verticalAlign=top;fontStyle=2;fontSize=12;align=left;spacingLeft=10;spacingTop=4;" value="Collector host — outbound-only, pull-only from git. Collector runs 0500 Pacific." vertex="1">
+          <mxGeometry height="270" width="990" x="40" y="190" as="geometry" />
         </mxCell>
 
-        <!-- Bridge: Google Drive -->
-        <mxCell id="drive" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#EEEDFE;strokeColor=#534AB7;fontSize=11;align=left;spacingLeft=8;" value="Google Drive&#10;corpus handoff (for now — swappable)" vertex="1">
-          <mxGeometry height="60" width="230" x="440" y="380" as="geometry" />
+        <mxCell id="pnd" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#F1EFE8;strokeColor=#888780;fontSize=11;align=left;spacingLeft=8;" value="&lt;domain&gt;/pnd.md&#10;the single control surface:&#10;sensors · scoring · production" vertex="1">
+          <mxGeometry height="70" width="152" x="66" y="252" as="geometry" />
         </mxCell>
-        <mxCell id="e_corpus_drive" edge="1" parent="1" source="corpus" style="endArrow=block;html=1;strokeColor=#534AB7;fontSize=10;" target="drive" value="rclone push">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="acolyte" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#E1F5EE;strokeColor=#0F6E56;fontSize=11;align=left;spacingLeft=8;" value="Acolyte&#10;collect · extract · dedupe" vertex="1">
+          <mxGeometry height="70" width="160" x="256" y="252" as="geometry" />
         </mxCell>
-
-        <!-- Synthesis -->
-        <mxCell id="synth" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=8;fillColor=#FAECE7;strokeColor=#D85A30;fontSize=11;align=left;spacingLeft=8;" value="Human gate + Claude&#10;(any MCP-capable LLM)&#10;reads corpus, guided by doctrine&#10;→ cut to 5–8 items" vertex="1">
-          <mxGeometry height="104" width="250" x="1010" y="190" as="geometry" />
+        <mxCell id="corpus" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontSize=11;align=left;spacingLeft=8;" value="corpus/&#10;dated JSON — PERMANENT,&#10;nothing prunes" vertex="1">
+          <mxGeometry height="70" width="164" x="436" y="252" as="geometry" />
         </mxCell>
-        <mxCell id="vox" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#E6F1FB;strokeColor=#185FA5;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" value="Vox&#10;weekly CTI brief · TLP:CLEAR" vertex="1">
-          <mxGeometry height="58" width="250" x="1010" y="330" as="geometry" />
+        <mxCell id="arbites" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#E1F5EE;strokeColor=#0F6E56;fontSize=11;align=left;spacingLeft=8;" value="Arbites&#10;score against requirements" vertex="1">
+          <mxGeometry height="70" width="168" x="640" y="252" as="geometry" />
         </mxCell>
-        <mxCell id="e_drive_synth" edge="1" parent="1" source="drive" style="endArrow=block;html=1;strokeColor=#D85A30;fontSize=10;" target="synth" value="reads corpus">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_synth_vox" edge="1" parent="1" source="synth" style="endArrow=block;html=1;strokeColor=#185FA5;" target="vox">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="staging" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#E6F1FB;strokeColor=#185FA5;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" value="STAGING DOCUMENT&#10;~55 ranked candidates, each&#10;showing its reasoning&#10;+ mandatory drop list" vertex="1">
+          <mxGeometry height="70" width="180" x="828" y="252" as="geometry" />
         </mxCell>
 
-        <!-- Governance edges -->
-        <mxCell id="e_doc_arbites" edge="1" parent="1" source="doctrine" style="endArrow=open;html=1;dashed=1;strokeColor=#B8860B;fontSize=10;" target="arbites" value="governs">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_doc_synth" edge="1" parent="1" source="doctrine" style="endArrow=open;html=1;dashed=1;strokeColor=#B8860B;fontSize=10;" target="synth" value="governs">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="lexicanum" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#E1F5EE;strokeColor=#0F6E56;fontSize=11;align=left;spacingLeft=8;" value="Lexicanum — asked on demand, outside the weekly cycle&#10;searches the WHOLE archive by keyword group · counts matches per period as a RATE&#10;matches recomputed live, so a group invented today runs against everything ever collected" vertex="1">
+          <mxGeometry height="66" width="572" x="256" y="372" as="geometry" />
         </mxCell>
 
-        <!-- Cogitator -->
-        <mxCell id="cogitator" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=8;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontSize=11;align=left;spacingLeft=8;" value="Cogitator — intel-cycle tracker&#10;Plan → Collect → Process → Analyze → Format → Disseminate → Feedback" vertex="1">
-          <mxGeometry height="64" width="470" x="40" y="380" as="geometry" />
+        <mxCell id="drive" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#EEEDFE;strokeColor=#534AB7;fontSize=11;align=left;spacingLeft=8;" value="Corpus store (Google Drive today — swappable)&#10;carries the corpus AND the dated staging document" vertex="1">
+          <mxGeometry height="62" width="330" x="620" y="510" as="geometry" />
         </mxCell>
 
-        <!-- Git -->
-        <mxCell id="git" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#EEEDFE;strokeColor=#534AB7;fontSize=11;align=left;spacingLeft=8;" value="Git repo (GitHub)&#10;source of truth: code + doctrine" vertex="1">
-          <mxGeometry height="58" width="250" x="1010" y="470" as="geometry" />
+        <mxCell id="synth" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=8;fillColor=#FAECE7;strokeColor=#D85A30;fontSize=11;align=left;spacingLeft=8;" value="Human gate + LLM chat&#10;reads the STAGING DOCUMENT&#10;— not the corpus&#10;&#10;selects · writes into prose&#10;judges relevance · assigns sections&#10;flags what is unverified&#10;&#10;⚠ this method is not yet in the repo" vertex="1">
+          <mxGeometry height="176" width="260" x="1140" y="258" as="geometry" />
         </mxCell>
-        <mxCell id="e_git_host" edge="1" parent="1" source="git" style="endArrow=block;html=1;dashed=1;strokeColor=#534AB7;fontSize=10;" target="host" value="deploy from">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="vox" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#E6F1FB;strokeColor=#185FA5;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" value="VOX&#10;the weekly brief · TLP:CLEAR&#10;shared Monday&#10;&#10;Sanctum's scope ends here" vertex="1">
+          <mxGeometry height="94" width="260" x="1140" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="after" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=8;dashed=1;fillColor=none;strokeColor=#A9A79F;fontSize=10;align=left;spacingLeft=8;fontColor=#5F5E5A;" value="Wednesday review, and whatever follows it,&#10;are deliberately OUT OF SCOPE." vertex="1">
+          <mxGeometry height="50" width="260" x="1140" y="566" as="geometry" />
         </mxCell>
 
-        <!-- Note -->
-        <mxCell id="note" parent="1" style="text;html=1;align=left;fontSize=11;fontColor=#5F5E5A;whiteSpace=wrap;" value="Synthesis is manual (no API/tokens). Corpus is transient (7-day; regenerates). Runs on a dedicated collector host; a hardened production node is planned (deferred until the effort proves a keeper). The corpus bridge is swappable — object storage or a self-served corpus are the planned alternatives." vertex="1">
-          <mxGeometry height="90" width="510" x="40" y="470" as="geometry" />
+        <mxCell id="e1" edge="1" parent="1" source="pnd" style="endArrow=block;html=1;strokeColor=#5F5E5A;" target="acolyte"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="acolyte" style="endArrow=block;html=1;strokeColor=#5F5E5A;" target="corpus"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="corpus" style="endArrow=block;html=1;strokeColor=#5F5E5A;" target="arbites"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="arbites" style="endArrow=block;html=1;strokeColor=#185FA5;" target="staging"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="corpus" style="endArrow=open;html=1;dashed=1;strokeColor=#0F6E56;fontSize=10;" target="lexicanum" value="reads all of it"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="corpus" style="endArrow=block;html=1;strokeColor=#534AB7;fontSize=10;" target="drive" value="rclone push"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="staging" style="endArrow=block;html=1;strokeColor=#534AB7;fontSize=10;" target="drive" value="rclone push (dated)"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="drive" style="endArrow=block;html=1;strokeColor=#D85A30;fontSize=10;fontStyle=1;" target="synth" value="picks up the staging document"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="synth" style="endArrow=block;html=1;strokeColor=#185FA5;" target="vox"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="doctrine" style="endArrow=open;html=1;dashed=1;strokeColor=#B8860B;fontSize=10;" target="arbites" value="governs"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="doctrine" style="endArrow=open;html=1;dashed=1;strokeColor=#B8860B;fontSize=10;" target="synth" value="governs"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="git" style="endArrow=block;html=1;dashed=1;strokeColor=#534AB7;fontSize=10;" target="host" value="pull only"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="cogitator" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=8;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontSize=11;align=left;spacingLeft=8;" value="Cogitator — the intel-cycle map&#10;Plan → Collect → Process → Analyse → Disseminate → Feedback" vertex="1">
+          <mxGeometry height="62" width="470" x="40" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="git" parent="1" style="whiteSpace=wrap;html=1;rounded=1;arcSize=10;fillColor=#EEEDFE;strokeColor=#534AB7;fontSize=11;align=left;spacingLeft=8;" value="Git repo (public)&#10;source of truth: engines + doctrine + domains" vertex="1">
+          <mxGeometry height="58" width="300" x="1120" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="note" parent="1" style="text;html=1;align=left;fontSize=11;fontColor=#5F5E5A;whiteSpace=wrap;" value="The engines hold no domain knowledge — a new domain is one pnd.md. Synthesis stays manual by choice, not limitation (tenet 7). The corpus is permanent and grows, so archive search gets more useful every week.&#10;&#10;THE OPEN GAP: stage 4 is the least portable part of the apparatus. Clone the repo and you get collection and triage — but not the method that turns 55 candidates into a vox." vertex="1">
+          <mxGeometry height="110" width="1040" x="40" y="600" as="geometry" />
         </mxCell>
 
       </root>
