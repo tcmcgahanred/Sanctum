@@ -40,13 +40,13 @@
         <mxCell id="s2_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• KIQ (wide-net posture)&#xa;• Feed list (per domain)&#xa;• Collection window">
           <mxGeometry x="420" y="185" width="330" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="s2_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• Raw article JSON (full text)&#xa;• Dated corpus: corpus/YYYY-MM-DD/&#xa;• Pushed to storage (rclone remote)">
+        <mxCell id="s2_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• Raw article JSON (full text)&#xa;• Dated corpus: corpus/YYYY-MM-DD/&#xa;  PERMANENT — nothing prunes it&#xa;• Pushed to storage (rclone remote)">
           <mxGeometry x="420" y="280" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s2_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7E6;strokeColor=#C9820A;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;&lt;domain&gt;/pnd.md → sensors block —&#xa;reliable AND additive only; verify vs.&#xa;egress; DROP any noisy source.">
           <mxGeometry x="420" y="375" width="330" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="s2_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• core/acolyte.py: feedparser + trafilatura&#xa;• URL+TITLE dedupe · systemd timer&#xa;• rclone → object/Drive storage&#xa;• Runs on the domain's current host">
+        <mxCell id="s2_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• core/acolyte.py: feedparser + trafilatura&#xa;• URL+TITLE dedupe · systemd timer (0500 PT)&#xa;• rclone → object/Drive storage&#xa;• Runs on the domain's current host">
           <mxGeometry x="420" y="525" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s2_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• core/acolyte.py (collector)&#xa;• &lt;domain&gt;/pnd.md (sensors block = feeds)&#xa;• collection window (pnd.md manifest)">
@@ -60,7 +60,7 @@
         <mxCell id="s3_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• Rolling corpus (JSON)&#xa;• Tiers + elevation signals&#xa;• Scoring model (pnd.md)">
           <mxGeometry x="780" y="185" width="330" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="s3_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• Deduped corpus (URL + title hash)&#xa;• Tier-scored item set&#xa;• Ranked candidate list + drop list">
+        <mxCell id="s3_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• Deduped corpus (URL + title hash)&#xa;• Tier-scored item set&#xa;• THE STAGING DOCUMENT — ~55 ranked&#xa;  candidates + reasoning + drop list">
           <mxGeometry x="780" y="280" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s3_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7E6;strokeColor=#C9820A;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;&lt;domain&gt;/pnd.md → scoring block&#xa;(tiers / groups / multipliers / rules).&#xa;&#xa;&lt;b&gt;RECENCY GATE&lt;/b&gt; — flag items whose&#xa;PUBLISH date is outside the cycle&#xa;window (flag, don't drop; keep hooks)">
@@ -69,7 +69,7 @@
         <mxCell id="s3_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• core/arbites.py (config-driven scorer)&#xa;• core/rules.py (match + score + recency)&#xa;• Content-hash dedupe&#xa;• Rules/weights from &lt;domain&gt;/pnd.md">
           <mxGeometry x="780" y="525" width="330" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="s3_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• core/arbites.py (scorer)&#xa;• core/rules.py (match + score + recency)&#xa;• &lt;domain&gt;/pnd.md (scoring block)">
+        <mxCell id="s3_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• core/arbites.py · core/rules.py&#xa;• core/lexicanum.py (archive search, off-cycle)&#xa;• &lt;domain&gt;/pnd.md (scoring block)">
           <mxGeometry x="780" y="625" width="330" height="80" as="geometry" />
         </mxCell>
 
@@ -77,19 +77,19 @@
         <mxCell id="s4_head" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F1FB;strokeColor=#185FA5;fontStyle=1;fontSize=14;verticalAlign=middle;" value="4. ANALYSIS &amp; PRODUCTION">
           <mxGeometry x="1140" y="130" width="330" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="s4_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• Ranked candidate items&#xa;• Scoring model + requirements&#xa;• Analyst review + deeper analysis&#xa;• Distribution template">
+        <mxCell id="s4_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• THE STAGING DOCUMENT (stage 3 output)&#xa;  — not the corpus&#xa;• Scoring model + requirements&#xa;• Analyst judgement · production standards">
           <mxGeometry x="1140" y="185" width="330" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="s4_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• STAGING DRAFT (content only, no markings)&#xa;• → distribution-ready product:&#xa;  presentation + deeper analysis + handling&#xa;• Serialized IDs, ranked in section">
+        <mxCell id="s4_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• THE VOX — the weekly brief&#xa;  selected · written · relevance judged ·&#xa;  sectioned · unverified claims flagged&#xa;• SANCTUM'S SCOPE ENDS HERE">
           <mxGeometry x="1140" y="280" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s4_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7E6;strokeColor=#C9820A;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;• &lt;domain&gt;/pnd.md → production block&#xa;  (sections, entry-IDs, item target)&#xa;• Distribution template — layout,&#xa;  analytic depth, handling marking&#xa;• Date discipline: title / ICOD / LTIOV">
           <mxGeometry x="1140" y="375" width="330" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="s4_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• Analyst synthesis (manual; no API)&#xa;• Markdown staging output&#xa;• Distribution template (per domain)&#xa;• Human analyst (presentation + analysis)">
+        <mxCell id="s4_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• Human gate + LLM chat&#xa;• Manual BY CHOICE (tenet 7), not limitation&#xa;• Markdown vox output&#xa;• ⚠ this method is NOT YET IN THE REPO">
           <mxGeometry x="1140" y="525" width="330" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="s4_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• &lt;domain&gt;/editions/ (staging briefs)&#xa;• &lt;domain&gt;/pnd.md (production block)&#xa;• distribution template (per domain)">
+        <mxCell id="s4_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• &lt;domain&gt;/editions/ (the vox editions)&#xa;• &lt;domain&gt;/pnd.md (production block)&#xa;• ⚠ the A&amp;P method itself — nowhere">
           <mxGeometry x="1140" y="625" width="330" height="80" as="geometry" />
         </mxCell>
 
@@ -146,7 +146,7 @@
         </mxCell>
 
         <!-- STAGING BOUNDARY NOTE -->
-        <mxCell id="boundary_note" parent="1" vertex="1" style="text;html=1;align=center;fontSize=11;fontStyle=2;fontColor=#A32C7C;" value="within Stage 4:  ◄ automated staging artifact (pipeline output) ─┼─ human production: template · deeper analysis · handling marking ►">
+        <mxCell id="boundary_note" parent="1" vertex="1" style="text;html=1;align=center;fontSize=11;fontStyle=2;fontColor=#A32C7C;" value="STAGE 3 makes the STAGING DOCUMENT (machine)  ─┼─  STAGE 4 makes the VOX (human).   Sanctum's scope ends at the vox; stages 5–6 are doctrine, not apparatus.">
           <mxGeometry x="1140" y="712" width="690" height="24" as="geometry" />
         </mxCell>
 

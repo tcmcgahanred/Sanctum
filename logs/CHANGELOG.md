@@ -2,6 +2,15 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-17] Cogitator corrected — the staging document belongs to stage 3, not stage 4
+
+- **The cycle map placed the staging artifact inside Analysis & Production.** Its boundary note read *"within Stage 4: ◄ automated staging artifact ─┼─ human production ►"*, and stage 4's outputs listed a "STAGING DRAFT" leading to a distribution-ready product. That is the wrong seam, and it is the same error the topology diagram carried: it made the staging document look like something stage 4 emits rather than something stage 4 *consumes*.
+- **Corrected to the settled model.** Stage 3 emits **the staging document** — ~55 ranked candidates with reasoning plus the drop list. Stage 4 consumes it and emits **the vox**. The boundary note now reads: *"STAGE 3 makes the STAGING DOCUMENT (machine) ─┼─ STAGE 4 makes the VOX (human). Sanctum's scope ends at the vox; stages 5–6 are doctrine, not apparatus."*
+- **Stage 4's inputs say "the staging document — not the corpus."** The corpus is not what a human reads; conflating the two is what let one word mean two documents for weeks.
+- **Stage 4 is marked human by choice**, citing tenet 7, so the manual gate reads as a decision rather than a missing feature. Its files entry now carries the honest gap: the Analysis & Production method itself is nowhere in the repo.
+- Also corrected: the corpus is permanent, the collector runs 0500 Pacific, and `core/lexicanum.py` is listed under stage 3 as explicitly off-cycle.
+- **Verification.** 52 cells before and after, XML parses, no dangling references, every text block re-measured against its fixed box height — five boxes overflowed after the first pass and the wording was trimmed rather than the layout disturbed, since the rows sit 5–10px apart. Not opened in draw.io.
+
 ## [2026-08-17] Topology diagram redrawn around the stage 3 / stage 4 boundary
 
 - **The diagram was describing a machine that no longer exists.** It showed a `feeds.txt` that was folded into `pnd.md` long ago, a "transient 7-day" corpus that is in fact permanent, no Lexicanum, and — the significant one — an arrow saying the human gate **reads the corpus**. It does not. It reads the staging document. That single wrong arrow is the ambiguity that had "vox" meaning two different things for weeks.
