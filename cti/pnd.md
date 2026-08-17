@@ -293,12 +293,15 @@ production:
   relevance_clause: "Why an SLTT organization should care:"
   show_scores: true                    # R6 — carry the 3a score and reasoning per item
   # -----------------------------------------------------------------------------
-  report_title: "WCTI — Pre-Filtered Candidate Queue"
+  # Two documents, two names. 3a makes the staging document; 3b makes the vox.
+  # Use these EXACTLY as written — no prefixes, no additions, no org initials.
+  report_title: "WCTI — Staging Document (candidate queue)"   # 3a output, title
+  vox_title: "WCTI — Weekly Cyber Threat Intelligence Vox"     # 3b output, title
   staging_item_target: [15, 18]        # Monday review surface — total across content sections
   staging_per_section: [5, 6]          # NEWS / CTA TTPs / LATEST ATTACKS OR RISKS
   distributed_item_target: [5, 8]      # Thursday finished report — "restraint is the product"
   sections: ["NEWS", "CTA TTPs", "LATEST ATTACKS OR RISKS", "KEYWORDS"]
-  deliverable_name: "WCTI_v[YYYYMMDD]_STAGING"   # date = distribution (Thu)
+  deliverable_name: "WCTI_v[YYYYMMDD]_VOX"       # 3b output, filename. date = distribution (Thu)
   notes: >
     Staging = content only, no handling markings, generous item count (review
     surface). The distributed product narrows to 5-8 and adds handling markings.
