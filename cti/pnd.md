@@ -281,6 +281,18 @@ supplies roughly 3× the new staging target, so no scoring change is required.*
 
 ```yaml
 production:
+  # ---- Stage 3b (exploitation) — the domain's answers to ../EXPLOITATION.md ----
+  # The generic method lives in EXPLOITATION.md at the repo root. These are the
+  # only parts of it that are CTI-specific.
+  audience: >
+    Low-maturity State/Local/Tribal/Territorial (SLTT) organisations in the AOR —
+    counties, cities, school and special districts. They consume vendor software;
+    they do not write code. Recommendations must be plain-language and
+    minimal-tooling (IG1 CIS controls preferred), and lean on vendor
+    accountability and procurement governance rather than engineering effort.
+  relevance_clause: "Why an SLTT organization should care:"
+  show_scores: true                    # R6 — carry the 3a score and reasoning per item
+  # -----------------------------------------------------------------------------
   report_title: "WCTI — Pre-Filtered Candidate Queue"
   staging_item_target: [15, 18]        # Monday review surface — total across content sections
   staging_per_section: [5, 6]          # NEWS / CTA TTPs / LATEST ATTACKS OR RISKS

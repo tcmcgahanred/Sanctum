@@ -2,6 +2,17 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-17] `EXPLOITATION.md` — stage 3b written down for the first time
+
+- **Every part of Sanctum was version-controlled except the one doing the most visible work.** Sensors, scoring model, collection window — all config. But the step that turns ~55 ranked candidates into a readable vox lived only as accumulated instruction inside one operator's chat. A different operator, or a different model, produced a different vox from identical input. Clone the repo and you got collection and triage but not the thing that made the output good.
+- **The method was extracted, not invented.** The rules were read out of a vox already judged good. Several were already declared in that document's own header — *"PRODUCTION STANDARDS APPLIED: impact/attribution claims stated only as far as sources confirm…"* — and the rest were being applied consistently without ever being recorded. Deriving from a known-good artifact beats guessing at requirements.
+- **Eleven rules, domain-agnostic.** Actionable relevance clause per item; claims never stated more strongly than the source; **marginal items kept and flagged rather than dropped** (tenet 8 carried into the exploitation layer); product-specific items name the product; dated source plus verification state; score and reasoning carried through; jargon explained in-line; one event one entry; serialised IDs ordered by requirement priority; the document declares its own recency window and collection gaps; no handling markings.
+- **R6 answers the weights request.** Each item carries its 3a score with the tier and multipliers behind it, plus a legend of the domain's scoring model generated from `pnd.md` so a reader who has never seen the config can interpret the numbers. Stated once in the header: *a score is an ordering aid, not a measurement.* The purpose is to let the team argue with the **ranking**, not just the content — and the ranking is the part Planning & Direction actually controls.
+- **3b is documented as the second gate, not polish.** 3a scores on terms, so it surfaces items that match well and matter little — a foreign government breach with no local nexus scores like a local one. In the reference vox, 3a surfaced exactly that and 3b caught it. Framing 3b as a finishing touch would have produced a specification too loose to catch it again.
+- **Domain-specific parts moved into config**, same split as everything else: `cti/pnd.md` `production` now declares `audience`, `relevance_clause` and `show_scores`. The method file holds no domain knowledge.
+- **Tenet 7 holds.** Nothing in `core/` calls a model. Sanctum ships the method; the operator brings the tool and the judgement, and decides every item.
+- **Verification.** Config loads with the new production keys, 50 sensors and all 8 groups intact, full suite passes including 1,014-article scorer parity. No engine code changed.
+
 ## [2026-08-17] Cogitator spacing — the top of the map was cramped
 
 - Three collisions at the head of the diagram, all introduced when the grouping containers were added. The title and subtitle touched with no gap at all. The feedback edge ran 8px beneath the subtitle. And each container began only 18px above the stage headers, so its own title text landed on top of them.

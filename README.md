@@ -151,6 +151,7 @@ Secrets **never** enter the repo — the `.gitignore` blocks credential carriers
 sanctum/
 ├── README.md
 ├── ROADMAP.md               # vision, keeper test, future production node
+├── EXPLOITATION.md          # stage 3b — how a staging document becomes a vox
 ├── VERSIONING.md            # git-as-truth; artifact version anchors
 ├── requirements.txt         # python deps (feedparser, trafilatura, pyyaml)
 ├── run.sh                   # run.sh <domain>  — collect + score one domain
