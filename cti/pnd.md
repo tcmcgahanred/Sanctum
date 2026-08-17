@@ -191,7 +191,7 @@ scoring:
       enabled: true
       window_days: 7               # cycle window length (ends at the cutoff below)
       cutoff_weekday: monday       # ICOD day
-      cutoff_time: "09:00"         # ICOD time
+      cutoff_time: "05:00"         # ICOD time — matches the 0500 collector run
       timezone: America/Los_Angeles
     grouping:                      # near-duplicate EVENT grouping — display only
       enabled: true                # never merges, never drops, never re-scores

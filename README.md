@@ -127,6 +127,12 @@ Counts are bucketed by **collection date**, because publication dates are
 missing or malformed often enough that the scorer carries a recency gate to cope
 with it. `--by-published` switches axis where you accept the gaps.
 
+**Read the rate, not the count.** Every table shows hits, the articles collected
+in that period, and the resulting rate — because a period where you collected
+less looks exactly like a period where less happened. On the first real run,
+ransomware hits fell 475 → 122 and read as a collapse; the denominators showed
+6,585 articles versus 1,370, and the rate had *risen*.
+
 **Portability:** the only host-coupled value is `base_dir` in each `pnd.md` manifest — override it per host with the `SANCTUM_BASE` env var. To stand Sanctum up elsewhere: clone, `pip install -r requirements.txt`, point the manifest at your corpus store, and run. No code changes.
 
 **To add a domain:** drop in `<newdomain>/pnd.md` (+ `codex.md`, `mandate.md`) and run `./run.sh <newdomain>`. The cycle applies unchanged.

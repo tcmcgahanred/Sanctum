@@ -174,9 +174,19 @@ class Hit:
 
 def search(cfg, targets, since, until, by, by_published):
     """
-    `targets` is {label: [terms]}. Returns (hits, series, per_term, scanned).
-      series    {label: {bucket: count}}
+    `targets` is {label: [terms]}. Returns
+    (hits, series, per_term, totals, scanned, undated).
+      series    {label: {bucket: hit count}}
       per_term  {label: {term: count}}
+      totals    {bucket: articles COLLECTED in that bucket}
+
+    `totals` is the denominator, and it is the whole reason this function counts
+    articles it found nothing in. Without it a period where less was collected
+    looks exactly like a period where less happened. Measured on the first real
+    run: ransomware hits fell 475 -> 122 week over week, which read as a
+    collapse until the denominators showed 6,585 articles collected versus
+    1,370 — the RATE had risen, 7.2% to 8.9%. Counts alone said the opposite of
+    the truth.
     """
     scoring = cfg["scoring"]
     all_hits = make_all_hits(scoring.get("word_boundary_terms"))
@@ -184,6 +194,7 @@ def search(cfg, targets, since, until, by, by_published):
     hits = []
     series = {label: defaultdict(int) for label in targets}
     per_term = {label: defaultdict(int) for label in targets}
+    totals = defaultdict(int)
     scanned = 0
     undated = 0
 
@@ -198,22 +209,25 @@ def search(cfg, targets, since, until, by, by_published):
             undated += 1
             axis = day                     # fall back rather than discard
 
+        b = bucket(axis, by)
+        totals[b] += 1                     # counted whether or not anything hits
+
         for label, terms in targets.items():
             found = all_hits(blob, terms)
             if not found:
                 continue
             hits.append(Hit(day, pub, label, found, art))
-            series[label][bucket(axis, by)] += 1
+            series[label][b] += 1
             for t in found:
                 per_term[label][t] += 1
 
-    return hits, series, per_term, scanned, undated
+    return hits, series, per_term, totals, scanned, undated
 
 
 # ------------------------------------------------------------------
 # Report
 # ------------------------------------------------------------------
-def render(cfg, targets, hits, series, per_term, scanned, undated,
+def render(cfg, targets, hits, series, per_term, totals, scanned, undated,
            by, by_published, counts_only, since, until):
     L = []
     dom = cfg["domain"]
@@ -232,11 +246,19 @@ def render(cfg, targets, hits, series, per_term, scanned, undated,
         L.append(f"> **{undated} article(s) had no usable publication date** and were "
                  f"bucketed by collection date instead. Counts below are that far approximate.")
     L.append("")
-    L.append("> Counts describe how often terms appeared in what was collected. "
-             "Reporting volume is not the same as activity — a quiet week for a "
-             "publisher looks identical to a quiet week in the field. Read the "
-             "items, not just the line.")
+    L.append("> **Read the rate, not the count.** Hits rise and fall with how much "
+             "was collected, so the `of` column is the denominator and `rate` is "
+             "the comparable number. The bar tracks rate for that reason. Even "
+             "then, reporting volume is not activity — a quiet week for a "
+             "publisher looks identical to a quiet week in the field.")
     L.append("")
+
+    # Collection volume per period, stated once. Every rate below divides by it,
+    # and an uneven row here explains most surprising-looking trends.
+    if totals:
+        L.append(f"**Articles collected per {by}:** " + " · ".join(
+            f"{b} **{totals[b]}**" for b in sorted(totals)))
+        L.append("")
 
     for label in targets:
         s = series[label]
@@ -249,13 +271,17 @@ def render(cfg, targets, hits, series, per_term, scanned, undated,
             L.append("")
             continue
 
-        L.append(f"| {by} | hits | |")
-        L.append("|---|---:|---|")
-        peak = max(s.values())
+        def rate(b):
+            t = totals.get(b, 0)
+            return (100.0 * s[b] / t) if t else 0.0
+
+        L.append(f"| {by} | hits | of | rate | |")
+        L.append("|---|---:|---:|---:|---|")
+        peak_rate = max((rate(b) for b in s), default=0.0)
         for b in sorted(s):
-            n = s[b]
-            bar = "█" * max(1, round(20 * n / peak))
-            L.append(f"| {b} | {n} | {bar} |")
+            r = rate(b)
+            bar = "█" * max(1, round(20 * r / peak_rate)) if peak_rate else ""
+            L.append(f"| {b} | {s[b]} | {totals.get(b, 0)} | {r:.1f}% | {bar} |")
         L.append("")
 
         pt = per_term[label]
@@ -345,10 +371,10 @@ def main(argv=None):
               f"or SANCTUM_BASE points somewhere else", file=sys.stderr)
         return 1
 
-    hits, series, per_term, scanned, undated = search(
+    hits, series, per_term, totals, scanned, undated = search(
         cfg, targets, since, until, args.by, args.by_published)
 
-    report = render(cfg, targets, hits, series, per_term, scanned, undated,
+    report = render(cfg, targets, hits, series, per_term, totals, scanned, undated,
                     args.by, args.by_published, args.counts, since, until)
 
     if args.out:

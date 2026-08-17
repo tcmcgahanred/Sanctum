@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.rules import score_article, _eval_atom, make_matcher, _scopes  # noqa: E402
 from core.lexicanum import (make_all_hits, bucket, published_date,       # noqa: E402
-                            walk_corpus, search)
+                            walk_corpus, search, render)
 
 FAILURES = []
 
@@ -203,7 +203,7 @@ def test_lexicanum():
         cfg = {"domain": "test", "corpus_dir": root,
                "scoring": {"groups": TARGET_GROUPS, "word_boundary_terms": None}}
 
-        h, series, per_term, scanned, undated = search(
+        h, series, per_term, totals, scanned, undated = search(
             cfg, TARGET_GROUPS, None, None, "month", False)
 
         check("scanned every dated article", scanned, 6)
@@ -227,21 +227,75 @@ def test_lexicanum():
 
         # Retroactive question: a group invented now, run over old material.
         new_group = {"invented_today": ["shipping"]}
-        _, ser_new, _, _, _ = search(cfg, new_group, None, None, "month", False)
+        _, ser_new, _, _, _, _ = search(cfg, new_group, None, None, "month", False)
         check("a brand-new group finds old articles",
               sum(ser_new["invented_today"].values()), 1)
 
         # Publication-date axis, including the undated fallback.
-        _, ser_pub, _, _, und = search(cfg, {"g": ["qakbot", "lockbit"]},
+        _, ser_pub, _, _, _, und = search(cfg, {"g": ["qakbot", "lockbit"]},
                                        None, None, "month", True)
         check("undated items are counted, not discarded", und, 2)
         check("published axis still totals every hit", sum(ser_pub["g"].values()), 3)
+
+
+def test_denominator():
+    """
+    The production trap, reproduced.
+
+    On the first real run, weekly ransomware hits fell 475 -> 122 and read as a
+    collapse. Article volume that week had fallen 6,585 -> 1,370, so the RATE
+    had actually risen. Counts alone said the opposite of the truth.
+
+    This builds the same shape at small scale: a heavy month and a light month
+    with the SAME underlying rate, and asserts the denominators expose it.
+    """
+    print("\nLexicanum — collection volume must not read as a trend")
+
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td) / "corpus"
+        # January: 100 articles, 20 mention the term.
+        # February:  10 articles,  2 mention the term.
+        # Counts collapse 20 -> 2. The rate is flat at 20%.
+        for day, n, hitting in (("2026-01-10", 100, 20), ("2026-02-10", 10, 2)):
+            d = root / day
+            d.mkdir(parents=True)
+            for i in range(n):
+                body = "emotet loader seen" if i < hitting else "unrelated filler"
+                (d / f"{i}.json").write_text(json.dumps(
+                    {"title": f"item {i}", "text": body, "published": day,
+                     "url": f"https://example.com/{day}/{i}", "source": "test"}))
+
+        cfg = {"domain": "test", "corpus_dir": root,
+               "scoring": {"groups": {}, "word_boundary_terms": None}}
+        targets = {"loader": ["emotet"]}
+
+        _, series, _, totals, scanned, _ = search(
+            cfg, targets, None, None, "month", False)
+
+        check("every article counted in the denominator, hit or not",
+              dict(totals), {"2026-01": 100, "2026-02": 10})
+        check("raw counts look like a 90% collapse",
+              dict(series["loader"]), {"2026-01": 20, "2026-02": 2})
+
+        rates = {b: round(100.0 * series["loader"][b] / totals[b], 1) for b in totals}
+        check("but the rate is flat — the collapse was collection volume",
+              rates, {"2026-01": 20.0, "2026-02": 20.0})
+
+        report = render(cfg, targets, [], series, {"loader": {}}, totals,
+                        scanned, 0, "month", False, True, None, None)
+        check("report states collection volume per period",
+              "Articles collected per month" in report, True)
+        check("report shows the denominator column", "| of |" in report, True)
+        check("report shows the rate, not just the count", "20.0%" in report, True)
+        check("report tells the reader to read the rate",
+              "Read the rate, not the count" in report, True)
 
 
 def run():
     test_exclusion()
     test_exclusion_changes_nothing_else()
     test_lexicanum()
+    test_denominator()
     print()
     if FAILURES:
         print(f"FAIL — {len(FAILURES)} problem(s)")
