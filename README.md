@@ -164,6 +164,7 @@ sanctum/
 ├── README.md
 ├── ROADMAP.md               # vision, keeper test, future production node
 ├── EXPLOITATION.md          # stage 3b — how a staging document becomes a vox
+├── VOCABULARY.md            # how a domain builds and maintains its word lists
 ├── VERSIONING.md            # git-as-truth; artifact version anchors
 ├── requirements.txt         # python deps (feedparser, trafilatura, pyyaml)
 ├── run.sh                   # run.sh <domain>  — collect + score one domain
@@ -176,6 +177,8 @@ sanctum/
 │   └── lexicanum.py         # archive search + match-frequency over time
 ├── cti/                     # Effort 1 — SLTT CTI (example domain) — CONFIG + outputs
 │   ├── pnd.md               # THE P&D file: manifest + sensors + scoring + production
+│   ├── vocab.md             # WHY the word lists say what they say — collisions,
+│   │                        #   dropped terms, review dates, gaps (never the terms)
 │   ├── codex.md             # intelligence requirements & doctrine (prose)
 │   ├── mandate.md           # standing planning & direction record (+ status/backlog)
 │   ├── README.md            # effort overview
@@ -188,11 +191,14 @@ sanctum/
 │   └── sanctum-topology.png
 ├── logs/
 │   └── CHANGELOG.md
+├── tools/                   # operator tools — not part of a collection cycle
+│   └── vocab_check.py       # tenet 8  — no silent decay in a domain's word lists
 └── tests/                   # engine tests + the commit gate
-    ├── pre_commit.sh        # THE COMMIT GATE — runs both guards below
+    ├── pre_commit.sh        # THE COMMIT GATE — runs all three guards
     ├── scrub_check.sh       # tenet 11 — nothing identifying reaches the public repo
     ├── domain_check.py      # tenet 3  — no domain file contains behavior
     ├── domain_check_test.py
+    ├── vocab_check_test.py
     ├── upgrades_test.py     # exclusion operator + archive search
     ├── grouping_test.py
     ├── diff_scores.py

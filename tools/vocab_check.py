@@ -1,0 +1,353 @@
+#!/usr/bin/env python3
+"""
+Sanctum · tools/vocab_check.py · the vocabulary guard
+
+Checks a domain's word lists for the decay modes that manual review does not
+catch. See ../VOCABULARY.md for the method this enforces.
+
+WHY THIS EXISTS
+---------------
+Vocabulary is the highest-leverage and least-examined part of Sanctum. Scoring
+is visible and gets argued about; word lists are typed once and never read
+again. Every failure mode below is SILENT — the group keeps matching something,
+so it looks like it works, and detecting the problem means noticing an absence.
+
+This was not a precaution. A completed domain build in another session found
+stale word-boundary entries by hand, on the fourth revision, having read the
+file three times before that. This tool finds them in a tenth of a second.
+
+WHAT IT CHECKS
+--------------
+  orphaned boundary term   an entry equal to no live term — dead, and it implies
+                           a term is present when it is not              [ERROR]
+  empty group              declared but has no terms; any rule referencing it
+                           silently never fires                          [ERROR]
+  dropped term still live  recorded as DROPPED in vocab.md but still in pnd.md —
+                           the exact drift the two-file split prevents   [ERROR]
+  redundant boundary term  <=4 chars, where the matcher already applies word
+                           boundaries automatically                       [WARN]
+  stale group              review date older than the configured interval [WARN]
+
+The first two need no vocab.md. The last three do.
+
+WHY BOUNDARY ENTRIES GO DEAD
+----------------------------
+`word_boundary_terms` is matched against a WHOLE term string in a group, not
+against substrings of one. An entry `hack` does nothing for a group term
+`hacked` — the strings are not equal, and `hacked` is long enough to use
+substring matching anyway. So an entry survives a term's deletion, and a later
+reader reads the boundary list as evidence that term is still live.
+
+USAGE
+    tools/vocab_check.py                 # every domain in the repo
+    tools/vocab_check.py --tracked-only  # only domains git tracks (the commit gate)
+    tools/vocab_check.py cti             # one domain
+    tools/vocab_check.py --pnd path/to/pnd.md
+    tools/vocab_check.py --today 2026-12-01   # for testing staleness
+
+A gitignored domain — a second effort kept out of the public repo, a stub that
+is not operational yet — is still checked on a manual run, because its defects
+are real. It is skipped by the commit gate, because it cannot reach the repo the
+gate protects.
+
+EXIT CODES
+    0  no errors (warnings may still be printed)
+    1  at least one error, or a domain failed to load
+"""
+
+import argparse
+import re
+import subprocess
+import sys
+from datetime import date, datetime
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from core.pnd import load_domain, REPO_ROOT   # noqa: E402
+
+try:
+    import yaml
+except ImportError:  # pragma: no cover
+    raise SystemExit("vocab_check needs PyYAML: pip install pyyaml")
+
+_YAML_BLOCK = re.compile(r"```ya?ml\s*\n(.*?)```", re.DOTALL)
+
+# The matcher in core/rules.py applies word boundaries automatically at this
+# length or below. Keep these in step: if that threshold ever changes, an
+# explicit entry that was redundant becomes load-bearing.
+AUTO_BOUNDARY_MAX_LEN = 4
+
+ERROR, WARN, NOTED = "ERROR", "WARN", "NOTED"
+
+
+class Finding:
+    def __init__(self, severity, domain, check, subject, detail):
+        self.severity = severity
+        self.domain = domain
+        self.check = check
+        self.subject = subject
+        self.detail = detail
+
+    def __str__(self):
+        return (f"  {self.severity:<5}  {self.check:<24}  {self.subject}\n"
+                f"         {self.detail}")
+
+
+def load_vocab(vocab_path):
+    """
+    Parse the `vocab:` block from a domain's vocab.md. Returns {} when the file
+    is absent — the file is optional, and the checks that need it simply do not
+    run. A domain is not broken for lacking one; it is only unguarded.
+    """
+    if not vocab_path.exists():
+        return {}
+    text = vocab_path.read_text(encoding="utf-8")
+    merged = {}
+    for i, block in enumerate(_YAML_BLOCK.findall(text)):
+        try:
+            data = yaml.safe_load(block)
+        except yaml.YAMLError as e:
+            raise ValueError(f"{vocab_path.name} yaml block #{i+1}: {e}") from e
+        if isinstance(data, dict) and "vocab" in data:
+            merged.update(data["vocab"] or {})
+    return merged
+
+
+def _as_date(v):
+    """Accept a real date or an ISO string; return None for anything else."""
+    if isinstance(v, date) and not isinstance(v, datetime):
+        return v
+    if isinstance(v, datetime):
+        return v.date()
+    try:
+        return datetime.strptime(str(v).strip(), "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def check_domain(domain, cfg, vocab, today):
+    findings = []
+    scoring = cfg["scoring"]
+    groups = scoring.get("groups") or {}
+
+    # Every live term, lowercased, mapped to the groups holding it.
+    live = {}
+    for gname, terms in groups.items():
+        for t in (terms or []):
+            live.setdefault(str(t).strip().lower(), []).append(gname)
+
+    # --- empty groups -------------------------------------------------
+    # An empty group is worse than a missing one: core/pnd.py validates that
+    # every referenced group EXISTS, so an empty group passes that check and
+    # then matches nothing. The rule reads as active and is inert.
+    for gname, terms in sorted(groups.items()):
+        if not terms:
+            findings.append(Finding(
+                ERROR, domain, "empty group", gname,
+                "declared with no terms — any rule referencing it never fires, "
+                "but passes the loader's reference check"))
+
+    # --- padded terms --------------------------------------------------
+    # The matcher calls .strip() on every term before matching, so leading or
+    # trailing spaces are silently discarded. Someone writing " term " is
+    # reaching for word-boundary behaviour and not getting it: after stripping,
+    # a term longer than the auto-boundary length falls back to plain substring
+    # matching, which is exactly what the padding was meant to prevent.
+    for gname, terms in sorted(groups.items()):
+        for t in (terms or []):
+            raw = str(t)
+            stripped = raw.strip()
+            if raw == stripped or not stripped:
+                continue
+            if len(stripped.lower()) <= AUTO_BOUNDARY_MAX_LEN:
+                findings.append(Finding(
+                    WARN, domain, "padded term", f"{raw!r} in {gname}",
+                    f"padding is stripped before matching. Harmless here — "
+                    f"{stripped!r} is {len(stripped)} chars, so boundaries apply "
+                    f"automatically — but the spaces imply a guard that is not "
+                    f"doing the work."))
+            else:
+                findings.append(Finding(
+                    ERROR, domain, "padded term", f"{raw!r} in {gname}",
+                    f"padding is stripped before matching, leaving the bare "
+                    f"substring {stripped!r} ({len(stripped)} chars, above the "
+                    f"<={AUTO_BOUNDARY_MAX_LEN} auto-boundary length). It now "
+                    f"matches inside longer words. Add {stripped!r} to "
+                    f"word_boundary_terms, or use a more precise term."))
+
+    # --- boundary list drift ------------------------------------------
+    for entry in (scoring.get("word_boundary_terms") or []):
+        key = str(entry).strip().lower()
+        if key not in live:
+            findings.append(Finding(
+                ERROR, domain, "orphaned boundary term", repr(entry),
+                "equal to no live term in any group. The entry does nothing, and "
+                "it implies that term is still in the vocabulary."))
+        elif len(key) <= AUTO_BOUNDARY_MAX_LEN:
+            findings.append(Finding(
+                WARN, domain, "redundant boundary term", repr(entry),
+                f"{len(key)} chars — the matcher applies boundaries automatically "
+                f"at <={AUTO_BOUNDARY_MAX_LEN}. Entry adds nothing "
+                f"(live in: {', '.join(sorted(set(live[key])))})."))
+
+    # --- dropped terms that are still live ----------------------------
+    for rec in (vocab.get("dropped") or []):
+        if not isinstance(rec, dict):
+            continue
+        term = str(rec.get("term", "")).strip().lower()
+        if term and term in live:
+            findings.append(Finding(
+                ERROR, domain, "dropped term still live", repr(rec.get("term")),
+                f"recorded as dropped in vocab.md but still present in pnd.md "
+                f"(group: {', '.join(sorted(set(live[term])))}). "
+                f"Remove it from pnd.md, or remove the dropped record."))
+
+    # --- staleness -----------------------------------------------------
+    # A WARN, never an ERROR. A date passing is not a reason to block a commit;
+    # it is a reason to look. Blocking here would train people to --no-verify,
+    # which would disable the scrub guard too.
+    default_interval = vocab.get("review_interval_days")
+    gmeta = vocab.get("groups") or {}
+    for gname in sorted(groups):
+        meta = gmeta.get(gname) or {}
+        interval = meta.get("review_interval_days", default_interval)
+        reviewed = _as_date(meta.get("reviewed")) if meta.get("reviewed") else None
+        if interval is None:
+            continue
+        if reviewed is None:
+            if gmeta:  # only nag once the domain has started recording dates
+                findings.append(Finding(
+                    WARN, domain, "no review date", gname,
+                    "no `reviewed:` date in vocab.md — staleness cannot be "
+                    "assessed for this group"))
+            continue
+        age = (today - reviewed).days
+        if age > int(interval):
+            findings.append(Finding(
+                WARN, domain, "stale group", gname,
+                f"last reviewed {reviewed} — {age} days ago, interval is "
+                f"{interval}. Decay in a word list is silent; the group keeps "
+                f"matching something either way."))
+
+    # --- acknowledged findings -----------------------------------------
+    # A guard nobody can satisfy is a guard people route around, and here the
+    # route around is `--no-verify`, which also disables the scrub check. So a
+    # finding the domain has consciously accepted is downgraded to NOTED rather
+    # than left blocking — but it must be written down, with a reason, and it
+    # keeps printing. Silence is not on the menu; that is the whole point.
+    accepted = [a for a in (vocab.get("accepted") or []) if isinstance(a, dict)]
+    for f in findings:
+        for a in accepted:
+            if (str(a.get("check", "")).strip().lower() == f.check.lower()
+                    and str(a.get("subject", "")).strip() in f.subject):
+                f.severity = NOTED
+                f.detail = (f"ACCEPTED {a.get('date', 'undated')}: "
+                            f"{a.get('reason', 'no reason recorded')}\n"
+                            f"         (underlying: {f.detail})")
+                break
+
+    return findings
+
+
+def git_tracked(repo_root, rel_path):
+    """
+    True if git tracks this path. False on any error — if we cannot ask git,
+    we do not get to claim a file is untracked.
+    """
+    try:
+        r = subprocess.run(["git", "-C", str(repo_root), "ls-files", "--error-unmatch",
+                            str(rel_path)],
+                           capture_output=True, text=True)
+        return r.returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def discover_domains(repo_root, tracked_only=False):
+    """
+    Every <domain>/pnd.md in the repo, by folder name.
+
+    `tracked_only` skips domains git does not track. The commit gate uses it:
+    a gitignored domain cannot reach the public repo, so it cannot be the gate's
+    business, and blocking a commit over a file git will never see just teaches
+    people to reach for --no-verify — which would disable the scrub check too.
+
+    A manual run still checks everything, because an untracked domain's defects
+    are real and the operator should be able to see them.
+    """
+    out = []
+    for p in sorted(repo_root.glob("*/pnd.md")):
+        if tracked_only and not git_tracked(repo_root, p.relative_to(repo_root)):
+            continue
+        out.append(p.parent.name)
+    return out
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description="Check a Sanctum domain's vocabulary for silent decay.")
+    ap.add_argument("domain", nargs="?", help="domain name (default: all in repo)")
+    ap.add_argument("--pnd", help="explicit path to a pnd.md (overrides domain)")
+    ap.add_argument("--today", help="YYYY-MM-DD, for testing staleness")
+    ap.add_argument("--tracked-only", action="store_true",
+                    help="skip domains git does not track (used by the commit gate)")
+    args = ap.parse_args(argv)
+
+    today = date.today()
+    if args.today:
+        parsed = _as_date(args.today)
+        if parsed is None:
+            print(f"vocab_check: --today must be YYYY-MM-DD, got {args.today!r}",
+                  file=sys.stderr)
+            return 1
+        today = parsed
+
+    if args.pnd:
+        targets = [(Path(args.pnd).resolve().parent.name, Path(args.pnd).resolve())]
+    elif args.domain:
+        targets = [(args.domain, REPO_ROOT / args.domain / "pnd.md")]
+    else:
+        names = discover_domains(REPO_ROOT, tracked_only=args.tracked_only)
+        if not names:
+            scope = "tracked " if args.tracked_only else ""
+            print(f"vocab_check: no {scope}<domain>/pnd.md found")
+            return 0
+        targets = [(n, REPO_ROOT / n / "pnd.md") for n in names]
+
+    findings, failed = [], False
+    for name, pnd_path in targets:
+        try:
+            cfg = load_domain(pnd_path=str(pnd_path))
+            vocab = load_vocab(pnd_path.parent / "vocab.md")
+        except Exception as e:
+            print(f"vocab_check: [{name}] could not load — {e}", file=sys.stderr)
+            failed = True
+            continue
+        findings.extend(check_domain(name, cfg, vocab, today))
+
+    errors = [f for f in findings if f.severity == ERROR]
+    warns = [f for f in findings if f.severity == WARN]
+    noted = [f for f in findings if f.severity == NOTED]
+
+    checked = ", ".join(n for n, _ in targets)
+    if not findings:
+        print(f"vocab_check: PASS — {checked}: no vocabulary defects")
+        return 1 if failed else 0
+
+    for group_name, bucket in (("ERRORS", errors), ("WARNINGS", warns),
+                               ("ACCEPTED — recorded in vocab.md, still true", noted)):
+        if bucket:
+            print(f"\n{group_name}")
+            for f in bucket:
+                print(f)
+
+    print(f"\nvocab_check: {len(errors)} error(s), {len(warns)} warning(s), "
+          f"{len(noted)} accepted — across: {checked}")
+    if errors:
+        print("Errors block the commit. See VOCABULARY.md §5 for what each means.")
+    return 1 if (errors or failed) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

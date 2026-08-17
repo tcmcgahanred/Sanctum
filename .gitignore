@@ -17,7 +17,14 @@ rclone.conf
 secrets/
 .secrets/
 
-# --- Runtime data (regenerates; transient 7-day corpus) ---
+# --- Runtime data (kept out of git; the corpus is NOT transient) ---
+# The corpus is PERMANENT and lives in the corpus store. It is excluded here
+# because it is large, not because it is disposable. Retention is load-bearing:
+# core/lexicanum.py recomputes matches on demand instead of storing them, which
+# is what lets a group invented today be run against everything collected last
+# year. Pruning the corpus would silently destroy that, and would turn the
+# vocabulary-granularity decision into a permanent one.
+# Read VOCABULARY.md §4 before changing retention.
 corpus/
 seen.txt
 seen_titles.txt

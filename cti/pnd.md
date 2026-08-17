@@ -188,8 +188,45 @@ scoring:
       factor: 1.3
       when: {all: [{group: ransom, scope: blob}, {group: ci, scope: blob}]}
 
+  # ---------------------------------------------------------------------
+  # FORCE-SURFACE — Vox Policy §7 mandatory-surface rule. Inclusion, not
+  # ranking: a match guarantees the item reaches the surface regardless of
+  # score. Score still orders everything, so a forced low-score item sits at
+  # the bottom of the surface, marked — a visible ranking/relevance
+  # disagreement, which is a tuning signal rather than a miss.
+  #
+  # ⚠ M1 and M3 ARE APPROXIMATIONS. The policy specifies "subject-of-incident
+  # logic" — that the AOR entity is the SUBJECT of the attack. Sanctum has no
+  # subject detection; these rules fire on CO-OCCURRENCE of a place (or sector)
+  # and an incident word in the same article. They will over-fire on national
+  # round-ups that mention California in passing. Over-firing is the safe
+  # direction (tenet 8) but the surface will carry noise until subject-of
+  # detection exists. This is a Planning & Direction item, not a config tweak.
+  #
+  # ⚠ M2 IS PARTIAL. The policy wants in-the-wild exploitation OR a weaponised
+  # public PoC OR a KEV addition. Only `kev` exists as a group today; there is
+  # no exploitation vocabulary. M2 therefore fires on KEV + SLTT-relevant tech
+  # and misses the other two triggers.
+  force_surface:
+    - name: "M1 in-AOR entity in an incident"
+      when: {all: [{group: geo, scope: blob}, {group: incident, scope: blob}]}
+    - name: "M2 KEV listing affecting SLTT-relevant technology"
+      when: {all: [{group: kev, scope: blob}, {group: lowmat_tech, scope: blob}]}
+    - name: "M3 SLTT sector in an incident"
+      when: {all: [{group: sector, scope: blob}, {group: incident, scope: blob}]}
+
   settings:
-    surface_n: 55
+    # SURFACE-VS-DROP is a score threshold, never a count. Vox Policy §7
+    # forbids a cap: "the count is an OUTPUT of the scoring and rules, never a
+    # target imposed on top of them." `surface_n: 55` was exactly such a cap,
+    # and it also made the force-surface guarantee below impossible.
+    #
+    # PROVISIONAL VALUE — 2.0 is the tier-3 weight, so an item surfaces if it
+    # reached tier 3 or better, or if multipliers lifted a tier-4 item to 2.0.
+    # This has never been measured against the live corpus. Check the surfaced
+    # count on the first real run and tune. If the surface is too big, tune the
+    # weights or the vocabulary; do NOT reintroduce a cap.
+    surface_min_score: 2.0
     empty_title: {score: 0.5, tier: 4, flag: "FLAG: empty title (feed artifact — verify source)"}
     recency:                       # Codex Layer 4 — flag stale-by-publish-date, never drop
       enabled: true
@@ -208,7 +245,14 @@ scoring:
                                    #    event — dissolved, items shown normally, noted in header
       max_group_display: 12        # cap children shown per group; the rest stay in the drop list
 
-  word_boundary_terms: ["hack", "ics", "scada", "grid", "leak", "ransom", "court", "uc", "csu", "cisco", "war"]
+  # Only terms that are BOTH live in a group AND longer than 4 characters
+  # belong here — core/rules.py applies boundaries automatically at <=4, so a
+  # shorter entry does nothing. Seven of the previous eleven entries were dead:
+  # "hack", "leak" and "war" matched no live term at all, and "ics", "grid",
+  # "uc", "csu" were already covered by the length rule. All seven removals are
+  # provable no-ops and the parity test confirms scoring is unchanged.
+  # Verified by tools/vocab_check.py — reasoning in cti/vocab.md.
+  word_boundary_terms: ["scada", "ransom", "court", "cisco"]
 
   groups:
     geo: ["california", "californian", " calif ", "sacramento", "fresno",
@@ -274,10 +318,9 @@ down an already-ranked list; it does not lower the standard. Every entry still
 shows its scoring reasoning (tier + which multipliers fired) so the analyst can
 audit where the cut falls.
 
-*Both targets are advisory — no engine reads them (verified 2026-08-11: `arbites.py`
-reads only `report_title` from this block). The only code-enforced production knob is
-`scoring.settings.surface_n`, which sets candidate-queue depth. At 55 it already
-supplies roughly 3× the new staging target, so no scoring change is required.*
+*`arbites.py` reads only `report_title` from this block. What the surface actually
+contains is decided by `scoring.settings.surface_min_score` and the `force_surface`
+rules — a threshold plus guaranteed inclusions, never a count.*
 
 ```yaml
 production:
@@ -295,13 +338,18 @@ production:
   # -----------------------------------------------------------------------------
   # Two documents, two names. 3a makes the staging document; 3b makes the vox.
   # Use these EXACTLY as written — no prefixes, no additions, no org initials.
+  # "Vox" is INTERNAL shorthand and must never appear in the reader-facing
+  # product (Vox Policy §3). No "CCIC" prefix until AOR-direct sensors exist.
   report_title: "WCTI — Staging Document (candidate queue)"   # 3a output, title
-  vox_title: "WCTI — Weekly Cyber Threat Intelligence Vox"     # 3b output, title
-  staging_item_target: [15, 18]        # Monday review surface — total across content sections
-  staging_per_section: [5, 6]          # NEWS / CTA TTPs / LATEST ATTACKS OR RISKS
-  distributed_item_target: [5, 8]      # Thursday finished report — "restraint is the product"
+  vox_title: "WCTI — Weekly Cyber Threat Intelligence"         # 3b output, reader-facing heading
+  # Vox Policy §7: NO fixed limit on items per section or overall. The former
+  # staging_item_target [15,18] and staging_per_section [5,6] were exactly the
+  # caps the policy forbids and have been removed. Restraint belongs to the
+  # distributed product, applied by the team as editorial judgment — it is not
+  # an automated cap on what surfaces for review.
+  distributed_item_target: [5, 8]      # Thursday product — OUTSIDE Sanctum's scope; recorded for reference only
   sections: ["NEWS", "CTA TTPs", "LATEST ATTACKS OR RISKS", "KEYWORDS"]
-  deliverable_name: "WCTI_v[YYYYMMDD]_VOX"       # 3b output, filename. date = distribution (Thu)
+  deliverable_name: "WCTI_v[YYYYMMDD]"           # 3b output, filename. date = distribution (Thu)
   notes: >
     Staging = content only, no handling markings, generous item count (review
     surface). The distributed product narrows to 5-8 and adds handling markings.
