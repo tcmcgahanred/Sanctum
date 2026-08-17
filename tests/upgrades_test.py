@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from core.rules import score_article, _eval_atom, make_matcher, _scopes  # noqa: E402
 from core.lexicanum import (make_all_hits, bucket, published_date,       # noqa: E402
                             walk_corpus, search, render)
+from core.arbites import staging_target, push_staging                    # noqa: E402
 
 FAILURES = []
 
@@ -291,11 +292,59 @@ def test_denominator():
               "Read the rate, not the count" in report, True)
 
 
+def test_staging_push():
+    """
+    The staging hand-off. Naming is tested without touching the network,
+    because the thing that matters is that consecutive runs do NOT collide.
+    """
+    print("\nStaging push — dated, and off by default when unconfigured")
+
+    d = date(2026, 8, 17)
+    nxt = date(2026, 8, 18)
+
+    check("no staging block configured -> no push",
+          staging_target({}, d), (None, None))
+    check("backend other than rclone -> no push",
+          staging_target({"staging": {"backend": "local"}}, d), (None, None))
+    check("backend set but no remote -> no push",
+          staging_target({"staging": {"backend": "rclone"}}, d), (None, None))
+
+    m = {"staging": {"backend": "rclone", "rclone_remote": "gdrive:staging",
+                     "filename": "WCTI_{date}_STAGING.md"}}
+    check("remote passed through", staging_target(m, d)[0], "gdrive:staging")
+    check("date substituted into the filename",
+          staging_target(m, d)[1], "WCTI_20260817_STAGING.md")
+
+    # The reason the name is dated at all: a fixed name would be overwritten by
+    # the next daily run, potentially on top of a draft already being edited.
+    check("consecutive days do not collide",
+          staging_target(m, d)[1] != staging_target(m, nxt)[1], True)
+
+    check("filename defaults sensibly when omitted",
+          staging_target({"staging": {"backend": "rclone",
+                                      "rclone_remote": "r:p"}}, d)[1],
+          "staging_20260817.md")
+
+    # A failed push must warn and return None, never raise — the local copy
+    # already exists and a bad network is not a lost cycle.
+    msgs = []
+    with tempfile.TemporaryDirectory() as td:
+        f = Path(td) / "staging.md"
+        f.write_text("x")
+        bad = {"staging": {"backend": "rclone",
+                           "rclone_remote": "nonexistent-remote-xyz:p"}}
+        got = push_staging(bad, f, d, log=msgs.append)
+    check("failed push returns None instead of raising", got, None)
+    check("failed push warns and names the local copy",
+          bool(msgs) and "WARNING" in msgs[0] and "staging.md" in msgs[0], True)
+
+
 def run():
     test_exclusion()
     test_exclusion_changes_nothing_else()
     test_lexicanum()
     test_denominator()
+    test_staging_push()
     print()
     if FAILURES:
         print(f"FAIL — {len(FAILURES)} problem(s)")

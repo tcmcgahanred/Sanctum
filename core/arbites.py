@@ -28,7 +28,8 @@ import argparse
 import json
 import math
 import re
-from datetime import datetime, timedelta, timezone
+import subprocess
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from core.pnd import load_domain
@@ -215,11 +216,68 @@ def group_near_duplicates(scored, settings, suffix_separators=(" - ", " | ", " �
     return groups, grouped, dissolved
 
 
+# ------------------------------------------------------------------
+# Staging hand-off
+#
+# The staging document is written to the collector host, which is a headless,
+# outbound-only box. The analyst edits on a different machine. Without a push
+# the document has to be copied by hand every cycle, which is exactly the kind
+# of manual step that gets skipped on a busy Monday.
+#
+# Acolyte already pushes the corpus this way; this is the same mechanism for
+# the one artifact a human actually opens.
+#
+# The remote filename is DATED, not fixed. A fixed name would be overwritten by
+# the next daily run — including on top of a document the analyst had already
+# started editing in a synced folder. Dating it means each cycle lands beside
+# the last and nothing clobbers work in progress.
+# ------------------------------------------------------------------
+def staging_target(manifest, today):
+    """
+    Resolve (remote_base, filename) for the staging push, or (None, None) if
+    the domain hasn't configured one. Pure — no side effects, so the naming is
+    testable without touching the network.
+
+    Config (in the domain manifest):
+        staging:
+          backend: rclone
+          rclone_remote: <remote>:<path>
+          filename: "STAGING_{date}.md"     # {date} -> YYYYMMDD
+    """
+    st = (manifest or {}).get("staging", {}) or {}
+    if st.get("backend") != "rclone":
+        return None, None
+    remote = st.get("rclone_remote")
+    if not remote:
+        return None, None
+    template = str(st.get("filename", "staging_{date}.md"))
+    return remote, template.replace("{date}", today.strftime("%Y%m%d"))
+
+
+def push_staging(manifest, out_path, today, log=print):
+    """Copy the staging document to the configured remote under a dated name."""
+    remote, name = staging_target(manifest, today)
+    if not remote:
+        return None
+    dest = f"{remote.rstrip('/')}/{name}"
+    try:
+        subprocess.run(["rclone", "copyto", str(out_path), dest], check=True)
+        log(f"staging pushed -> {dest}")
+        return dest
+    except Exception as e:
+        # Same posture as the corpus push: warn, never fail the cycle. The
+        # document is already written locally; a failed copy is an
+        # inconvenience, not a lost cycle.
+        log(f"WARNING: staging push failed ({e}). Local copy is at {out_path}")
+        return None
+
+
 def main():
     ap = argparse.ArgumentParser(description="Sanctum Arbites — domain-agnostic scorer")
     ap.add_argument("--domain", help="domain name (folder under repo, e.g. cti)")
     ap.add_argument("--pnd", help="explicit path to a pnd.md (overrides --domain)")
     ap.add_argument("--out", help="output path (default: <base_dir>/staging_candidates.md)")
+    ap.add_argument("--no-push", action="store_true", help="skip the staging push")
     args = ap.parse_args()
 
     cfg = load_domain(domain=args.domain, pnd_path=args.pnd)
@@ -345,6 +403,10 @@ def main():
     out_path.write_text("\n".join(lines), encoding="utf-8")
     print(f"[{cfg['domain']}] {len(arts)} scored -> {len(surfaced)} candidates, "
           f"{len(dropped)} dropped -> {out_path}")
+
+    if not args.no_push:
+        push_staging(cfg["manifest"], out_path, date.today(),
+                     log=lambda m: print(f"[{cfg['domain']}] {m}"))
 
 
 if __name__ == "__main__":

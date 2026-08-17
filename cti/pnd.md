@@ -28,6 +28,10 @@ manifest:
   corpus:
     backend: rclone                 # rclone | local | (s3 future)
     rclone_remote: gdrive:ravenor-corpus
+  staging:                          # where the analyst picks the draft up
+    backend: rclone
+    rclone_remote: gdrive:ravenor-staging
+    filename: "WCTI_{date}_STAGING.md"   # {date} -> YYYYMMDD (collection date)
   collection:
     window_days: 7                  # rolling collection window
     min_title_len: 15               # below this, don't title-dedup

@@ -2,6 +2,15 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-17] Staging document pushed to the corpus store
+
+- **The one artifact a human opens was the only one stranded on the collector.** The staging draft is written to a headless, outbound-only host; the analyst edits on a different machine. Every cycle it had to be copied across by hand — precisely the manual step that gets skipped on a busy Monday. Acolyte has pushed the corpus this way since the beginning; this extends the same mechanism to the draft.
+- **The remote filename is dated, deliberately.** A fixed name would be overwritten by the next daily run — potentially on top of a draft the analyst had already begun editing in a synced folder. Dating it means each cycle lands beside the last and nothing clobbers work in progress.
+- **Config, not code** (tenet 3). A domain opts in by declaring `manifest.staging` with a backend, a remote, and a filename template carrying `{date}`. A domain that declares nothing pushes nothing — verified by test, including the partially-configured cases.
+- **Fails soft** (tenet 8), matching the corpus push: a failed copy warns, names the local path, and lets the cycle finish. The document is already on disk; a bad network is an inconvenience, not a lost cycle.
+- **`--no-push` added to Arbites** for parity with Acolyte and so the push can be suppressed in testing.
+- **Verification.** Nine checks in `tests/upgrades_test.py` covering opt-out, date substitution, the default filename, that consecutive days do not collide, and that a failed push returns rather than raises. Naming is tested without touching the network. Full suite passes, scorer parity unchanged.
+
 ## [2026-08-17] Cycle cutoff moved to 0500 to match when collection actually happens
 
 - **The stated ICOD could not be met.** The cutoff was Monday 0900 Pacific, but the collector ran daily at 00:00 UTC — 5:00 PM Pacific the day before. So the newest article available at the Monday 0900 cutoff was from Sunday evening, and everything published Sunday night through Monday morning missed the cycle entirely, every week. The product carried an "information current as of Monday 0900" line it had never been able to support.

@@ -51,6 +51,8 @@ The point of Sanctum is that both run on the **same engine** — only their `pnd
       |                  + drop list)              override scores)
       v
  Corpus store (the handoff surface between collection and analysis)
+ — the staging draft is pushed here too, under a dated name, so the
+   analyst picks it up on their own machine rather than on the collector
       |
       v
  [ Lexicanum ]  archive search + match-frequency over time
