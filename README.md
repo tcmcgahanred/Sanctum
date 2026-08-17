@@ -6,9 +6,9 @@
 
 <p align="center"><em>"Restraint is the product."</em></p>
 
-**Sanctum — the seat of detection.** A domain-agnostic, open-source-intelligence (OSINT) apparatus: you set the **Planning & Direction** for a domain, and Sanctum goes out and collects, triages against that direction, and stages the results for a human analyst to review. The intelligence cycle is the same whatever the domain; only the requirements and sensors change.
+**Sanctum — the seat of detection.** A domain-agnostic, open-source-intelligence (OSINT) apparatus: you set the **Planning & Direction** for a domain, and Sanctum collects against it, scores what it finds, and refines the result into a **vox** — a review surface an analyst can actually work from. The intelligence cycle is the same whatever the domain; only the requirements and sensors change.
 
-Sanctum is themed after the Imperium's Inquisition — its working parts are an **Acolyte** that gathers, an **Arbites** that judges, a **Codex** of doctrine, a **Cogitator** that maps the cycle, and the **Vox** by which the finished word goes out. The theme is flavor; the machinery underneath is a plain, auditable pipeline.
+Sanctum is themed after the Imperium's Inquisition — an **Acolyte** that gathers, an **Arbites** that judges, a **Lexicanum** that remembers, a **Codex** of doctrine, a **Cogitator** that maps the cycle, and the **Vox** in which the week's findings are set down. The theme is flavour; the machinery underneath is a plain, auditable pipeline.
 
 All work is **unclassified / OSINT**. The finished product is **TLP:CLEAR** (freely shareable).
 
@@ -16,16 +16,18 @@ All work is **unclassified / OSINT**. The finished product is **TLP:CLEAR** (fre
 
 You configure a domain once (its mission, requirements, sensors, and scoring), then run one command. Sanctum:
 
-1. **Collects** from the sensors you list (RSS/Atom feeds and pages), extracts full text, deduplicates, and stores a dated corpus.
-2. **Triages** the corpus against your requirements — a transparent, multiplicative scoring model — and produces a ranked candidate shortlist plus a full drop list.
-3. **Stages** the result as a content-only draft for a human analyst to verify, cut, and finish.
+1. **Collects** (stage 2) from the sensors you list, extracts full text, deduplicates, and stores a dated corpus that is never pruned.
+2. **Processes** (stage 3a) the corpus against your requirements — a transparent, multiplicative scoring model — producing the **staging document**: ~55 ranked candidates, each showing its reasoning, plus a full drop list. This part is deterministic Python.
+3. **Exploits** (stage 3b) that queue into the **vox** — selected, summarised, caveated, sectioned. This part needs language, so it is an operator with a model, following the twelve rules in [`EXPLOITATION.md`](EXPLOITATION.md).
 
-A human always reviews before anything is published. The score orders the queue; the analyst decides. Synthesis is deliberately **manual** — no API, no tokens.
+**Sanctum is stages 1–3 and its output is the vox** — a refined staging document, not an intelligence product. Analysis, dissemination and feedback are the analyst's and sit outside the apparatus.
+
+A human decides every item. Nothing in `core/` calls a model, spends a token, or reaches a network service it wasn't pointed at.
 
 ## Two efforts (example domains)
 
 - **Effort 1 — CTI (operational).** A weekly OSINT cyber-threat-intelligence cycle for low-maturity **State/Local/Tribal/Territorial (SLTT)** partners, tuned for a regional Area of Responsibility. Produces a weekly **TLP:CLEAR** brief. See `cti/`.
-- **Effort 2 — a second domain.** Configured and run separately, outside this repo. Sanctum is built so a second effort needs only its own `pnd.md`; nothing in `core/` changes.
+- **Effort 2 — a second domain.** A second effort needs only its own `pnd.md`; nothing in `core/` changes. Domains live in the repo, so a clone gives you worked examples rather than an empty engine. A domain that must stay private can live anywhere on disk instead and be passed with `--pnd`.
 
 The point of Sanctum is that both run on the **same engine** — only their `pnd.md` differs.
 
@@ -38,31 +40,39 @@ The point of Sanctum is that both run on the **same engine** — only their `pnd
 | **Arbites** (`arbites.py`) | Pre-filter / scorer — provisional judgment on items | Engine |
 | **Lexicanum** (`lexicanum.py`) | Archivist — searches everything ever collected, and counts matches over time | Engine |
 | **Codex** | Intelligence requirements & doctrine (KIQ / PIRs / scoring) | Doc |
-| **Vox** | The brief itself — the product disseminated | Product |
+| **Vox** | The weekly output — a refined staging document, not an intelligence product | Product |
 | **Cogitator** | The intelligence-cycle map (process + roles) | Diagram |
 
 ## Architecture
 
+![Sanctum apparatus architecture](diagrams/sanctum-topology.png)
+
 ```
-[ Acolyte ]            [ Arbites ]              [ Human Gate ]          [ Vox ]
- collector      -->     pre-filter/scorer  -->   analyst review   -->   published brief
- (autonomous,           (scores corpus,          (verify, merge,        (TLP:CLEAR,
-  daily)                 surfaces top ~55,         cut to 5-8,            weekly)
-      |                  + drop list)              override scores)
-      v
- Corpus store (the handoff surface between collection and analysis)
- — the staging draft is pushed here too, under a dated name, so the
-   analyst picks it up on their own machine rather than on the collector
-      |
-      v
- [ Lexicanum ]  archive search + match-frequency over time
-                (asked on demand, reads the whole corpus, changes nothing)
+   stage 2          stage 3a                stage 3b              out of scope
+[ Acolyte ]  -->  [ Arbites ]      -->   [ operator + LLM ]  -->   [ analyst ]
+ collect           score & rank            select · summarise       assess ·
+ extract           ~55 candidates          caveat · section         disseminate
+ dedupe            + drop list                                      feed back
+      |                  |                        |
+      v                  v                        v
+   corpus/         STAGING DOCUMENT              VOX
+  permanent         (machine-made,          (judgement applied,
+                     reproducible)           committed to editions/)
+
+ [ Lexicanum ]  archive search + match-frequency as a rate
+                asked on demand, outside the weekly cycle, changes nothing
 ```
 
-The top row is the weekly cycle. **Lexicanum** sits off to the side and runs
-only when asked: the cycle answers *"what matters this week?"*, Lexicanum
-answers *"where has this appeared, and is it rising?"* — a question about the
-whole archive rather than the current window.
+Both the corpus and the dated staging document are pushed to the corpus store, so
+the operator picks the staging document up on their own machine rather than on the
+collector.
+
+The intelligence cycle in full, and which stages are Sanctum's:
+
+![Sanctum intelligence cycle](diagrams/cogitator.png)
+
+Stages 1–3 are the apparatus. Stages 4–6 are drawn greyed because they belong to
+the analyst — their outcomes return to Sanctum only as edits to `pnd.md`.
 
 Governed by the **Codex**. Mapped by the **Cogitator**. Everything domain-specific lives in a domain's **Planning & Direction** file (`<domain>/pnd.md`); the engines hold no domain knowledge.
 
@@ -75,10 +85,10 @@ Eleven tenets govern every decision in this build. The first five are how it is 
 3. **Domain files declare, they never behave.** A domain file holds settings and the explanation of those settings. Nothing else — no logic, no conditions, no scoring behavior. The moment a domain file can *act*, the engine has quietly stopped being shared. Enforced by `tests/domain_check.py`, not by discipline.
 4. **Planning & Direction is the single control surface.** Set the domain there; it drives Collection, Processing & Exploitation, and Analysis & Production. One place to configure.
 5. **Portable & decoupled.** Git is the source of truth; the repo is standalone; the host and corpus store are configuration, not code. It moves anywhere via env/manifest — no code changes.
-6. **Restraint is the product.** 5–8 items in the *distributed* report; the Monday staging draft is a deliberately larger review surface that narrows through the week. Quality over quantity on sensors, generous on items. Coverage emerges from good sensors well-operated, not from piling on feeds.
-7. **The human gate is absolute.** The score orders the queue; the analyst always decides and overrides. Synthesis stays manual (no API/tokens) by deliberate choice.
+6. **Restraint is the product.** The vox is a deliberately generous review surface; whatever the analyst distributes afterward narrows hard. Quality over quantity on sensors, generous on items. Coverage emerges from good sensors well-operated, not from piling on feeds.
+7. **The human gate is absolute.** The score orders the queue; the analyst always decides and overrides. Stage 3b uses a language model because it needs language — but a person decides every item, and **nothing in `core/` ever calls a model or spends a token**. Sanctum ships the method; the operator brings the tool.
 8. **Transparent and fail-safe.** Every surfaced item shows its scoring reasoning; nothing is hidden (mandatory drop list). Prefer false positives to false negatives — flag, don't drop. Exclusion (`not`) is the one narrowing tool and it still drops nothing: it withholds a tier or a multiplier, so an excluded item is scored lower but remains collected, listed, and shown with its reasoning.
-9. **Stops at the staging document.** Sanctum triages and stages; it does not build the finished product. That final step diverges hardest by domain and stays a human job.
+9. **Stops at the vox.** Sanctum collects, processes and exploits; it does not assess. The vox is a refined staging document — a review surface, not an intelligence product. What the vox *means* is the analyst's judgement, and that diverges hardest by domain.
 10. **Prove before you build.** Don't over-engineer; don't abstract before a second real use case exists; scale or migrate only after it earns it. Favor near-zero technical debt.
 11. **Scrubbed, secure, verified.** Secrets never enter the repo; the public face carries no identifying or infra detail. Verify, don't guess — behavior-changing edits are proven by tests.
 
@@ -88,11 +98,11 @@ Scoring is convergence-based and multiplicative (tier weights 8/4/2/1 × elevati
 
 The weekly cycle runs on a fixed schedule (see `cti/mandate.md` for the authoritative version):
 
-- **Collection cutoff / ICOD — Monday 0900.** Corpus is windowed on the 7 days ending Monday 0900.
-- **Staging draft ready — Monday.**
-- **Individual review / amend — Monday–Tuesday.**
-- **Team review — Wednesday.**
-- **Distribution — Thursday afternoon.**
+- **Collector runs — 0500 Pacific, daily.** Pinned to `America/Los_Angeles`, so it does not drift at daylight saving.
+- **Collection cutoff / ICOD — Monday 0500**, matching the moment collection completes.
+- **Staging document ready — Monday 0500.** Pushed to the corpus store, dated.
+- **Vox produced and shared — Monday morning.** Stage 3b. Sanctum's job ends here.
+- **Team review — Monday to Wednesday.** Outside the apparatus; its outcome returns as edits to `pnd.md`.
 
 Three dates on the product: the **title** carries the distribution date; the body carries an **"information current as of" (ICOD)** line = the collection cutoff; **LTIOV** stays in planning doctrine only and never appears on the product.
 
@@ -141,7 +151,9 @@ ransomware hits fell 475 → 122 and read as a collapse; the denominators showed
 
 ## Version control & sync
 
-**Git is the source of truth** (see `VERSIONING.md`). A private remote is authoritative; the collector host and an authoring workstation are working copies that push/pull against it, so history survives any host rebuild.
+**Git is the source of truth** (see `VERSIONING.md`). The remote is authoritative. The authoring workstation pushes; **the collector host only ever pulls** — nothing it produces is tracked, and read-only means a compromise there cannot rewrite the source of truth.
+
+Each domain's `editions/` folder holds its published voxes. They are committed because judgement was applied and nothing can regenerate them. The staging document is *not* committed — it is machine-made and reproducible from the corpus plus the config, both of which are kept.
 
 Secrets **never** enter the repo — the `.gitignore` blocks credential carriers (`rclone.conf`, tokens, service-account JSON, `.env`) and runtime data (`corpus/`, `seen.txt`, `seen_titles.txt`). Public feed URLs are safe to commit.
 
@@ -169,9 +181,11 @@ sanctum/
 │   ├── README.md            # effort overview
 │   └── editions/            # brief editions
 │                            # (references/ kept local, git-ignored)
-├── diagrams/                # domain-neutral diagrams
-│   ├── cogitator.drawio     # the intelligence-cycle map (shared by all domains)
-│   └── sanctum-topology.drawio
+├── diagrams/                # domain-neutral diagrams — .drawio is the source,
+│   ├── cogitator.drawio     #   .png is the viewable copy for GitHub
+│   ├── cogitator.png
+│   ├── sanctum-topology.drawio
+│   └── sanctum-topology.png
 ├── logs/
 │   └── CHANGELOG.md
 └── tests/                   # engine tests + the commit gate
@@ -193,6 +207,15 @@ git config core.hooksPath .githooks
 mkdir -p .githooks && ln -sf ../tests/pre_commit.sh .githooks/pre-commit
 cp .scrub-denylist.example .scrub-denylist   # then edit it
 ```
+
+## Diagrams
+
+`.drawio` is the source of truth; the `.png` beside it is what GitHub renders.
+To update one: edit the `.drawio`, then **File → Export as → PNG** with
+*Include a copy of my diagram* ticked, saving over the existing `.png`. That
+export embeds the diagram in the image, so the PNG can be dragged back into
+draw.io and edited too — and it beats a screenshot on bounds, resolution and
+repeatability. Commit both files together.
 
 ## License / use
 

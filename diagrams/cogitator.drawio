@@ -18,7 +18,7 @@
           <mxGeometry x="60" y="24" width="1400" height="36" as="geometry" />
         </mxCell>
         <mxCell id="subtitle" parent="1" vertex="1" style="text;html=1;align=left;fontSize=13;fontColor=#5F5E5A;verticalAlign=middle;" value="The cycle EVERY Sanctum domain runs — the cycle does not change by domain. Engines in core/ are shared; each domain (cti/, …) supplies its own pnd.md. This map shows the stages, where you adjust each, and which files play each role. Per-domain STATUS, backlog &amp; lessons live in &lt;domain&gt;/mandate.md and logs/CHANGELOG.md — not here.">
-          <mxGeometry x="60" y="74" width="2100" height="34" as="geometry" />
+          <mxGeometry x="60" y="68" width="2100" height="28" as="geometry" />
         </mxCell>
 
         <!-- STAGE 1 -->
@@ -147,9 +147,9 @@
         <mxCell id="a34" parent="1" edge="1" source="s3_head" target="s4_head" style="endArrow=block;html=1;strokeColor=#185FA5;strokeWidth=2;"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="a45" parent="1" edge="1" source="s4_head" target="s5_head" style="endArrow=block;html=1;strokeColor=#185FA5;strokeWidth=2;"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="a56" parent="1" edge="1" source="s5_head" target="s6_head" style="endArrow=block;html=1;strokeColor=#185FA5;strokeWidth=2;"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="a61" parent="1" edge="1" source="s6_head" target="s1_head" style="endArrow=block;html=1;strokeColor=#534AB7;strokeWidth=3;dashed=1;exitX=0.5;exitY=0;entryX=0.5;entryY=0;curved=1;fontSize=11;fontColor=#534AB7;" value="THE ONLY LINK BACK — review outcomes return as edits to pnd.md">
+        <mxCell id="a61" parent="1" edge="1" source="s6_head" target="s1_head" style="endArrow=block;html=1;strokeColor=#534AB7;strokeWidth=3;dashed=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;curved=0;rounded=1;fontSize=11;fontColor=#534AB7;" value="THE ONLY LINK BACK — review outcomes return as edits to pnd.md">
           <mxGeometry relative="1" as="geometry">
-            <Array as="points"><mxPoint x="2025" y="120" /><mxPoint x="225" y="120" /></Array>
+            <Array as="points"><mxPoint x="2260" y="195" /><mxPoint x="2260" y="120" /><mxPoint x="20" y="120" /><mxPoint x="20" y="195" /></Array>
           </mxGeometry>
         </mxCell>
 
