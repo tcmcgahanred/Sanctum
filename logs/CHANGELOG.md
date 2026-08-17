@@ -2,6 +2,13 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-17] Cogitator spacing — the top of the map was cramped
+
+- Three collisions at the head of the diagram, all introduced when the grouping containers were added. The title and subtitle touched with no gap at all. The feedback edge ran 8px beneath the subtitle. And each container began only 18px above the stage headers, so its own title text landed on top of them.
+- Opened the top and dropped the stage block 40px; notes, legend and cross-cutting line moved 56px to stay clear. Nothing moved sideways. Resulting gaps: 14px title to subtitle, 26px subtitle to container, **36px of headroom inside each container above the headers** so the group titles have somewhere to sit, and 10–15px between every footer element.
+- Page height raised 1000 → 1080 to fit content now ending at 1011.
+- **Verification.** 54 cells, XML parses, no dangling references, all six stages still inside their intended group, and no overlapping boxes anywhere. Every vertical gap measured rather than eyeballed. Not opened in draw.io.
+
 ## [2026-08-17] Taxonomy settled: Sanctum is stages 1–3, and its output is the vox
 
 - **The vox is not an intelligence product — it is a refined staging document.** Everything in it is *exploitation*: items selected from candidates, reporting summarised into readable prose, source caveats (*"claims under investigation, do not state as confirmed"*), triage notes (*"out-of-scope geography, likely cut"*), section assignment. None of it is assessment. The document says so itself — *"a REVIEW SURFACE, not the finished product."* An earlier revision of both diagrams filed the vox as a stage 4 output. That was wrong.

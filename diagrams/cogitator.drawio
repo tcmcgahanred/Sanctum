@@ -1,144 +1,144 @@
 <mxfile host="app.diagrams.net">
   <!-- Sanctum · Cogitator · v0.5 (starting anchor; history via git) — domain-agnostic intelligence-cycle map -->
   <diagram name="Sanctum Intelligence Cycle" id="sanctum-intel-cycle-1">
-    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1000" math="0" shadow="0">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1080" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
         <mxCell id="grp_sanctum" parent="1" vertex="1" style="rounded=1;arcSize=2;whiteSpace=wrap;html=1;fillColor=#F7FAFD;strokeColor=#185FA5;strokeWidth=2;dashed=0;verticalAlign=top;align=left;spacingLeft=14;spacingTop=6;fontStyle=1;fontSize=13;fontColor=#185FA5;" value="SANCTUM — stages 1–3. This is the apparatus. Everything here is configured, versioned and repeatable.">
-          <mxGeometry x="44" y="112" width="1080" height="598" as="geometry" />
+          <mxGeometry x="44" y="134" width="1080" height="624" as="geometry" />
         </mxCell>
 
         <mxCell id="grp_human" parent="1" vertex="1" style="rounded=1;arcSize=2;whiteSpace=wrap;html=1;fillColor=#FBFBFA;strokeColor=#C9C7C0;strokeWidth=1;dashed=1;verticalAlign=top;align=left;spacingLeft=14;spacingTop=6;fontStyle=1;fontSize=13;fontColor=#8A8880;" value="HUMAN-CENTRIC — stages 4–6. NOT Sanctum. Shown for context only: conceptual stages the analyst owns, whose outcomes loop back into Planning &amp; Direction.">
-          <mxGeometry x="1124" y="112" width="1080" height="598" as="geometry" />
+          <mxGeometry x="1124" y="134" width="1080" height="624" as="geometry" />
         </mxCell>
 
         <mxCell id="title" parent="1" vertex="1" style="text;html=1;align=left;fontSize=22;fontStyle=1;verticalAlign=middle;" value="Sanctum — Intelligence Cycle (domain-agnostic)">
-          <mxGeometry x="60" y="30" width="1400" height="40" as="geometry" />
+          <mxGeometry x="60" y="24" width="1400" height="36" as="geometry" />
         </mxCell>
         <mxCell id="subtitle" parent="1" vertex="1" style="text;html=1;align=left;fontSize=13;fontColor=#5F5E5A;verticalAlign=middle;" value="The cycle EVERY Sanctum domain runs — the cycle does not change by domain. Engines in core/ are shared; each domain (cti/, …) supplies its own pnd.md. This map shows the stages, where you adjust each, and which files play each role. Per-domain STATUS, backlog &amp; lessons live in &lt;domain&gt;/mandate.md and logs/CHANGELOG.md — not here.">
-          <mxGeometry x="60" y="70" width="2100" height="24" as="geometry" />
+          <mxGeometry x="60" y="74" width="2100" height="34" as="geometry" />
         </mxCell>
 
         <!-- STAGE 1 -->
         <mxCell id="s1_head" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F1FB;strokeColor=#185FA5;fontStyle=1;fontSize=14;verticalAlign=middle;" value="1. PLANNING &amp; DIRECTION">
-          <mxGeometry x="60" y="130" width="330" height="50" as="geometry" />
+          <mxGeometry x="60" y="170" width="330" height="50" as="geometry" />
         </mxCell>
         <mxCell id="s1_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• Mission / AOR&#xa;• Analyst intent / leadership need&#xa;• Prior-edition feedback">
-          <mxGeometry x="60" y="185" width="330" height="90" as="geometry" />
+          <mxGeometry x="60" y="225" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s1_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• KIQ (broad, collection-governing)&#xa;• PIRs / information requirements&#xa;• Scoring model (tiers + multipliers)">
-          <mxGeometry x="60" y="280" width="330" height="90" as="geometry" />
+          <mxGeometry x="60" y="320" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s1_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7E6;strokeColor=#C9820A;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;&lt;domain&gt;/pnd.md (manifest + scoring&#xa;+ production) + &lt;domain&gt;/codex.md&#xa;doctrine. Set the domain here.">
-          <mxGeometry x="60" y="375" width="330" height="140" as="geometry" />
+          <mxGeometry x="60" y="415" width="330" height="140" as="geometry" />
         </mxCell>
         <mxCell id="s1_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• P&amp;D config (pnd.md, yaml-in-md)&#xa;• Domain frameworks (per-domain doctrine)&#xa;• Threat convergence model (I×O×C)">
-          <mxGeometry x="60" y="525" width="330" height="90" as="geometry" />
+          <mxGeometry x="60" y="565" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s1_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• &lt;domain&gt;/pnd.md (manifest+scoring+production)&#xa;• &lt;domain&gt;/codex.md · &lt;domain&gt;/mandate.md&#xa;• core/pnd.py (config loader)">
-          <mxGeometry x="60" y="625" width="330" height="80" as="geometry" />
+          <mxGeometry x="60" y="665" width="330" height="80" as="geometry" />
         </mxCell>
 
         <!-- STAGE 2 -->
         <mxCell id="s2_head" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F1FB;strokeColor=#185FA5;fontStyle=1;fontSize=14;verticalAlign=middle;" value="2. COLLECTION">
-          <mxGeometry x="420" y="130" width="330" height="50" as="geometry" />
+          <mxGeometry x="420" y="170" width="330" height="50" as="geometry" />
         </mxCell>
         <mxCell id="s2_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• KIQ (wide-net posture)&#xa;• Feed list (per domain)&#xa;• Collection window">
-          <mxGeometry x="420" y="185" width="330" height="90" as="geometry" />
+          <mxGeometry x="420" y="225" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s2_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• Raw article JSON (full text)&#xa;• Dated corpus: corpus/YYYY-MM-DD/&#xa;  PERMANENT — nothing prunes it&#xa;• Pushed to storage (rclone remote)">
-          <mxGeometry x="420" y="280" width="330" height="90" as="geometry" />
+          <mxGeometry x="420" y="320" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s2_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7E6;strokeColor=#C9820A;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;&lt;domain&gt;/pnd.md → sensors block —&#xa;reliable AND additive only; verify vs.&#xa;egress; DROP any noisy source.">
-          <mxGeometry x="420" y="375" width="330" height="140" as="geometry" />
+          <mxGeometry x="420" y="415" width="330" height="140" as="geometry" />
         </mxCell>
         <mxCell id="s2_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• core/acolyte.py: feedparser + trafilatura&#xa;• URL+TITLE dedupe · systemd timer (0500 PT)&#xa;• rclone → object/Drive storage&#xa;• Runs on the domain's current host">
-          <mxGeometry x="420" y="525" width="330" height="90" as="geometry" />
+          <mxGeometry x="420" y="565" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s2_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• core/acolyte.py (collector)&#xa;• &lt;domain&gt;/pnd.md (sensors block = feeds)&#xa;• collection window (pnd.md manifest)">
-          <mxGeometry x="420" y="625" width="330" height="80" as="geometry" />
+          <mxGeometry x="420" y="665" width="330" height="80" as="geometry" />
         </mxCell>
 
         <!-- STAGE 3 -->
         <mxCell id="s3_head" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F1FB;strokeColor=#185FA5;fontStyle=1;fontSize=14;verticalAlign=middle;" value="3. PROCESSING &amp; EXPLOITATION">
-          <mxGeometry x="780" y="130" width="330" height="50" as="geometry" />
+          <mxGeometry x="780" y="170" width="330" height="50" as="geometry" />
         </mxCell>
         <mxCell id="s3_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• Rolling corpus (JSON)&#xa;• Tiers + elevation signals&#xa;• Scoring model (pnd.md)">
-          <mxGeometry x="780" y="185" width="330" height="90" as="geometry" />
+          <mxGeometry x="780" y="225" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s3_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#185FA5;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• 3a mechanical: ~55 ranked candidates&#xa;  + reasoning + drop list&#xa;• 3b linguistic: select · summarise ·&#xa;  caveat · section → THE VOX">
-          <mxGeometry x="780" y="280" width="330" height="90" as="geometry" />
+          <mxGeometry x="780" y="320" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s3_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF7E6;strokeColor=#C9820A;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;&lt;domain&gt;/pnd.md → scoring block&#xa;(tiers / groups / multipliers / rules).&#xa;&#xa;&lt;b&gt;RECENCY GATE&lt;/b&gt; — flag items whose&#xa;PUBLISH date is outside the cycle&#xa;window (flag, don't drop; keep hooks)">
-          <mxGeometry x="780" y="375" width="330" height="140" as="geometry" />
+          <mxGeometry x="780" y="415" width="330" height="140" as="geometry" />
         </mxCell>
         <mxCell id="s3_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#888780;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• core/arbites.py (config-driven scorer)&#xa;• core/rules.py (match + score + recency)&#xa;• Content-hash dedupe&#xa;• Rules/weights from &lt;domain&gt;/pnd.md">
-          <mxGeometry x="780" y="525" width="330" height="90" as="geometry" />
+          <mxGeometry x="780" y="565" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s3_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• core/arbites.py · core/rules.py&#xa;• core/lexicanum.py (archive search, off-cycle)&#xa;• &lt;domain&gt;/pnd.md (scoring block)">
-          <mxGeometry x="780" y="625" width="330" height="80" as="geometry" />
+          <mxGeometry x="780" y="665" width="330" height="80" as="geometry" />
         </mxCell>
 
         <!-- STAGE 4 -->
         <mxCell id="s4_head" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F3F0;strokeColor=#C9C7C0;fontStyle=1;fontSize=14;fontColor=#8A8880;verticalAlign=middle;" value="4. ANALYSIS &amp; PRODUCTION">
-          <mxGeometry x="1140" y="130" width="330" height="50" as="geometry" />
+          <mxGeometry x="1140" y="170" width="330" height="50" as="geometry" />
         </mxCell>
         <mxCell id="s4_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• THE VOX (stage 3 output)&#xa;• Analyst tradecraft + external context&#xa;• Consumer's decision to be informed">
-          <mxGeometry x="1140" y="185" width="330" height="90" as="geometry" />
+          <mxGeometry x="1140" y="225" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s4_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• An assessed intelligence product&#xa;  — judgement, not exploitation&#xa;• Handling markings · presentation">
-          <mxGeometry x="1140" y="280" width="330" height="90" as="geometry" />
+          <mxGeometry x="1140" y="320" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s4_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;• &lt;domain&gt;/pnd.md → production block&#xa;  (sections, entry-IDs, item target)&#xa;• Distribution template — layout,&#xa;  analytic depth, handling marking&#xa;• Date discipline: title / ICOD / LTIOV">
-          <mxGeometry x="1140" y="375" width="330" height="140" as="geometry" />
+          <mxGeometry x="1140" y="415" width="330" height="140" as="geometry" />
         </mxCell>
         <mxCell id="s4_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• The analyst. Whatever tools they choose.&#xa;• Nothing here is Sanctum's concern">
-          <mxGeometry x="1140" y="525" width="330" height="90" as="geometry" />
+          <mxGeometry x="1140" y="565" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s4_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• &lt;domain&gt;/editions/ (vox archive, for the record)&#xa;• Everything else lives outside the repo">
-          <mxGeometry x="1140" y="625" width="330" height="80" as="geometry" />
+          <mxGeometry x="1140" y="665" width="330" height="80" as="geometry" />
         </mxCell>
 
         <!-- STAGE 5 -->
         <mxCell id="s5_head" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F3F0;strokeColor=#C9C7C0;fontStyle=1;fontSize=14;fontColor=#8A8880;verticalAlign=middle;" value="5. DISSEMINATION">
-          <mxGeometry x="1500" y="130" width="330" height="50" as="geometry" />
+          <mxGeometry x="1500" y="170" width="330" height="50" as="geometry" />
         </mxCell>
         <mxCell id="s5_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• Distribution-ready product&#xa;• Distribution list&#xa;• Cadence target">
-          <mxGeometry x="1500" y="185" width="330" height="90" as="geometry" />
+          <mxGeometry x="1500" y="225" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s5_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• Published product&#xa;• Delivered to the audience&#xa;• Downstream consumers">
-          <mxGeometry x="1500" y="280" width="330" height="90" as="geometry" />
+          <mxGeometry x="1500" y="320" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s5_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;Output destination + distribution&#xa;list. Cadence (per domain, in&#xa;pnd.md manifest). Trigger.">
-          <mxGeometry x="1500" y="375" width="330" height="140" as="geometry" />
+          <mxGeometry x="1500" y="415" width="330" height="140" as="geometry" />
         </mxCell>
         <mxCell id="s5_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• Delivery channel (Drive / etc.)&#xa;• Distribution mechanism (per domain)&#xa;• run.sh &lt;domain&gt; drives the run">
-          <mxGeometry x="1500" y="525" width="330" height="90" as="geometry" />
+          <mxGeometry x="1500" y="565" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s5_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• run.sh (domain dispatcher)&#xa;• storage remote (pnd.md manifest)&#xa;• distribution channel (per domain)">
-          <mxGeometry x="1500" y="625" width="330" height="80" as="geometry" />
+          <mxGeometry x="1500" y="665" width="330" height="80" as="geometry" />
         </mxCell>
 
         <!-- STAGE 6 -->
         <mxCell id="s6_head" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontStyle=1;fontSize=14;verticalAlign=middle;" value="6. FEEDBACK &amp; EVALUATION">
-          <mxGeometry x="1860" y="130" width="330" height="50" as="geometry" />
+          <mxGeometry x="1860" y="170" width="330" height="50" as="geometry" />
         </mxCell>
         <mxCell id="s6_in" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#534AB7;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;INPUTS&lt;/b&gt;&#xa;• Analyst review notes (cuts, fixes)&#xa;• Discard log (collection misses)&#xa;• Consumer feedback">
-          <mxGeometry x="1860" y="185" width="330" height="90" as="geometry" />
+          <mxGeometry x="1860" y="225" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s6_out" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#534AB7;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;OUTPUTS&lt;/b&gt;&#xa;• Tuned requirements / weights (pnd.md)&#xa;• Feed list adjustments&#xa;• Format + template refinements">
-          <mxGeometry x="1860" y="280" width="330" height="90" as="geometry" />
+          <mxGeometry x="1860" y="320" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s6_tp" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TOUCHPOINT (adjust here)&lt;/b&gt;&#xa;The analyst pass itself (always&#xa;overrides the score). Empirical&#xa;tuning of pnd.md over editions.&#xa;&#xa;&lt;b&gt;Per-domain status + lessons&#xa;live in &lt;domain&gt;/mandate.md.&lt;/b&gt;">
-          <mxGeometry x="1860" y="375" width="330" height="140" as="geometry" />
+          <mxGeometry x="1860" y="415" width="330" height="140" as="geometry" />
         </mxCell>
         <mxCell id="s6_tech" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=11;" value="&lt;b&gt;TECHNOLOGIES&lt;/b&gt;&#xa;• Human analyst (you)&#xa;• Discard log instrumentation&#xa;• Version-controlled artifacts (git)">
-          <mxGeometry x="1860" y="525" width="330" height="90" as="geometry" />
+          <mxGeometry x="1860" y="565" width="330" height="90" as="geometry" />
         </mxCell>
         <mxCell id="s6_files" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFCFB;strokeColor=#C9C7C0;fontColor=#8A8880;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fontSize=10;" value="&lt;b&gt;FILES&lt;/b&gt;&#xa;• &lt;domain&gt;/mandate.md (directives + lessons&#xa;  = the per-domain status/tracker)&#xa;• logs/CHANGELOG.md · tests/">
-          <mxGeometry x="1860" y="625" width="330" height="80" as="geometry" />
+          <mxGeometry x="1860" y="665" width="330" height="80" as="geometry" />
         </mxCell>
 
         <!-- FLOW ARROWS -->
@@ -149,34 +149,34 @@
         <mxCell id="a56" parent="1" edge="1" source="s5_head" target="s6_head" style="endArrow=block;html=1;strokeColor=#185FA5;strokeWidth=2;"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="a61" parent="1" edge="1" source="s6_head" target="s1_head" style="endArrow=block;html=1;strokeColor=#534AB7;strokeWidth=3;dashed=1;exitX=0.5;exitY=0;entryX=0.5;entryY=0;curved=1;fontSize=11;fontColor=#534AB7;" value="THE ONLY LINK BACK — review outcomes return as edits to pnd.md">
           <mxGeometry relative="1" as="geometry">
-            <Array as="points"><mxPoint x="2025" y="102" /><mxPoint x="225" y="102" /></Array>
+            <Array as="points"><mxPoint x="2025" y="120" /><mxPoint x="225" y="120" /></Array>
           </mxGeometry>
         </mxCell>
 
         <!-- STAGING BOUNDARY NOTE -->
         <mxCell id="boundary_note" parent="1" vertex="1" style="text;html=1;align=center;fontSize=11;fontStyle=2;fontColor=#A32C7C;" value="SANCTUM IS STAGES 1–3.  Stage 3 has two halves: 3a mechanical (Arbites scores and ranks) and 3b linguistic (select · summarise · caveat · section).  Its output is THE VOX — a refined staging document, not an intelligence product.">
-          <mxGeometry x="1140" y="712" width="690" height="24" as="geometry" />
+          <mxGeometry x="1140" y="768" width="690" height="24" as="geometry" />
         </mxCell>
 
         <!-- LEGEND -->
         <mxCell id="legend_box" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#888780;dashed=1;verticalAlign=top;align=left;fontStyle=1;fontSize=13;spacingLeft=10;spacingTop=8;" value="Legend">
-          <mxGeometry x="60" y="750" width="700" height="150" as="geometry" />
+          <mxGeometry x="60" y="806" width="700" height="150" as="geometry" />
         </mxCell>
         <mxCell id="leg_row_color" parent="1" vertex="1" style="text;html=1;align=left;fontSize=11;verticalAlign=top;" value="&lt;b&gt;Cell colors&lt;/b&gt;&#xa;• White border = Inputs / Outputs (data through the stage)&#xa;• Amber = Touchpoint — where YOU adjust this stage&#xa;• Grey = Technologies supporting the stage&#xa;• Purple = FILES — repo paths that play this role (&lt;domain&gt; = cti, …)&#xa;• Header blue = cycle stage · purple header = feedback">
-          <mxGeometry x="80" y="785" width="660" height="110" as="geometry" />
+          <mxGeometry x="80" y="841" width="660" height="110" as="geometry" />
         </mxCell>
 
         <!-- STATUS POINTER -->
         <mxCell id="status_note" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAF7;strokeColor=#5F5E5A;verticalAlign=top;align=left;fontStyle=1;fontSize=13;spacingLeft=10;spacingTop=8;" value="Where per-domain status lives (this map stays domain-neutral)">
-          <mxGeometry x="800" y="750" width="1390" height="150" as="geometry" />
+          <mxGeometry x="800" y="806" width="1390" height="150" as="geometry" />
         </mxCell>
         <mxCell id="status_body" parent="1" vertex="1" style="text;html=1;align=left;fontSize=11;verticalAlign=top;" value="This diagram shows the cycle + file roles ONLY — it does not change per domain. Anything that DOES vary per domain lives in text, one place each:&#xa;&#xa;• &lt;domain&gt;/mandate.md — Standing Directives, PENDING DIRECTION (backlog), and the dated LESSONS log = the live tracker for that effort.&#xa;• logs/CHANGELOG.md — curated history across the whole apparatus.&#xa;• &lt;domain&gt;/pnd.md — the actual config (feeds, weights, sections) currently in force.&#xa;&#xa;To add a domain: create &lt;newdomain&gt;/pnd.md (+ codex.md, mandate.md) and run  run.sh &lt;newdomain&gt;. This cycle applies unchanged.">
-          <mxGeometry x="820" y="785" width="1350" height="110" as="geometry" />
+          <mxGeometry x="820" y="841" width="1350" height="110" as="geometry" />
         </mxCell>
 
         <!-- CROSS-CUTTING FILES -->
         <mxCell id="crosscut" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#5E35B1;align=left;spacingLeft=10;spacingTop=6;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Cross-cutting (all domains / repo scaffolding):&lt;/b&gt;  README.md · ROADMAP.md · VERSIONING.md · requirements.txt · run.sh · .gitignore · core/__init__.py · diagrams/sanctum-topology.drawio · diagrams/cogitator.drawio (this map)">
-          <mxGeometry x="60" y="915" width="2130" height="40" as="geometry" />
+          <mxGeometry x="60" y="971" width="2130" height="40" as="geometry" />
         </mxCell>
 
       </root>
