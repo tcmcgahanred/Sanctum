@@ -66,21 +66,20 @@
 
 ### Production
 - **NO CAP ON THE REVIEW SURFACE — trust the weights.** *(Vox Policy §7. Supersedes the item targets this document carried until 2026-08-17.)* There is no fixed limit on items per section or overall. Every item that qualifies — by score, or by the mandatory-surface rule below — appears, however many that is. If 20 high-weight items qualify, 20 surface. **The count is an OUTPUT of the scoring and the rules, never a target imposed on top of them.**
-  - The former targets (~5–6 per section, ~15–18 total) were exactly such a cap and have been removed here, from `codex.md`, and from `pnd.md`.
+  - The former targets (~5–6 per section, ~15–18 total) were exactly such a cap and have been removed here and from `pnd.md` (and from `codex.md`, before that file was retired).
   - Surface-vs-drop is now a **score threshold** — `scoring.settings.surface_min_score` — plus guaranteed inclusions. Never a rank cut.
 - **If the surface is too large or too noisy, tune Sanctum — do not cap.** Adjust the weights, the mandatory-surface vocabulary, or the exclusion operators. Capping hides what the scoring did and destroys the feedback that tunes it. **The uncapped surface IS the diagnostic.**
 - **Mandatory-surface rule — inclusion, not ranking.** An item is force-surfaced regardless of score if it meets any of: **(M1)** an in-AOR entity is the subject of a cyberattack, breach or disruption; **(M2)** in-the-wild exploitation, weaponised public PoC, or KEV addition **and** the affected product is in the SLTT-relevant technology vocabulary; **(M3)** a specific incident confirms an SLTT sector was targeted or impacted. Score still orders everything, so a forced low-scoring item sits at the bottom of the surface with its ranking/relevance disagreement visible — which is the tuning signal. **Known limit: these rules can only fire on vocabulary the domain has already declared** — see `vocab.md`, Open finding 1.
 - **"Restraint is the product" governs the DISTRIBUTED product only.** Restraint is the finished report's virtue, applied by the cyber team as editorial judgment after review. It is never an automated cap on what surfaces. The distributed target (5–8 items, Thursday) sits **outside Sanctum's scope** and is recorded here for reference only.
 - **A wider surface does not lower the standard.** The added entries are lower-ranked items from the *same* sorted queue — lower tier and/or fewer elevation signals, not lower-quality sourcing. Every entry still shows its scoring reasoning so the analyst can audit where the cut falls.
-#### Content standards — locked by Vox Policy §7
+#### Content standards — owned by [`vox_policy.md`](vox_policy.md) §7
 
-- **Body, not headline.** Every entry is written from the article body, never the headline. **If the corpus has no usable body on a topic, the item is dropped.** A headline is a claim about an article, not the article.
-- **Serious-impact verification.** Independently verify serious impact claims — 911 or public-safety outages, casualties, service disruption, breach scope, attribution — against a primary or authoritative source before inclusion. If not clearly substantiated, attribute it ("per the city's statement…") or soften it; never state it as fact. Check the wording does not inflate the source: *"affected 911 routing"* is not *"911 went down."* **Re-check status if the item has aged since first drafted — "not confirmed" goes stale.**
-- **Attribution discipline.** Suspected is not confirmed. Represent the actual state of the evidence — neither assert nor flatly deny where reporting indicates something but officials have not confirmed it.
-- **Audience-portfolio filter.** Developer-only items (e.g. package poisoning) and defense-industrial-only items (e.g. CMMC) are out of portfolio unless they reach SLTT through a vendor. **Topicality is not relevance.**
-- **Provider/product relevance.** A product-specific item is relevant only if the audience actually uses the affected product or provider. Name the product, the versions, and who is unaffected.
-- **Sourcing.** Primary-source elevation; verify aggregator and roundup items against the primary advisory. Flag vendor-statistic methodology limits.
-- **Recency.** Filter on publication date within the collection window. Out-of-window items are flagged, never silently dropped, and stay only with a fresh this-week hook — new exploitation, new victim, new KEV.
+**Read them there, not here.** Body-not-headline, serious-impact verification,
+attribution discipline, the audience-portfolio filter, provider relevance, plain
+language and sourcing are all locked in the policy, and the policy is the
+authority. *A summary of them lived in this section from 2026-08-17 until it was
+removed the same day: reproducing rules is how the two copies drift, and this
+Mandate is not their home.*
 
 - **Every item needs a "why an SLTT org cares" clause** tied to the low-maturity California SLTT audience, framed as vendor accountability and procurement or foundational controls (CIS IG1), not developer-level fixes. Items without SLTT relevance get cut.
 - **Plain language, minimal-tooling recommendations** (IG1 CIS controls preferred). Audience consumes vendor software; they don't write code. Emphasis on vendor accountability and procurement governance.

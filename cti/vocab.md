@@ -90,7 +90,7 @@ auto-boundary length once stripped, so they get whole-word matching regardless.
 
 **Severity: medium-high. Unresolved. P&D decision.**
 
-`cti/decomposition.md` (EEI-1.2.a) already documents that several of the 34
+`cti/requirements.md` (EEI-1.2.a) already documents that several of the 34
 county names are not California-exclusive:
 
 | Term | Also | 

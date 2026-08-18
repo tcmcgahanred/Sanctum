@@ -392,6 +392,6 @@ Worth knowing before you hit them:
 
 - **`README.md`** — architecture and the eleven tenets the design follows
 - **`cti/pnd.md`** — a fully worked, operational domain. The best reference for what a real scoring model looks like
-- **`cti/codex.md`** — how one domain's requirements were structured (KIQ → PIRs → scoring)
+- **`cti/requirements.md`** — how one domain's requirements were structured (KIQ → PIR → SIR → EEI)
 - **`cti/mandate.md`** — how standing decisions and lessons get recorded across cycles
 - **`ROADMAP.md`** — where this is going, and the "keeper test" for whether it earns further investment

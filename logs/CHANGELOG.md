@@ -2,6 +2,18 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-17] `codex.md` retired; one file now owns the requirements tree
+
+- **One requirements tree had been split across two files.** `codex.md` held the KIQ and the PIRs; `decomposition.md` held the SIRs and EEIs beneath them. Reading a requirement end to end meant opening both. The tell was that `decomposition.md` had to *state the boundary in its own header* — when two documents need a written rule to stay out of each other's way, they usually wanted to be one document.
+- **`decomposition.md` became `requirements.md` and now owns the whole tree** — KIQ → PIR → SIR → EEI, each collectable fact mapped to the sensor that serves it, plus the collection posture that had been sitting in the Codex's Layer 1. It owns no numbers.
+- **The Codex turned out to be two documents stapled together.** Layers 1–2 were requirements. Layers 3–6 were the scoring model and content standards — a different subject, and the site of all three ownership violations found when the rule in `DOMAINS.md` was applied. Strip the duplication, merge the requirements down, and there was not enough left to justify a file.
+- **Every block was inventoried before anything was deleted.** Five had no home anywhere else and would have been lost silently: round-up-on-uncertainty, the argument against a score handicap, tiers-are-not-additive, the four worked scoring examples, and the mandatory drop list. All five moved into `cti/pnd.md`, **beside the values they explain** — so tuning a weight and leaving the reasoning stale is no longer possible. *Retiring a document means rehoming its contents first, not deleting and hoping.*
+- **The oldest violation is closed.** The tier weights and multiplier factors had lived in both `codex.md` and `pnd.md` — eight numbers in two places, and changing the config made the Codex quietly wrong. The numbers now exist once, in the file that executes them.
+- **The two violations introduced that morning are closed too.** `mandate.md`'s reproduced copy of Vox Policy §7 was thinned to a pointer, with a line recording that a summary lived there for part of one day and why it was removed. Reproducing rules is how copies drift; the Mandate is not their home.
+- **The suspected overlap was never the real one.** `codex.md` versus `decomposition.md` looked like the duplication and was clean. The actual duplication was between the Codex and the config — which is only visible once you ask *who owns this fact* rather than *do these two files look similar*.
+- **Sixteen files updated**, including the template, both READMEs, `VERSIONING.md`, `GETTING_STARTED.md`, and two code comments that still pointed at Layer 4 for doctrine. The Inquisition naming table keeps *Codex* as the name for a domain's requirements; it now points at `requirements.md`.
+- **Verification.** Parity `PASS`. All six suites green. Vocabulary gate clean. Scrub clean. A sweep for `codex.md` and `decomposition.md` returns only the entries that deliberately record the change.
+
 ## [2026-08-17] `DOMAINS.md` — what a domain folder is, and who owns which fact
 
 - **The engine requires exactly one file from a domain: `pnd.md`.** Nothing in `core/` opens anything else in a domain folder. That was already true and nothing said so, which meant `cti/` was being read as a template when it is actually one domain's history — design and accident mixed together, with no way to tell which was which.

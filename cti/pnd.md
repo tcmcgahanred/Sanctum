@@ -2,7 +2,7 @@
 
 *Sanctum · CTI domain config. This file is BOTH the human-readable P&D and the
 machine config the engines consume. Prose is for you; the engines read only the
-fenced `yaml` blocks below. The prose doctrine lives in `codex.md` / `mandate.md`;
+fenced `yaml` blocks below. The requirements tree lives in `requirements.md`, the operating doctrine in `mandate.md`, the product spec in `vox_policy.md`;
 this file is where Planning & Direction is turned into the parameters that drive
 Collection, Processing & Exploitation, and Analysis & Production.*
 
@@ -139,7 +139,55 @@ The multiplicative model, verbatim from the CTI doctrine: a base **tier weight**
 **subject of an incident** — either California in the title *and* an incident word
 present, or a California term within ~120 chars of an incident word in the body —
 not a passing mention. Groups are keyword lists; short/ambiguous ones match on
-word boundaries. Full rationale is in `codex.md` (Layers 3–4).
+word boundaries.
+
+**Score = (tier weight) × (product of elevation multipliers)**
+
+### Why the model is shaped this way
+
+*Moved here from `codex.md` Layers 3–4 on 2026-08-17, when that file was retired.
+The rationale now sits beside the values it explains, so tuning a number and
+leaving the reasoning stale is no longer possible.*
+
+**Convergence wins, and the tier spacing is chosen to allow it.** 8/4/2/1 is
+deliberately narrow enough that a heavily-elevated lower-tier item **can**
+outrank a bare higher-tier one. That is intended: a multi-signal active campaign
+against an out-of-state school is allowed to lead over a quiet in-AOR breach
+carrying no urgency signals. Convergence across requirements is a stronger
+priority signal than geography alone.
+
+Worked, using the values below:
+
+| Item | Calculation | Score |
+|---|---|---|
+| CA water utility breach, no elevation signals | 8.0 × 1 | **8.0** |
+| Out-of-state school ransomware on common tech (KEV + low-maturity + ransomware) | 4.0 × 1.5 × 1.5 × 1.3 | **11.7** — *outranks the bare CA item, by design* |
+| National KEV vuln in SLTT-common tech (KEV + low-maturity) | 2.0 × 1.5 × 1.5 | **4.5** |
+| Broad supply-chain story | 1.0 × 1.3 | **1.3** |
+
+**Tiers are not additive with each other.** An item takes its single highest
+qualifying tier weight — something both AOR-direct and sector-targeting is tier 1,
+not 8+4. Only the elevation multipliers stack.
+
+**An absent multiplier is neutral (×1.0), never suppressive.** A maximally
+relevant item with no urgency signals must never be scored toward zero.
+
+**Round up on uncertainty.** If an item's tier or a multiplier is ambiguous,
+score it as though the higher interpretation were true. Ambiguity resolves
+toward visibility, not away from it — same asymmetry as the surfacing rules:
+a false positive costs a few seconds of skimming, a false negative means a real
+threat never reaches the analyst.
+
+**Why there is no score handicap.** Discounting automated scores by a flat factor
+assumes the bias runs consistently in one direction. It does not — scoring errors
+are inconsistent, sometimes high and sometimes low, so a handicap gives false
+comfort while catching none of the real errors. Transparency is the chosen
+safeguard instead: visible reasoning on every surfaced item, plus a full drop
+list. That catches what a correction factor would miss.
+
+**The drop list is mandatory and is what makes a generous cut safe.** Everything
+below the threshold is still listed by title. *Dropped* never means *invisible* —
+the analyst eyeballs the discards in seconds and rescues anything mis-scored.
 
 ```yaml
 scoring:

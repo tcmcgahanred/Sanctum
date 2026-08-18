@@ -10,10 +10,10 @@ collects it and the scoring signal that weights it.
 prioritised sensor-build roadmap, and a documented rationale for every scoring
 signal.
 
-**Where this sits.** `codex.md` owns the top-level requirement wording — they
-are restated here only as tree roots, not maintained in two places. This file
-owns everything below. `pnd.md` is the implementation. **When requirements
-shift, revise here first, then the config, then the Codex.**
+**Where this sits.** This file owns the WHOLE tree — KIQ, PIRs, SIRs, EEIs.
+`pnd.md` is the implementation and owns every number, term and threshold;
+**nothing here restates one.** **When requirements shift, revise here first,
+then the config.**
 
 ## Terminology
 

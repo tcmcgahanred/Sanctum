@@ -17,7 +17,7 @@ All work is **unclassified / OSINT**. The finished product is **TLP:CLEAR** (fre
 You configure a domain once (its mission, requirements, sensors, and scoring), then run one command. Sanctum:
 
 1. **Collects** (stage 2) from the sensors you list, extracts full text, deduplicates, and stores a dated corpus that is never pruned.
-2. **Processes** (stage 3a) the corpus against your requirements — a transparent, multiplicative scoring model — producing the **staging document**: ~55 ranked candidates, each showing its reasoning, plus a full drop list. This part is deterministic Python.
+2. **Processes** (stage 3a) the corpus against your requirements — a transparent, multiplicative scoring model — producing the **staging document**: every candidate that clears the score threshold or matches a mandatory-surface rule, each showing its reasoning, plus a full drop list. **The count is an output, never a target.** This part is deterministic Python.
 3. **Exploits** (stage 3b) that queue into the **vox** — selected, summarised, caveated, sectioned. This part needs language, so it is an operator with a model, following the twelve rules in [`EXPLOITATION.md`](EXPLOITATION.md).
 
 **Sanctum is stages 1–3 and its output is the vox** — a refined staging document, not an intelligence product. Analysis, dissemination and feedback are the analyst's and sit outside the apparatus.
@@ -39,7 +39,7 @@ The point of Sanctum is that both run on the **same engine** — only their `pnd
 | **Acolyte** (`acolyte.py`) | Collector — gathers signal from the sensors | Engine |
 | **Arbites** (`arbites.py`) | Pre-filter / scorer — provisional judgment on items | Engine |
 | **Lexicanum** (`lexicanum.py`) | Archivist — searches everything ever collected, and counts matches over time | Engine |
-| **Codex** | Intelligence requirements & doctrine (KIQ / PIRs / scoring) | Doc |
+| **Codex** | A domain's intelligence requirements — KIQ / PIR / SIR / EEI (`<domain>/requirements.md`) | Doc |
 | **Vox** | The weekly output — a refined staging document, not an intelligence product | Product |
 | **Cogitator** | The intelligence-cycle map (process + roles) | Diagram |
 
@@ -51,7 +51,7 @@ The point of Sanctum is that both run on the **same engine** — only their `pnd
    stage 2          stage 3a                stage 3b              out of scope
 [ Acolyte ]  -->  [ Arbites ]      -->   [ operator + LLM ]  -->   [ analyst ]
  collect           score & rank            select · summarise       assess ·
- extract           ~55 candidates          caveat · section         disseminate
+ extract           uncapped surface          caveat · section         disseminate
  dedupe            + drop list                                      feed back
       |                  |                        |
       v                  v                        v
@@ -74,7 +74,7 @@ The intelligence cycle in full, and which stages are Sanctum's:
 Stages 1–3 are the apparatus. Stages 4–6 are drawn greyed because they belong to
 the analyst — their outcomes return to Sanctum only as edits to `pnd.md`.
 
-Governed by the **Codex**. Mapped by the **Cogitator**. Everything domain-specific lives in a domain's **Planning & Direction** file (`<domain>/pnd.md`); the engines hold no domain knowledge.
+Governed by each domain's requirements. Mapped by the **Cogitator**. Everything domain-specific lives in a domain's **Planning & Direction** file (`<domain>/pnd.md`); the engines hold no domain knowledge.
 
 ## Doctrine
 
@@ -147,7 +147,7 @@ ransomware hits fell 475 → 122 and read as a collapse; the denominators showed
 
 **Portability:** the only host-coupled value is `base_dir` in each `pnd.md` manifest — override it per host with the `SANCTUM_BASE` env var. To stand Sanctum up elsewhere: clone, `pip install -r requirements.txt`, point the manifest at your corpus store, and run. No code changes.
 
-**To add a domain:** drop in `<newdomain>/pnd.md` (+ `codex.md`, `mandate.md`) and run `./run.sh <newdomain>`. The cycle applies unchanged.
+**To add a domain:** copy `_template/` to `<newdomain>/` (see `DOMAINS.md`) and run `./run.sh <newdomain>`. The cycle applies unchanged.
 
 ## Version control & sync
 
@@ -182,7 +182,7 @@ sanctum/
 │   ├── pnd.md               # THE P&D file: manifest + sensors + scoring + production
 │   ├── vocab.md             # WHY the word lists say what they say — collisions,
 │   │                        #   dropped terms, review dates, gaps (never the terms)
-│   ├── codex.md             # intelligence requirements & doctrine (prose)
+│   ├── requirements.md      # KIQ -> PIR -> SIR -> EEI, each mapped to a sensor
 │   ├── mandate.md           # standing planning & direction record (+ status/backlog)
 │   ├── README.md            # effort overview
 │   └── editions/            # brief editions

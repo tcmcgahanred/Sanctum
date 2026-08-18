@@ -9,10 +9,11 @@
 | File | Role |
 |------|------|
 | `pnd.md` | **Planning & Direction** — the single config file the engines read: `manifest` + the `sensors` feed list + `scoring` model + `production`. Config is in fenced blocks; prose is for humans. |
-| `codex.md` | Intelligence requirements & doctrine (prose). Documents what `pnd.md`'s scoring block encodes (KIQ / PIRs / scoring / cut doctrine). |
-| `decomposition.md` | **PIR → SIR → EEI decomposition.** Every EEI mapped to the sensor that collects it and the scoring signal that weights it. Drives the sensor-build roadmap and the rationale for each signal. **Requirements changes start here**, then the config, then the Codex. |
+| `requirements.md` | The whole intelligence-requirements tree: KIQ -> PIR -> SIR -> EEI, each EEI mapped to the sensor that collects it. Owns no numbers. |
 | `mandate.md` | Standing planning & direction record (directives + lessons log) — and the per-domain status/backlog tracker. |
-| `editions/vox_v*.md` | The brief (Vox) — keyed to the distribution date. |
+| `vocab.md` | Why the word lists say what they say — collisions, dropped terms, review dates. Never the terms themselves. |
+| `vox_policy.md` | The product spec: format, structure, locked content standards. **Authoritative** — where anything disagrees with it, it wins. |
+| `editions/WCTI_v*.md` | The voxes actually put out, keyed to the distribution date. |
 
 ## How P&D drives the cycle
 
@@ -20,9 +21,9 @@
 
 - **`manifest`** → Collection: where the corpus lives, the feed list, the collection window.
 - **`scoring`** → Processing & Exploitation: tiers (8/4/2/1), keyword groups, elevation multipliers, and the "geo-subject-of-an-incident" rule — all as data.
-- **`production`** → Analysis & Production: the staging report title, section taxonomy, and the 5–8 item target.
+- **`production`** → Exploitation: the document titles, the section taxonomy, and the audience. **No item target** — the surface is uncapped by design.
 
-Change what lands first by editing `scoring` in `pnd.md` (keep `codex.md`'s prose in sync). Change what's collected by editing the `sensors` block in `pnd.md`.
+Change what lands first by editing `scoring` in `pnd.md` -- the rationale lives beside the values, so there is nothing to keep in sync. Change what's collected by editing the `sensors` block in `pnd.md`.
 
 ## Tuning it for another AOR
 

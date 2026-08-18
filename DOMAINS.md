@@ -47,7 +47,7 @@ satisfies the machine is one nobody can maintain.
 | `pnd.md` | **REQUIRED** | Planning & Direction. Manifest, sensors, scoring model, production block. The only file the engine reads. |
 | `vocab.md` | **EXPECTED** | The reasoning behind the word lists — collisions, dropped terms, per-group review dates, known gaps. Never the terms themselves. See `VOCABULARY.md`. |
 | `README.md` | **EXPECTED** | What this domain is, who it serves, how to run it, how to adapt it. |
-| `decomposition.md` | **EXPECTED** | Requirements decomposed to the collectable-fact layer, each mapped to the sensor that collects it. **This is the file that makes a coverage gap visible** — see `ROADMAP.md`. |
+| `requirements.md` | **EXPECTED** | The whole requirements tree — KIQ → PIR → SIR → EEI — each collectable fact mapped to the sensor that serves it. **This is the file that makes a coverage gap visible** — see `ROADMAP.md`. Owns no numbers. |
 | `mandate.md` | **EXPECTED** | Standing operating directives plus the dated lessons log. The continuity mechanism: a fresh session handed this can run the cycle. |
 | `policy.md` | **EXPECTED** | The product specification — format, structure, locked content standards. CTI's is `vox_policy.md`. A domain can run without one; it just means the vox's standards live in someone's head instead of in git. |
 | `editions/` | **REQUIRED once the domain produces its first vox** | The committed record of what was actually put out, and the only way to answer "what did we say in August?" a year later. |
@@ -75,8 +75,7 @@ remote that had been public since publication.
 
 | Fact | Owner | Everyone else |
 |---|---|---|
-| Key Intelligence Questions, Priority Intelligence Requirements | `codex.md` | Reference by name; do not restate the wording |
-| Specific requirements, collectable facts, which sensor serves each | `decomposition.md` | Reference; do not restate |
+| The whole requirements tree — KIQ, PIRs, SIRs, collectable facts, and which sensor serves each | `requirements.md` | Reference by name; do not restate the wording |
 | **Tier weights, multiplier factors, group terms, thresholds, force-surface rules** | **`pnd.md`** | **Never restate a number.** Explain design *intent* freely; the values live in config because config is what executes |
 | Product format and content standards | `policy.md` (if the domain has one) | Reference and state that the policy wins; do not reproduce the rules |
 | Vocabulary collisions, dropped terms, review dates | `vocab.md` | — |
@@ -86,33 +85,36 @@ remote that had been public since publication.
 **The test:** if you change a value in `pnd.md`, does any other file now contain
 a lie? If yes, that other file was restating instead of referencing.
 
-### Known violations, recorded rather than hidden
+### Violations found and closed — 2026-08-17
 
-Applying the rule to the CTI domain as it stands today finds three:
+Applying the rule to CTI found three, all of them centred on one file:
 
-1. **`codex.md` Layer 3 restates the scoring numbers.** The tier weights
-   (8/4/2/1) and multiplier factors (1.5/1.5/1.3/1.3) appear in both `codex.md`
-   and `pnd.md`. Tune the config and the Codex silently becomes wrong. **This is
-   the oldest and worst of the three.** Fix: keep the worked examples and the
-   convergence-wins explanation, replace the tables with a pointer.
+1. **The Codex restated the scoring numbers.** The tier weights (8/4/2/1) and
+   multiplier factors (1.5/1.5/1.3/1.3) lived in both `codex.md` and `pnd.md` —
+   the same eight values in two places, so tuning the config silently made the
+   Codex wrong. The oldest and worst of the three.
+2. **The Codex and `mandate.md` both reproduced `vox_policy.md` §7.** Introduced
+   the same day by the doctrine reconciliation, and recorded here rather than
+   quietly left.
+3. **The Codex's cut doctrine overlapped the policy's no-cap rule.** Same origin.
 
-2. **`codex.md` Layer 5 and `mandate.md`'s Production block both reproduce
-   `vox_policy.md` §7.** *Introduced 2026-08-17 by the doctrine reconciliation —
-   my own doing, recorded here rather than quietly left.* Both copies name the
-   policy as authoritative and carry the date they were reproduced, which bounds
-   the damage, but it is still the pattern this section forbids. Fix: thin both
-   to a reference.
+**Resolution: `codex.md` was retired.** Its requirements layers merged into
+`requirements.md`, which now owns the whole tree; its scoring rationale —
+convergence-wins, the worked examples, tiers-not-additive, round-up-on-
+uncertainty, why-there-is-no-handicap, the mandatory drop list — moved into
+`pnd.md`, beside the values it explains, where tuning a number and leaving the
+reasoning stale is no longer possible; its content standards were already owned
+by `vox_policy.md`, so `mandate.md`'s copy was thinned to a pointer.
 
-3. **`codex.md` Layer 4 overlaps the policy's no-cap rule.** Same origin, same
-   fix.
+Every block was inventoried before deletion and five would otherwise have been
+lost: round-up-on-uncertainty, the no-handicap argument, tiers-not-additive, the
+four worked examples, and the mandatory drop list. **Retiring a document means
+rehoming its contents first, not deleting and hoping.**
 
-*`codex.md` versus `decomposition.md` was the suspected overlap and is actually
-clean* — `decomposition.md` states its own boundary in its header and restates
-the KIQ and PIRs only as tree roots, explicitly not maintained there. The real
-duplication was between the Codex and the config.
-
-None of the three are urgent; nothing is broken and every copy currently agrees.
-Fix them on next touch, not as a special pass.
+*The suspected overlap was not the real one.* `codex.md` versus
+`decomposition.md` looked like the duplication and was clean — the tell was that
+the two needed a written rule to stay out of each other's way, which is what
+pointed at the split being wrong rather than the content.
 
 ---
 

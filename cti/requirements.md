@@ -1,10 +1,16 @@
-# Sanctum CTI — Intelligence Requirements Decomposition (PIR → SIR → EEI)
+# Sanctum CTI — Intelligence Requirements
 
 *Sanctum · CTI · Planning & Direction work product. Statuses current as of 2026-08-11.*
 
-Decomposes the standing PIRs into Specific Intelligence Requirements (SIRs) and Essential Elements of Information (EEIs), and maps each EEI to the sensor that collects it and the scoring signal that weights it. Scope is deliberately capped at the EEI layer — this is a solo weekly OSINT effort, not a full collection-management plan. The purpose is two concrete outputs: (1) a prioritized sensor-build roadmap, and (2) documented rationale for every scoring signal.
+**This file owns the whole requirements tree** — KIQ, PIRs, SIRs and EEIs — and maps each EEI to the sensor that collects it and the scoring signal that weights it. Scope is deliberately capped at the EEI layer: this is a solo weekly OSINT effort, not a full collection-management plan. The purpose is two concrete outputs: (1) a prioritized sensor-build roadmap, and (2) documented rationale for every scoring signal.
 
-**Where this sits.** `codex.md` Layers 1–2 own the KIQ and PIR wording — they are restated here only as tree roots, not maintained in two places. This file owns the SIR and EEI layers. `pnd.md` is the implementation. **When requirements shift, revise here first, then update the config, then the Codex.** Do not maintain a second copy of the scoring signals — the EEI layer drives the config, it does not duplicate it.
+**Where this sits.** `pnd.md` is the implementation — it owns every number, term and threshold, and **nothing here restates one**. `vox_policy.md` owns the product's format and content standards. **When requirements shift, revise here first, then the config.**
+
+*Consolidated 2026-08-17. The KIQ and PIR wording previously lived in `codex.md` Layers 1–2, with this file holding only the layers beneath — one requirements tree split across two documents, needing a written rule to stop them overlapping. `codex.md` is retired; its scoring rationale moved into `pnd.md` beside the values it explains, and its content standards were already owned by `vox_policy.md`.*
+
+## Collection posture
+
+Cast a wide net. Any credible cyber-threat reporting is in scope at the collection layer — **trusted sources are ingested wholesale and AOR relevance is decided at scoring**, never by keyword pre-filtering at collection. Filtering and prioritization happen downstream, against the tree below.
 
 ## Terminology
 

@@ -8,7 +8,7 @@ against the IR model (tier weight x elevation multipliers), and writes a
 CANDIDATE SHORTLIST plus a full DROP LIST to a single markdown file the
 analyst opens for synthesis.
 
-DOCTRINE (from codex.md, Layer 4):
+DOCTRINE (frozen copy; the live rules now live in the domain config):
   - Prefer false positives to false negatives. Bias the cut toward KEEPING.
   - Strict on sensors, generous on items.
   - Wide cutoff (~50-60 surfaced). Round UP on uncertainty.

@@ -27,7 +27,7 @@ stages 4-6 and outside Sanctum.
 |---|---|
 | `pnd.md` | Everything the engine reads |
 | `vocab.md` | Why the word lists say what they say |
-| `decomposition.md` | Requirements down to the collectable-fact layer |
+| `requirements.md` | KIQ -> PIR -> SIR -> EEI, each mapped to a sensor |
 | `mandate.md` | Standing directives and the lessons log |
 
 See `../DOMAINS.md` for the full contract and for which document owns which

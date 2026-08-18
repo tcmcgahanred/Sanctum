@@ -11,7 +11,7 @@ Reads the rolling collection window from the corpus, scores every article via
 core.rules.score_article against the domain's config, and writes a CANDIDATE
 SHORTLIST + full DROP LIST to a single markdown file for the analyst.
 
-DOCTRINE lives in the domain config + codex.md; the engine only executes it:
+DOCTRINE lives in the domain config; the engine only executes it:
   - Prefer false positives to false negatives (encoded in the domain rules).
   - Wide cutoff; mandatory drop list; every item shows its reasoning.
   - The score ORDERS the queue; the analyst decides. Never an opaque gate.

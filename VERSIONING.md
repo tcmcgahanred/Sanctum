@@ -22,7 +22,7 @@ Best-effort anchors reflecting work done to date — approximations, not exact r
 |----------|---------------|-------|
 | **Acolyte** (`acolyte.py`) | **v1.1** | Operational before this effort (URL-hash dedup, deployed); +1 feature this session (title-dedup). |
 | **Arbites** (`arbites.py`) | **v0.4** | Built this session; +3 real tuning revisions on live corpus. Pre-1.0 until a full production cycle. |
-| **Codex** (`codex.md`) | **v0.3** | Prior iterations of KIQ/PIRs/scoring; +Layer-4 cut doctrine this session. |
+| **Requirements** (`requirements.md`) | **v1.0** | Was `decomposition.md` + `codex.md` Layers 1-2. Consolidated 2026-08-17; `codex.md` retired, its scoring rationale moved into `pnd.md`. |
 | **Cogitator** (`cogitator.drawio`) | **v0.5** | Built this session; ~4 updates (stage insertion, status, backlog, review integration). |
 | **Mandate** (`mandate.md`) | **v1.0** | Standing planning & direction record; consolidated this session. |
 | **Vox** editions | **publish-date keyed** | `vYYYYMMDD` is *product-edition* versioning, keyed to the distribution (Thursday) date, separate from code versioning. |

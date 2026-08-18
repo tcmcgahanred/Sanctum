@@ -28,7 +28,7 @@ Planning & Direction is the single configuration surface. You set the domain the
 
 A domain's sensor priorities are not a roadmap item in the abstract; they fall out of decomposing its requirements. Each pending sensor is the essential means of collecting one or more Essential Elements of Information, and the priority order is how much AOR-specificity each one unlocks.
 
-**The CTI domain's ordered list lives in [`cti/decomposition.md`](cti/decomposition.md) — Byproduct 1.** It is not repeated here; a second copy would drift. Summary of where it stands: a prerequisite engine fix (`process_page` re-collection) blocks the top two sensors, both of which are web portals rather than feeds.
+**The CTI domain's ordered list lives in [`cti/requirements.md`](cti/requirements.md) — Byproduct 1.** It is not repeated here; a second copy would drift. Summary of where it stands: a prerequisite engine fix (`process_page` re-collection) blocks the top two sensors, both of which are web portals rather than feeds.
 
 ### A finding worth carrying across domains
 
