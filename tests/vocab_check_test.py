@@ -160,6 +160,11 @@ check("tracked-only is a subset of the full sweep",
       <= set(discover_domains(REPO_ROOT)), True)
 check("the tracked domain is never dropped from the gate",
       "cti" in discover_domains(REPO_ROOT, tracked_only=True), True)
+# A leading underscore means "not a domain" (DOMAINS.md). Without this,
+# _template/ is reported as a permanently broken domain — its groups are
+# deliberately empty — and a guard that always fails is a guard people ignore.
+check("an underscore-prefixed folder is not treated as a domain",
+      [d for d in discover_domains(REPO_ROOT) if d.startswith("_")], [])
 
 print("\nvocab.md parsing")
 missing = Path("/nonexistent/does/not/exist/vocab.md")

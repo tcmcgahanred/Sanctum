@@ -163,6 +163,7 @@ Secrets **never** enter the repo — the `.gitignore` blocks credential carriers
 sanctum/
 ├── README.md
 ├── ROADMAP.md               # vision, keeper test, future production node
+├── DOMAINS.md               # what a domain folder contains; who owns which fact
 ├── EXPLOITATION.md          # stage 3b — how a staging document becomes a vox
 ├── VOCABULARY.md            # how a domain builds and maintains its word lists
 ├── VERSIONING.md            # git-as-truth; artifact version anchors
@@ -175,6 +176,8 @@ sanctum/
 │   ├── acolyte.py           # collector engine
 │   ├── arbites.py           # pre-filter / scorer engine
 │   └── lexicanum.py         # archive search + match-frequency over time
+├── _template/               # copy this to start a domain. The leading underscore
+│                            #   means "not a domain" — tooling skips it
 ├── cti/                     # Effort 1 — SLTT CTI (example domain) — CONFIG + outputs
 │   ├── pnd.md               # THE P&D file: manifest + sensors + scoring + production
 │   ├── vocab.md             # WHY the word lists say what they say — collisions,

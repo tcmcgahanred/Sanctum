@@ -278,6 +278,11 @@ def discover_domains(repo_root, tracked_only=False):
     """
     out = []
     for p in sorted(repo_root.glob("*/pnd.md")):
+        # A leading underscore means "not a domain" (DOMAINS.md). Without this,
+        # _template/ is swept up and reported as a permanently broken domain,
+        # since its groups are deliberately empty.
+        if p.parent.name.startswith("_"):
+            continue
         if tracked_only and not git_tracked(repo_root, p.relative_to(repo_root)):
             continue
         out.append(p.parent.name)
