@@ -49,12 +49,19 @@ satisfies the machine is one nobody can maintain.
 | `README.md` | **EXPECTED** | What this domain is, who it serves, how to run it, how to adapt it. |
 | `decomposition.md` | **EXPECTED** | Requirements decomposed to the collectable-fact layer, each mapped to the sensor that collects it. **This is the file that makes a coverage gap visible** — see `ROADMAP.md`. |
 | `mandate.md` | **EXPECTED** | Standing operating directives plus the dated lessons log. The continuity mechanism: a fresh session handed this can run the cycle. |
-| `policy.md` | **OPTIONAL** | The product specification, where the domain produces a product with locked standards. CTI's is `vox_policy.md`. A domain terminal at the staging document may need none. |
-| `editions/` | **OPTIONAL** | Committed voxes. Only for domains that produce one. A domain terminal at 3a has nothing to put here. |
+| `policy.md` | **EXPECTED** | The product specification — format, structure, locked content standards. CTI's is `vox_policy.md`. A domain can run without one; it just means the vox's standards live in someone's head instead of in git. |
+| `editions/` | **REQUIRED once the domain produces its first vox** | The committed record of what was actually put out, and the only way to answer "what did we say in August?" a year later. |
 | `references/` | **LOCAL ONLY** | Working notes, feed candidate lists. Git-ignored by pattern — these carry host and internal detail. |
 
 **A domain with only `pnd.md` runs.** It is not wrong, it is just undocumented,
 and the first person to inherit it — including you in six months — pays for that.
+
+**Every domain ends at a vox.** That is tenet 9 and it is not a per-domain
+choice. A domain is not "done" at the staging document — the staging document is
+a machine artifact, reproducible from the corpus, and it is not committed. The
+vox is the deliverable, it is human-made, and it is what `editions/` records.
+What happens to the vox afterward — assessment, formatting, distribution — is
+stages 4 to 6 and is nobody's business here, in every domain equally.
 
 ---
 

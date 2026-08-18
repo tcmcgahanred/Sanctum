@@ -10,9 +10,10 @@ scoring — say which one applies.
 
 ## Where it stops
 
-Does this domain end at the staging document (3a), or does it produce a vox
-(3b)? A domain terminal at staging has no `editions/` folder and needs no
-`policy.md`.
+**At the vox.** Every domain does — tenet 9, not a per-domain choice. 3a makes
+the staging document (machine, reproducible, not committed); 3b makes the vox
+(human, committed to `editions/`). Whatever happens to the vox afterward is
+stages 4-6 and outside Sanctum.
 
 ## Running it
 

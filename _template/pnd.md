@@ -163,7 +163,7 @@ production:
   deliverable_name: "NAME_v[YYYYMMDD]"                        # 3b filename
   sections: []
   notes: >
-    Anything domain-specific that does not fit above. A domain terminal at the
-    staging document has no vox and can leave vox_title and deliverable_name
-    unset.
+    Anything domain-specific that does not fit above. Every domain ends at a
+    vox, so vox_title and deliverable_name are always required - the staging
+    document is a machine artifact on the way there, not the deliverable.
 ```
