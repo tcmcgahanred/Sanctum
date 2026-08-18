@@ -300,21 +300,25 @@ Shapes the staging output and the human synthesis stage: the pre-filter report
 title, the section taxonomy the analyst arranges items into, and the item-count
 targets.
 
-**Two different targets — do not conflate them.** The staging doc is a *review
-surface*; the distributed report is the *product*. The count narrows through the
-week, and that funnel is the intent:
+**No target on the review surface** (Vox Policy §7). The staging document and the
+vox are review surfaces, and the number of items in them is an **output** of the
+scoring and the force-surface rules — never a target set on top. This table
+previously read *"~5–6 per content section, ~15–18 total"*; that was a cap, the
+policy forbids caps, and it is gone:
 
-| Artifact | When | Target |
+| Artifact | When | Size |
 |---|---|---|
-| **Staging doc** (Vox draft) | Monday | **~5–6 per content section, ~15–18 total** — generous, so the analyst and the cyber team have material to review, cut, and use to tune P&D |
-| **Distributed report** | Thursday | **5–8 items total** — "restraint is the product" applies here |
+| **Staging document** (3a) | Monday 0500 | **Uncapped.** Everything clearing `surface_min_score` or matching a `force_surface` rule |
+| **Vox** (3b) | Monday | **Uncapped.** The operator cuts on judgement, not to a number |
+| **Distributed report** | Thursday | 5–8 items — "restraint is the product" applies here, and this is **outside Sanctum's scope** |
 
-Per-section targets cover the three content sections (NEWS, CTA TTPs, LATEST
-ATTACKS OR RISKS). KEYWORDS is wave-tops, not items, and carries no target.
+If the surface is too large, tune the weights, the vocabulary, or the exclusion
+operators. Do not reintroduce a cap: a cap hides what the scoring did and
+destroys the feedback that tunes it. **The uncapped surface is the diagnostic.**
 
-The extra staging entries are the **next-lower-ranked items from the same sorted
-queue** — lower tier and/or fewer elevation signals. This extends the cut line
-down an already-ranked list; it does not lower the standard. Every entry still
+A wider surface pulls in **lower-ranked items from the same sorted
+queue** — lower tier and/or fewer elevation signals. It does not lower the
+standard. Every entry still
 shows its scoring reasoning (tier + which multipliers fired) so the analyst can
 audit where the cut falls.
 
@@ -351,9 +355,11 @@ production:
   sections: ["NEWS", "CTA TTPs", "LATEST ATTACKS OR RISKS", "KEYWORDS"]
   deliverable_name: "WCTI_v[YYYYMMDD]"           # 3b output, filename. date = distribution (Thu)
   notes: >
-    Staging = content only, no handling markings, generous item count (review
-    surface). The distributed product narrows to 5-8 and adds handling markings.
-    KEYWORDS is wave-tops, not items - no target applies. Three dates on the
-    distribution product: title = distribution (Thursday); ICOD line = collection
-    cutoff (Monday 0900); LTIOV planning-only, never printed.
+    Staging document and vox are content only, no handling markings, and are
+    UNCAPPED - the item count is an output of the scoring and force-surface
+    rules, never a target (Vox Policy section 7). The distributed product
+    narrows to 5-8 and adds handling markings, and is outside Sanctum's scope.
+    KEYWORDS is wave-tops, not items. Three dates on the distribution product:
+    title = distribution (Thursday); ICOD line = collection cutoff
+    (Monday 0500 PT); LTIOV planning-only, never printed.
 ```

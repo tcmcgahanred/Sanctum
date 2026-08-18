@@ -30,4 +30,11 @@ This example is tuned for a California SLTT AOR (the `geo` keyword group is Cali
 
 ## Deliverable naming
 
-The staging deliverable is `WCTI_v[YYYYMMDD]_STAGING`, date = the **distribution (Thursday)** date. "Vox" stays the internal artifact concept.
+Two documents, two names, never interchangeable (Vox Policy §3):
+
+| | Made by | Reader-facing title | Filename |
+|---|---|---|---|
+| **Staging document** (3a) | `arbites.py` | `WCTI — Staging Document (candidate queue)` | dated by collection day, pushed to the staging store, **not committed** |
+| **Vox** (3b) | operator + model | `WCTI — Weekly Cyber Threat Intelligence` | `WCTI_v[YYYYMMDD]`, date = **distribution (Thursday)**, committed to `editions/` |
+
+"Vox" is internal shorthand and never appears in the reader-facing document. No `CCIC` prefix until AOR-direct sensors exist. The `_STAGING` suffix belongs to the 3a document only and must never appear on a vox.

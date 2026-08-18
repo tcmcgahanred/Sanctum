@@ -21,18 +21,28 @@
 
 | When | Step |
 |------|------|
-| **Monday 0900** | **Collection cutoff = ICOD** ("information current as of"). Corpus windowed on the 7 days ending here. |
-| **Monday** (after 0900) | **Staging draft (Vox) produced** from the closed corpus. |
+| **Monday 0500 PT** | **Collector runs. Collection cutoff = ICOD** ("information current as of"). Corpus windowed on the 7 days ending here. |
+| **Monday 0500** (same run) | **Staging document written** by `arbites.py` — 3a, machine, deterministic. Pushed to the staging store. |
+| **Monday ~0600** | **Vox created** from the staging document — 3b, operator plus a model, per `../EXPLOITATION.md`. |
 | **Monday–Tuesday** | **Individual review / amend** — analyst verification and edits. |
 | **Wednesday** | **Team review.** |
 | **Thursday afternoon** | **Distribution** — finished report sent. This is the product's **title date**. |
 
 **Three dates — keep them distinct:**
 - **Title date = distribution (Thursday).** What the product is dated.
-- **ICOD line = collection cutoff (that week's Monday 0900).** Carried in the product body: "information current as of …".
+- **ICOD line = collection cutoff (that week's Monday 0500 PT).** Carried in the product body: "information current as of …".
 - **LTIOV** (latest time information is of value) — **planning doctrine only. Never printed on the product.**
 
-**Staging deliverable filename:** `WCTI_v[YYYYMMDD]_STAGING`, where the date is the **distribution (Thursday)** date — e.g. `WCTI_v20260813_STAGING`. "Vox" stays the internal artifact concept; this is the exported deliverable name.
+**Two documents, two names — never interchangeable** (Vox Policy §3):
+
+| | 3a staging document | 3b vox |
+|---|---|---|
+| Made by | `arbites.py`, deterministic | operator + model |
+| Title | `WCTI — Staging Document (candidate queue)` | `WCTI — Weekly Cyber Threat Intelligence` |
+| Filename | dated by collection day, pushed to the staging store | `WCTI_v[YYYYMMDD]` — date is **distribution (Thursday)** |
+| Committed? | **No** — machine-made and reproducible | **Yes**, to `editions/` |
+
+**"Vox" is internal shorthand and never appears in the reader-facing document.** No `CCIC` prefix until AOR-direct sensors exist. No `_STAGING` suffix on a vox — that suffix belongs to the other document entirely.
 
 ---
 
@@ -42,7 +52,7 @@
 - **Quality over quantity on sensors.** A feed earns its place only if reliable AND additive (offers a vantage the others don't). Drop noisy sensors rather than filter them.
 - **Trusted sources ingested wholesale; AOR relevance decided at scoring**, not by keyword pre-filtering at collection.
 - **Verify every feed URL against the current host's actual egress** before loading (some sources 403 datacenter/server IPs even when they work from a browser).
-- **Collection window: the 7 days ending Monday 0900 (ICOD).** The window closes at the Monday 0900 cutoff; the staging draft is built from that closed corpus.
+- **Collection window: the 7 days ending Monday 0500 PT (ICOD).** The window closes at the 0500 cutoff and the staging document is built from that closed corpus in the same run. The 0500 time exists so a 0600 pull sees a finished run, leaving the analyst until 0900 to review.
 - **Dropped and why:** 34 county Google News keyword feeds — keyword search on a general news index returns the county's whole news firehose, not its cyber incidents. Wrong instrument for precision local detection. Do not reintroduce keyword-query feeds.
 
 ### Analysis / Scoring
@@ -55,15 +65,28 @@
 - **Arbites (pre-filter) known limits the analyst must catch:** keyword scoring can mis-tag on proximity (e.g., a national article discussing California near an incident word looks tier-1 — check the title), and national threat-landscape roundups score mid-pack. These are expected; the human gate catches them.
 
 ### Production
-- **"Restraint is the product" governs the DISTRIBUTED product, not the staging doc.** These are two different targets and conflating them was a real ambiguity in this document until 2026-08-11.
-  - **Staging doc (Monday, Vox draft) — generous: ~5–6 items per content section, ~15–18 total.** It is a *review surface*, not a product. Its job is to give the analyst and the cyber team enough material to review, cut down, and use to tune Planning & Direction. Per-section targets apply to NEWS, CTA TTPs, and LATEST ATTACKS OR RISKS; KEYWORDS is wave-tops and carries no target.
-  - **Distributed product (Thursday) — restrained: 5–8 items total.** This is where restraint applies.
-  - **The count narrows through the week. That funnel is the intent**, not slippage.
-- **Extending the staging cut line does not lower the standard.** The added entries are the next-lower-ranked items from the *same* sorted queue — lower tier and/or fewer elevation signals, not lower-quality sourcing. Every staging entry must still show its scoring reasoning (tier + which multipliers fired) so the analyst can audit where the cut falls.
-- **Every item needs a "why an SLTT org cares" clause** tied to the low-maturity California SLTT audience. Items without SLTT relevance get cut.
+- **NO CAP ON THE REVIEW SURFACE — trust the weights.** *(Vox Policy §7. Supersedes the item targets this document carried until 2026-08-17.)* There is no fixed limit on items per section or overall. Every item that qualifies — by score, or by the mandatory-surface rule below — appears, however many that is. If 20 high-weight items qualify, 20 surface. **The count is an OUTPUT of the scoring and the rules, never a target imposed on top of them.**
+  - The former targets (~5–6 per section, ~15–18 total) were exactly such a cap and have been removed here, from `codex.md`, and from `pnd.md`.
+  - Surface-vs-drop is now a **score threshold** — `scoring.settings.surface_min_score` — plus guaranteed inclusions. Never a rank cut.
+- **If the surface is too large or too noisy, tune Sanctum — do not cap.** Adjust the weights, the mandatory-surface vocabulary, or the exclusion operators. Capping hides what the scoring did and destroys the feedback that tunes it. **The uncapped surface IS the diagnostic.**
+- **Mandatory-surface rule — inclusion, not ranking.** An item is force-surfaced regardless of score if it meets any of: **(M1)** an in-AOR entity is the subject of a cyberattack, breach or disruption; **(M2)** in-the-wild exploitation, weaponised public PoC, or KEV addition **and** the affected product is in the SLTT-relevant technology vocabulary; **(M3)** a specific incident confirms an SLTT sector was targeted or impacted. Score still orders everything, so a forced low-scoring item sits at the bottom of the surface with its ranking/relevance disagreement visible — which is the tuning signal. **Known limit: these rules can only fire on vocabulary the domain has already declared** — see `vocab.md`, Open finding 1.
+- **"Restraint is the product" governs the DISTRIBUTED product only.** Restraint is the finished report's virtue, applied by the cyber team as editorial judgment after review. It is never an automated cap on what surfaces. The distributed target (5–8 items, Thursday) sits **outside Sanctum's scope** and is recorded here for reference only.
+- **A wider surface does not lower the standard.** The added entries are lower-ranked items from the *same* sorted queue — lower tier and/or fewer elevation signals, not lower-quality sourcing. Every entry still shows its scoring reasoning so the analyst can audit where the cut falls.
+#### Content standards — locked by Vox Policy §7
+
+- **Body, not headline.** Every entry is written from the article body, never the headline. **If the corpus has no usable body on a topic, the item is dropped.** A headline is a claim about an article, not the article.
+- **Serious-impact verification.** Independently verify serious impact claims — 911 or public-safety outages, casualties, service disruption, breach scope, attribution — against a primary or authoritative source before inclusion. If not clearly substantiated, attribute it ("per the city's statement…") or soften it; never state it as fact. Check the wording does not inflate the source: *"affected 911 routing"* is not *"911 went down."* **Re-check status if the item has aged since first drafted — "not confirmed" goes stale.**
+- **Attribution discipline.** Suspected is not confirmed. Represent the actual state of the evidence — neither assert nor flatly deny where reporting indicates something but officials have not confirmed it.
+- **Audience-portfolio filter.** Developer-only items (e.g. package poisoning) and defense-industrial-only items (e.g. CMMC) are out of portfolio unless they reach SLTT through a vendor. **Topicality is not relevance.**
+- **Provider/product relevance.** A product-specific item is relevant only if the audience actually uses the affected product or provider. Name the product, the versions, and who is unaffected.
+- **Sourcing.** Primary-source elevation; verify aggregator and roundup items against the primary advisory. Flag vendor-statistic methodology limits.
+- **Recency.** Filter on publication date within the collection window. Out-of-window items are flagged, never silently dropped, and stay only with a fresh this-week hook — new exploitation, new victim, new KEV.
+
+- **Every item needs a "why an SLTT org cares" clause** tied to the low-maturity California SLTT audience, framed as vendor accountability and procurement or foundational controls (CIS IG1), not developer-level fixes. Items without SLTT relevance get cut.
 - **Plain language, minimal-tooling recommendations** (IG1 CIS controls preferred). Audience consumes vendor software; they don't write code. Emphasis on vendor accountability and procurement governance.
-- **Staging (Vox draft) = content only, no handling markings.** Distribution product is a separate template with TLP:CLEAR, deeper analysis, and presentation polish. Never conflate the two.
-- **Three dates on the distribution product:** title = distribution (Thursday); ICOD line in body = collection cutoff (Monday 0900); LTIOV never printed.
+- **The vox is content, not a finished product.** No handling markings, no distribution furniture. The distributed product is a separate template with TLP:CLEAR, deeper analysis and presentation polish, built downstream by the team. Never conflate the two.
+- **No internal machinery in the reader-facing document** (Vox Policy §4). The header carries the heading, the filename and dates, a paragraph on what the document is, and a note on the scores. It does **not** carry staging-document filenames, stage labels, sensor names, feed URLs or pipeline paths. *"Local reporting was thin this week"* is the collection note; *"the Cal OES feed returned nothing"* is not.
+- **Three dates on the distribution product:** title = distribution (Thursday); ICOD line in body = collection cutoff (Monday 0500 PT); LTIOV never printed.
 - **Citations nested per entry** (not consolidated endnotes).
 - **Source-access check before publishing:** confirm every cited URL is publicly reachable. On 403/paywall/login wall, find an alternative citation for the same reporting. A citation the audience can't open is not usable.
 - **Synthesis stays manual** (no API/tokens) — deliberate choice, not a limitation to fix by default.
@@ -95,8 +118,8 @@
 
 ### Repo hygiene — reviewed and closed 2026-08-11
 
-- **Edition publishing stays manual.** `cti/editions/WCTI_v20260813_STAGING.md` and `The_Seal.png` (commit `23b61f3`) were placed in the repo deliberately, by hand. **Do not automate edition publishing** and do not propose it. Editions reach the repo when the analyst puts them there.
-- **`CCIC` reference in `WCTI_v20260813_STAGING.md` — reviewed, left as-is.** Line 17 names the CCIC 34-county AOR. Raised as a possible scrub violation (the CCIC title was stripped from the Cogitator during scrubbing, per CHANGELOG 2026-08-11); reviewed by the analyst and accepted. **Do not re-raise.** Note for context: the AOR is 34 counties — this is why the dropped county keyword feeds numbered 34, not a partial rollout.
+- **Edition publishing stays manual.** `cti/editions/WCTI_v20260813.md` (renamed from `..._STAGING.md` on 2026-08-17) and `The_Seal.png` (commit `23b61f3`) were placed in the repo deliberately, by hand. **Do not automate edition publishing** and do not propose it. Editions reach the repo when the analyst puts them there.
+- **`CCIC` reference in `WCTI_v20260813.md` — reviewed, left as-is.** Line 17 names the CCIC 34-county AOR. Raised as a possible scrub violation (the CCIC title was stripped from the Cogitator during scrubbing, per CHANGELOG 2026-08-11); reviewed by the analyst and accepted. **Do not re-raise.** Note for context: the AOR is 34 counties — this is why the dropped county keyword feeds numbered 34, not a partial rollout.
 
 *(Per-domain status/backlog lives here in the Mandate; the Cogitator is the shared, domain-neutral cycle map at `diagrams/cogitator.drawio`.)*
 
@@ -131,8 +154,9 @@
 - **Lesson:** the collector's own log is the sensor-health instrument. Query it before writing anything.
 
 ### 2026-08-11 — `production` config is advisory, not enforced
-- `core/arbites.py` loads the `production` block but reads only `report_title`. `item_target` and `sections` are referenced nowhere in `core/`. The sole code-enforced production knob is `scoring.settings.surface_n`.
-- **Consequence for the edition-size question:** editing `item_target` changes nothing mechanically. A bigger *review pool* means raising `surface_n`; a bigger *product* means changing doctrine in the Codex and this Mandate plus analyst behaviour. The two are separate levers and only one is code.
+- `core/arbites.py` loads the `production` block but reads only `report_title`. `item_target` and `sections` are referenced nowhere in `core/`.
+- **Consequence for the edition-size question:** editing `item_target` changes nothing mechanically. A bigger *product* means changing doctrine plus analyst behaviour. The two are separate levers and only one is code.
+- **Superseded 2026-08-17.** This entry named `scoring.settings.surface_n` as the sole code-enforced production knob. That knob was a rank cut — a cap — and Vox Policy §7 forbids caps, so it was removed from the engine. The code-enforced knobs are now `scoring.settings.surface_min_score` (a threshold) and `scoring.force_surface` (guaranteed inclusions). The reasoning above still holds; only the lever changed.
 - Consistent with "synthesis stays manual" — the production block is documentation for the human stage.
 
 ### 2026-08-11 — When clones disagree, check commit dates before assuming
