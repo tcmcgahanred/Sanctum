@@ -26,7 +26,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from core.rules import score_article, _eval_atom, make_matcher, _scopes  # noqa: E402
 from core.lexicanum import (make_all_hits, bucket, published_date,       # noqa: E402
                             walk_corpus, search, render)
-from core.arbites import staging_target, push_staging                    # noqa: E402
+from core.arbites import (staging_target, push_staging,                  # noqa: E402
+                          force_surface_match)
 
 FAILURES = []
 
@@ -339,12 +340,72 @@ def test_staging_push():
           bool(msgs) and "WARNING" in msgs[0] and "staging.md" in msgs[0], True)
 
 
+def test_force_surface():
+    """
+    Vox Policy §7: surface-vs-drop is a threshold plus guaranteed inclusions,
+    never a count. The most important assertion here is the LIMIT — a force
+    rule cannot surface something the domain's vocabulary cannot describe.
+    """
+    print("\nForce-surface — inclusion, not ranking")
+
+    groups = {
+        "place":    ["north county", "the valley"],
+        "incident": ["ransomware", "breach"],
+        "kev":      ["kev catalog"],
+        "tech":     ["wordpress"],
+    }
+    m = make_matcher(None)
+    rules = [
+        {"name": "M1 place in an incident",
+         "when": {"all": [{"group": "place"}, {"group": "incident"}]}},
+        {"name": "M2 KEV affecting relevant tech",
+         "when": {"all": [{"group": "kev"}, {"group": "tech"}]}},
+    ]
+
+    local = art("North County hit by ransomware", "A ransomware attack on the county.")
+    kev = art("KEV catalog adds WordPress flaw", "Added to the KEV catalog; WordPress affected.")
+    plain = art("Weather report", "Rain expected.")
+
+    check("no rules configured -> nothing is forced",
+          force_surface_match(local, [], groups, m), None)
+    check("M1 fires on place + incident",
+          force_surface_match(local, rules, groups, m), "M1 place in an incident")
+    check("M2 fires on KEV + relevant tech",
+          force_surface_match(kev, rules, groups, m), "M2 KEV affecting relevant tech")
+    check("an unrelated item is not forced",
+          force_surface_match(plain, rules, groups, m), None)
+    check("first matching rule wins, in declared order",
+          force_surface_match(art("North County ransomware and KEV catalog wordpress", ""),
+                              rules, groups, m), "M1 place in an incident")
+
+    # A bad rule must not take the cycle down — the run always produces a document.
+    bad = [{"name": "typo", "when": {"group": "no_such_group"}}]
+    check("a rule naming a missing group is skipped, not fatal",
+          force_surface_match(local, bad, groups, m), None)
+    check("a malformed atom is skipped, not fatal",
+          force_surface_match(local, [{"name": "junk", "when": {"nonsense": 1}}], groups, m), None)
+
+    # THE LIMIT, and it is the point of this test.
+    # "Website defaced" is a real incident against an in-AOR entity. The place
+    # matches; the incident word does not exist in the vocabulary. So the
+    # guarantee does not hold — and it is bounded by the word lists, not the rule.
+    defaced = art("North County town website defaced", "The city site was defaced overnight.")
+    check("GUARANTEE IS BOUNDED BY VOCABULARY: an incident word that is not in "
+          "the group cannot be force-surfaced",
+          force_surface_match(defaced, rules, groups, m), None)
+    check("...and it starts working the moment the vocabulary covers it",
+          force_surface_match(defaced, rules,
+                              {**groups, "incident": groups["incident"] + ["defaced"]}, m),
+          "M1 place in an incident")
+
+
 def run():
     test_exclusion()
     test_exclusion_changes_nothing_else()
     test_lexicanum()
     test_denominator()
     test_staging_push()
+    test_force_surface()
     print()
     if FAILURES:
         print(f"FAIL — {len(FAILURES)} problem(s)")

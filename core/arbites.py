@@ -33,7 +33,8 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from core.pnd import load_domain
-from core.rules import score_article, compute_cycle_window, recency_tag
+from core.rules import (score_article, compute_cycle_window, recency_tag,
+                        make_matcher, _eval_atom, _scopes)
 
 
 def in_window(art, cutoff):
@@ -125,7 +126,8 @@ def group_near_duplicates(scored, settings, suffix_separators=(" - ", " | ", " �
     """
     Cluster scored items that look like the same event.
 
-    `scored` is the score-sorted list of (score, tier, reasons, article, is_stale).
+    `scored` is the score-sorted list of
+    (score, tier, reasons, article, is_stale, surfaced).
     Returns ({head_index: [member_index, ...]}, {every grouped index},
     dissolved_count). Pure analysis — the caller decides how to render it.
     """
@@ -272,6 +274,36 @@ def push_staging(manifest, out_path, today, log=print):
         return None
 
 
+def force_surface_match(art, force_rules, groups, matcher):
+    """
+    Name of the first force-surface rule this article matches, or None.
+
+    Force-surface is INCLUSION, not ranking (Vox Policy §7). A match guarantees
+    the item reaches the surface whatever it scored; the score still orders
+    everything, so a forced low-score item lands at the bottom of the surface
+    with its disagreement on show. That visible disagreement is the tuning
+    signal — an item silently lost in the drop list is just a miss.
+
+    IMPORTANT LIMIT: this can only fire on vocabulary the domain has already
+    declared. A rule saying "an in-AOR entity in an incident" cannot surface an
+    incident described with a word missing from the incident group. The
+    guarantee is bounded by the word lists, not by the rule.
+
+    A malformed rule is skipped rather than allowed to take down the cycle —
+    the run must always produce a document.
+    """
+    if not force_rules:
+        return None
+    _, scopes, text_l = _scopes(art)
+    for rule in force_rules:
+        try:
+            if _eval_atom(rule.get("when", {}), groups, matcher, scopes, text_l):
+                return rule.get("name", "force-surface")
+        except (KeyError, ValueError):
+            continue
+    return None
+
+
 def main():
     ap = argparse.ArgumentParser(description="Sanctum Arbites — domain-agnostic scorer")
     ap.add_argument("--domain", help="domain name (folder under repo, e.g. cti)")
@@ -287,7 +319,19 @@ def main():
 
     window_days = int(cfg["manifest"].get("collection", {}).get("window_days",
                       settings.get("window_days", 7)))
-    surface_n = int(settings.get("surface_n", 55))
+    # SURFACE-VS-DROP — a score threshold, never a count.
+    #
+    # This used to be `surface_n: 55` — the top 55 by rank surfaced, the rest
+    # dropped. A rank cut is a cap, and a cap is forbidden by policy: it hides
+    # what the scoring did and destroys the feedback that tunes it. Worse, it
+    # made the force-surface guarantee below impossible — an in-AOR incident
+    # ranked 56th was in the drop list no matter what rule it satisfied.
+    #
+    # Now: an item surfaces if it clears `surface_min_score` OR any
+    # `force_surface` rule matches it. The count is an OUTPUT, not a target.
+    # If the surface is too big, tune the weights or the rules — do not cap it.
+    min_score = settings.get("surface_min_score")
+    min_score = float(min_score) if min_score is not None else None
     out_path = Path(args.out) if args.out else cfg["staging_out"]
     report_title = production.get("report_title", f"{cfg['domain'].upper()} — Pre-Filtered Candidate Queue")
 
@@ -298,9 +342,28 @@ def main():
     if recency_on:
         window_start, cutoff = compute_cycle_window(datetime.now(timezone.utc), settings)
 
+    # FORCE-SURFACE RULES — inclusion, never ranking.
+    #
+    # A domain may declare rules that guarantee an item reaches the surface
+    # regardless of its score. They use the same atom grammar as tiers and
+    # multipliers, so the engine learns no domain knowledge: the domain says
+    # what must never be missed, the engine only honours it.
+    #
+    # Score still orders everything. A forced item with a low score sits at the
+    # bottom of the surfaced list, marked, rather than being lost in the drop
+    # list — which is the whole point: a ranking/relevance disagreement you can
+    # see is a tuning signal, one you cannot see is a miss.
+    force_rules = scoring.get("force_surface", []) or []
+    fs_matcher = make_matcher(scoring.get("word_boundary_terms"))
+    fs_groups = scoring["groups"]
+
+    def forced_by(art):
+        return force_surface_match(art, force_rules, fs_groups, fs_matcher)
+
     arts = load_window(cfg["corpus_dir"], window_days)
     scored = []
     stale_count = 0
+    forced_count = 0
     for a in arts:
         s, tier, reasons = score_article(a, scoring)
         is_stale = False
@@ -310,14 +373,26 @@ def main():
                 reasons.append(tag)
                 is_stale = True
                 stale_count += 1
-        scored.append((s, tier, reasons, a, is_stale))
-    # Deterministic order: score desc, then title, then URL. Ties are common
-    # (many items share a tier weight with no multipliers) and grouping anchors
-    # on whichever member is seen first — so without a stable tiebreak the same
-    # corpus could produce different group heads run to run.
-    scored.sort(key=lambda x: (-x[0], str(x[3].get("title", "")), str(x[3].get("url", ""))))
-
-    surfaced_n = min(surface_n, len(scored))
+        hit = forced_by(a)
+        qualifies = (min_score is None) or (s >= min_score)
+        if hit and not qualifies:
+            reasons.append(f"FORCE-SURFACED: {hit} (score {s} is below the cut — "
+                           f"ranking and relevance disagree here)")
+            forced_count += 1
+        elif hit:
+            reasons.append(f"force-surface: {hit}")
+        scored.append((s, tier, reasons, a, is_stale, bool(hit) or qualifies))
+    # Surfaced items first, each block still in score order. Keeping the
+    # surfaced set contiguous means the grouping and rescue logic below — which
+    # compares indices against the cut — needs no change at all.
+    #
+    # Ties on score are common (many items share a tier weight with no
+    # multipliers) and grouping anchors on whichever member is seen first, so
+    # title and URL break ties: the same corpus produces the same group heads
+    # every run.
+    scored.sort(key=lambda x: (not x[5], -x[0], str(x[3].get("title", "")),
+                               str(x[3].get("url", ""))))
+    surfaced_n = sum(1 for x in scored if x[5])
     seps = tuple(cfg["manifest"].get("collection", {}).get(
         "suffix_separators", (" - ", " | ", " — ")))
     groups, grouped_idx, dissolved_groups = group_near_duplicates(scored, settings, seps)
@@ -345,9 +420,18 @@ def main():
     lines.append(f"# {report_title}")
     lines.append(f"*Generated {datetime.now(timezone.utc).isoformat()} · domain {cfg['domain']} · "
                  f"window {window_days}d · {len(arts)} articles scored · "
-                 f"top {len(surfaced)} surfaced, {len(dropped)} in drop list{recency_note}"
+                 f"{len(surfaced)} surfaced, {len(dropped)} in drop list"
+                 f"{f' · {forced_count} force-surfaced below the cut' if forced_count else ''}"
+                 f"{recency_note}"
                  f"{f' · {len(child_of)} event group(s)' if child_of else ''}"
                  f"{f' · {dissolved_groups} oversized cluster(s) dissolved' if dissolved_groups else ''}.*")
+    lines.append("")
+    cut_note = (f"Surfacing threshold: score ≥ {min_score}."
+                if min_score is not None else "No score threshold — everything surfaced.")
+    lines.append(f"> **{cut_note}** The count is an OUTPUT of the scoring, never a target. "
+                 f"If this surface is too large or too noisy, tune the weights, the "
+                 f"vocabulary or the exclusions — do not cap it. The uncapped surface "
+                 f"IS the diagnostic.")
     lines.append("")
     lines.append("> Score ORDERS the queue; it does not decide. Read the reasoning, "
                  "check the drop list, override freely. Prefer false positives.")
@@ -363,7 +447,7 @@ def main():
     lines.append("---")
     lines.append("## CANDIDATES (top-scored — review these first)")
     lines.append("")
-    for idx, (s, tier, reasons, a, is_stale) in enumerate(surfaced):
+    for idx, (s, tier, reasons, a, is_stale, _sf) in enumerate(surfaced):
         if idx in grouped_idx and idx not in child_of:
             continue                     # a sibling; printed under its group head
         mark = "⚠ STALE " if is_stale else ""
@@ -376,7 +460,7 @@ def main():
         shown = kids[:max_group_display]
         hidden = len(kids) - len(shown)
         for k in shown:
-            ks, _kt, kr, ka, k_stale = scored[k]
+            ks, _kt, kr, ka, k_stale, _ksf = scored[k]
             kmark = "⚠ STALE " if k_stale else ""
             note = " · **rescued from drop list**" if k in rescued else ""
             lines.append(f"  - ⧉ {kmark}[{ks}] {ka.get('title','(no title)')} "
@@ -391,7 +475,7 @@ def main():
     lines.append("---")
     lines.append("## DROP LIST (below cut — scan for anything mis-scored, rescue freely)")
     lines.append("")
-    for off, (s, tier, reasons, a, is_stale) in enumerate(dropped):
+    for off, (s, tier, reasons, a, is_stale, _sf) in enumerate(dropped):
         idx = surfaced_n + off
         mark = "⚠ STALE " if is_stale else ""
         note = "  ⧉ *(also shown grouped above)*" if idx in rescued else ""
