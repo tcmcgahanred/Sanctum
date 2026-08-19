@@ -2,6 +2,18 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-19] Three dead sensors removed, each diagnosed to a cause
+
+First full health check from the collector host. 50 sensors in, 47 returning items, 3 not — and one that had been reported dead was healthy.
+
+- **A status code proved nothing, exactly as designed for.** All three failures returned 200 or followed a redirect cleanly. Only the item count exposed them.
+- **Packet Storm** — the site moved to a new domain and every feed path 404s there, including on its dedicated feed host. Already at 1 new in 9 runs before the move.
+- **Full Disclosure** — reachable, but not by this collector. `curl` gets 200 from the same host on the same machine; `feedparser` gets connection-reset every time, under its default user agent and three others. The difference sits below the user agent, in the HTTP client itself. **Recorded rather than fixed:** swapping the fetch layer is not worth it for one sensor, and the point of writing it down is so nobody repeats the user-agent experiment. A genuine loss.
+- **MS-ISAC advisories** — broken at the publisher. Returns 200 with an "Object moved" stub pointing at a Sitecore internal URL, and that target serves a web application rather than a feed. **MS-ISAC coverage survives** through the sibling alert feed, which returns proper RSS. This one had been claiming active AOR-relevant coverage while serving an HTML stub, which is precisely the failure the health check was built to surface.
+- **Fortiguard was reported dead and is not.** The incoming handoff recorded it at HTTP 500 with an HTML error page; from the collector host it returns 50 items behind a 302 to a Fortinet file store. **Nothing was removed on the strength of that report.** Diagnose before deleting — a sensor removed on a guess is one someone re-adds next year.
+- **MSRC returned 4,912 items in a single fetch**, around three quarters of everything pulled. It is not publishing 4,912 new articles; it serves its whole catalogue every time and dedupe reduces it to a handful. That is the gap between *returned* and *new* made visible, and it explains the old "52.7% of the corpus" figure — the first fetch saved the entire catalogue as new. Standing decision to leave it alone and watch is unchanged.
+- **Reasons recorded in `cti/mandate.md`** alongside the previously dropped sensors, each with its diagnosis and, where relevant, what would have to change to bring it back.
+
 ## [2026-08-19] Sensor health: count the items, not the status code
 
 Findings from the S2 domain's first five cycles. Two of the four requests were corrected before building — one would have fixed nothing.

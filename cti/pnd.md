@@ -68,7 +68,6 @@ suppression. Both of the above burned a fetch per cycle for nine cycles.
 # --- National: government / CERT / SLTT ---
 https://www.cisa.gov/cybersecurity-advisories/all.xml
 https://us-cert.cisa.gov/ncas/current-activity.xml
-https://www.cisecurity.org/feed/advisories
 https://www.cisecurity.org/feed/alert
 https://www.kb.cert.org/vulfeed
 https://www.nist.gov/blogs/cybersecurity-insights/rss.xml
@@ -103,7 +102,6 @@ https://feeds.feedburner.com/TroyHunt
 https://www.infosecurity-magazine.com/rss/news/
 https://cybersecuritynews.com/feed/
 https://bartblaze.blogspot.com/feeds/posts/default
-https://seclists.org/rss/fulldisclosure.rss
 https://krebsonsecurity.com/feed/
 https://googleprojectzero.blogspot.com/feeds/posts/default
 https://www.bleepingcomputer.com/feed/
