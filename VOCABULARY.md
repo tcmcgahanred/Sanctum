@@ -62,6 +62,46 @@ the choice is genuinely between noise and a gap, and the asymmetry settles it.
 - **Place names that are not unique to your area of interest** — a county or city
   name that exists in four other jurisdictions will match all five
 
+### Mixing named entities with category nouns — VALIDATED by failure
+
+> **A group that holds both specific names and general category words will match
+> things that are not yours. The category half needs a qualifier the named half
+> does not.**
+
+A designation identifies *whose* thing it is. A category noun does not. Put both
+in one group and every rule using that group silently loses the distinction.
+
+Observed: a tier meant to capture *adversary* capability held both specific
+system designations and general terms of the form *"[category] system"*. Every
+one of the first ten items it surfaced was a friendly-force story — a domestic
+programme, a piece of equipment designed to *defeat* the thing being tracked,
+production contracts at home. The rule passed every automated check and the
+configuration was valid. **It was semantically wrong, and only reading the output
+showed it.**
+
+The fix is not to delete the category terms — they carry real coverage the
+designations miss, since much reporting never names a system. The fix is to
+require something alongside them that the designations already imply. Split the
+group, or pair the category half with an ownership term in the rule.
+
+**Check every group you write against this before it lands:** does it contain
+both proper nouns and common nouns? If so, the common nouns describe anyone's
+equipment, including your own.
+
+### Promoting a term to a proximity anchor re-opens a settled question
+
+The two sides of a proximity rule are **not** matched the same way. The anchor
+side is located by raw substring search with no word-boundary protection; the
+other side uses the boundary matcher. See §2.
+
+So a short term that was safe everywhere else becomes unsafe the moment it
+anchors a proximity rule. Observed: `icing`, safe under boundary matching,
+matches inside *servicing* and *pricing* when promoted to an anchor.
+
+**Any group moved onto the anchor side of a proximity rule needs its collisions
+re-audited from scratch.** Its previous clean record was earned under different
+matching rules and does not transfer.
+
 **Corollary — boundary lists decay.** `word_boundary_terms` entries for terms
 that have since been dropped are harmless at runtime but actively misleading on
 review: a later reader treats the boundary list as evidence those terms are live.
@@ -84,6 +124,29 @@ The same term can be unacceptable in one position and harmless in another.
 | **Tier with bare full-text matching** | No structural filter at all | **Exposed surface** |
 | **Tier with a proximity or scope rule** | Structure filters much of the noise before the term matters | **Partly self-protecting** |
 | **Urgency multiplier** | Applies to whatever tier the item already earned; junk stays at the floor | **Low** — floor weight × a modest factor is still near the floor |
+
+### How proximity actually matches — three behaviours you cannot infer
+
+`{proximity: {a: group_a, b: group_b, window: 120}}` requires a term from each
+group within `window` characters. Confirmed by test and then by production use:
+
+1. **It searches the article body only, never the title.** A rule using
+   proximity misses a headline-only match completely. Pair it with a title
+   branch: `any: [ {proximity: {...}}, {all: [{group: a, scope: title}, {group: b, scope: title}]} ]`
+2. **Only the first occurrence of each anchor-side term is tested.** The search
+   takes the first position and stops. An entity named early in passing, and
+   again beside a trigger word later, is missed. This is per *term*, not per
+   group, so a large anchor vocabulary softens it — but it does not remove it.
+3. **The anchor side has no word-boundary protection. The other side does.**
+   See §1 for what this costs when a term is promoted.
+
+**Prefer proximity to bare co-occurrence for any multi-group condition.**
+Requiring two groups to appear anywhere in a full article body is close to no
+condition at all: observed false positives matched one generic term and one
+platform term *paragraphs apart*, in stories about entirely unrelated subjects.
+Switching those rules to proximity removed the false positives and kept the
+genuine match. Treat whole-body co-occurrence as the exception that needs a
+reason, not the default shape.
 
 **The first row is new and it is the important one.** Every other position is
 subject to the score: a noisy term in a tier promotes junk, but the threshold and

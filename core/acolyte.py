@@ -85,9 +85,41 @@ def _load_titleset(path):
 
 
 def process_feed(url, seen, seen_titles, run_dir, ctx, log):
+    """
+    Collect one feed. Returns (saved, health) or (None, health) when the URL
+    yielded no feed entries and the caller should try the page path.
+
+    `health` is a dict the caller logs. It exists because "0 new" is ambiguous
+    and was hiding dead sensors:
+
+        a feed returning 50 items you have already seen   -> 0 new
+        a feed returning nothing at all                   -> 0 new
+
+    Identical in the log, opposite in meaning. The number that separates them is
+    the DENOMINATOR — how many items the source returned before the seen-list
+    filter — and it was being computed on every run and thrown away.
+
+    This is the second time a raw count without its denominator has misled here;
+    the first was match-frequency in the archive search, where a fall in hits was
+    read as a real decline when collection volume had simply dropped. Same
+    mistake, different place. When reporting a count, report what it is out of.
+
+    feedparser also hands back status, the final URL after redirects, and a
+    parse-error flag, all of which were being discarded. They cost nothing.
+    """
     parsed = feedparser.parse(url)
+    health = {
+        "returned": len(parsed.entries),
+        "status": getattr(parsed, "status", None),
+        "bozo": bool(getattr(parsed, "bozo", 0)),
+        "final_url": getattr(parsed, "href", None),
+        "error": None,
+    }
+    if health["bozo"]:
+        exc = getattr(parsed, "bozo_exception", None)
+        health["error"] = f"{type(exc).__name__}: {exc}" if exc else "malformed feed"
     if not parsed.entries:
-        return None
+        return None, health
     saved = 0
     for e in parsed.entries:
         link = e.get("link")
@@ -107,7 +139,7 @@ def process_feed(url, seen, seen_titles, run_dir, ctx, log):
                 f.write(tkey + "\n")
             seen_titles.add(tkey)
         saved += 1
-    return saved
+    return saved, health
 
 
 def process_page(url, seen, run_dir, ctx, log):
@@ -155,16 +187,53 @@ def main():
     total = 0
     log.info("run start [%s] — %d sources (%s), %d seen, %d seen-titles",
              cfg["domain"], len(urls), cfg["sensors_source"], len(seen), len(seen_titles))
+    dead = []
     for url in urls:
         try:
-            n = process_feed(url, seen, seen_titles, run_dir, ctx, log)
-            n = process_page(url, seen, run_dir, ctx, log) if n is None else n
-            log.info("%s -> %d new", url, n)
+            n, health = process_feed(url, seen, seen_titles, run_dir, ctx, log)
+
+            # A feed that parsed to zero entries used to fall through to the page
+            # path SILENTLY, which is how a broken feed stopped being a broken
+            # feed and quietly became "a page source that yielded nothing." That
+            # reclassification is the reason a source can sit in the list for
+            # months contributing nothing with no error anywhere. It still falls
+            # through — sometimes a page really is the right path — but it says so.
+            if n is None:
+                log.warning("no feed entries %s (status=%s bozo=%s%s) — trying page path",
+                            url, health["status"], health["bozo"],
+                            f" err={health['error']}" if health["error"] else "")
+                n = process_page(url, seen, run_dir, ctx, log)
+                health["returned"] = n  # the page path yields at most one item
+
+            log.info("%s -> %d new of %d returned (status=%s)",
+                     url, n, health["returned"], health["status"])
+
+            # ZERO RETURNED is the signal worth acting on. Zero NEW is normal —
+            # it just means nothing has been published since the last run.
+            if health["returned"] == 0:
+                dead.append((url, health))
+                log.warning("ZERO YIELD %s (status=%s bozo=%s%s)",
+                            url, health["status"], health["bozo"],
+                            f" err={health['error']}" if health["error"] else "")
             total += n
         except Exception as e:
             log.error("source failed %s: %s", url, e)
-    log.info("run done — %d new in %s", total, run_dir)
+            dead.append((url, {"status": None, "bozo": False, "error": str(e)}))
+
+    log.info("run done — %d new in %s; %d of %d sources returned nothing",
+             total, run_dir, len(dead), len(urls))
     print(f"[{cfg['domain']}] {total} new articles -> {run_dir}")
+    if dead:
+        # Printed, not only logged. A sensor list that claims coverage it does
+        # not have is the failure this whole change exists to surface, and a
+        # warning nobody sees is not a warning.
+        print(f"[{cfg['domain']}] WARNING: {len(dead)} of {len(urls)} sources "
+              f"returned zero items:")
+        for url, h in dead:
+            detail = h.get("error") or f"status={h.get('status')}"
+            print(f"    {url}  ({detail})")
+        print(f"[{cfg['domain']}] Zero items is not the same as zero new. "
+              f"Run tools/sensor_check.py for a full diagnosis.")
 
     # Corpus push (config-driven; portable). rclone remote comes from the manifest.
     corpus = cfg["manifest"].get("corpus", {})

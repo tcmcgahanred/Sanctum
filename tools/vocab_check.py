@@ -148,6 +148,64 @@ def check_domain(domain, cfg, vocab, today):
                 "declared with no terms — any rule referencing it never fires, "
                 "but passes the loader's reference check"))
 
+    # --- a group's own name used as a term -------------------------------
+    # Harmless at runtime, misleading on review: it inflates the term count and
+    # a later reader takes it for real vocabulary. Found eight of these in one
+    # domain, including one group's name sitting inside a different group.
+    group_names = {g.strip().lower() for g in groups}
+    for gname, terms in sorted(groups.items()):
+        for t in (terms or []):
+            key = str(t).strip().lower()
+            if key in group_names:
+                where = "its own name" if key == gname.strip().lower() else \
+                        f"the name of group '{key}'"
+                findings.append(Finding(
+                    WARN, domain, "group name as term", f"{t!r} in {gname}",
+                    f"this term is {where}. Group names are labels, not vocabulary — "
+                    f"it inflates the term count and reads as real coverage on review."))
+
+    # --- multiplier ceiling versus tier spacing --------------------------
+    # If every multiplier fires at once, can a floor-tier item outrank a bare
+    # higher-tier one? Some overtaking is deliberate — convergence across
+    # requirements is meant to beat a single-axis match. Overtaking by TWO tier
+    # steps is not: at that point relevance has stopped ordering the queue.
+    #
+    # This exists because a domain documented its stack as 4.9x when the true
+    # product of six signals was 6.43x — five factors multiplied instead of six.
+    # A catch-all item with five signals then outranked every tier-2 and tier-3
+    # item in the cycle. Arithmetic nobody checks is arithmetic that is wrong.
+    mults = scoring.get("multipliers") or []
+    tiers = scoring.get("tiers") or []
+    if mults and len(tiers) >= 3:
+        ceiling = 1.0
+        for m in mults:
+            try:
+                ceiling *= float(m.get("factor", 1.0))
+            except (TypeError, ValueError):
+                continue
+        weights = sorted({float(t["weight"]) for t in tiers if "weight" in t},
+                         reverse=True)
+        if len(weights) >= 3:
+            floor = weights[-1]
+            two_steps = weights[0] / weights[2] if weights[2] else float("inf")
+            best_floor_item = floor * ceiling
+            overtaken = [w for w in weights if best_floor_item > w and w != floor]
+            if ceiling > two_steps:
+                findings.append(Finding(
+                    ERROR, domain, "multiplier ceiling", f"{ceiling:.2f}x",
+                    f"every multiplier firing gives {ceiling:.2f}x, which exceeds two "
+                    f"tier steps ({two_steps:.2f}x). A floor-tier item with all signals "
+                    f"scores {best_floor_item:.2f} and outranks bare tiers at "
+                    f"{', '.join(str(w) for w in overtaken)}. Relevance has stopped "
+                    f"ordering the queue. Reduce a factor, or drop a multiplier."))
+            elif overtaken:
+                findings.append(Finding(
+                    WARN, domain, "multiplier ceiling", f"{ceiling:.2f}x",
+                    f"a floor-tier item with every signal scores {best_floor_item:.2f} "
+                    f"and outranks bare tiers at {', '.join(str(w) for w in overtaken)}. "
+                    f"Within one tier step, so probably the intended convergence "
+                    f"behaviour — but adding one more multiplier likely crosses the line."))
+
     # --- padded terms --------------------------------------------------
     # The matcher calls .strip() on every term before matching, so leading or
     # trailing spaces are silently discarded. Someone writing " term " is

@@ -195,7 +195,8 @@ sanctum/
 ├── logs/
 │   └── CHANGELOG.md
 ├── tools/                   # operator tools — not part of a collection cycle
-│   └── vocab_check.py       # tenet 8  — no silent decay in a domain's word lists
+│   ├── vocab_check.py       # tenet 8  — no silent decay in a domain's word lists
+│   └── sensor_check.py      # tenet 8  — no sensor claiming coverage it hasn't got
 └── tests/                   # engine tests + the commit gate
     ├── pre_commit.sh        # THE COMMIT GATE — runs all three guards
     ├── scrub_check.sh       # tenet 11 — nothing identifying reaches the public repo

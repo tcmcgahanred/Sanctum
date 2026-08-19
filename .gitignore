@@ -58,3 +58,8 @@ references/
 # --- Second domain: kept out of the public repo entirely.
 s2/
 .githooks/
+
+# Private: never publish
+claude_S2-running-log.md
+deploy-s2.ps1
+deploy-*.ps1
