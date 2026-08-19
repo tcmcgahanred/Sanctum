@@ -63,7 +63,6 @@ Note: a source that returns neither feed entries nor extractable text is **retri
 cycle** — `process_page` returns before recording the URL in `seen.txt`, so there is no
 suppression. Both of the above burned a fetch per cycle for nine cycles.
 
-On notice: `packetstormsecurity.com/feeds/news/` (1 new in 9 runs).
 
 ```sensors
 # --- National: government / CERT / SLTT ---
@@ -104,7 +103,6 @@ https://feeds.feedburner.com/TroyHunt
 https://www.infosecurity-magazine.com/rss/news/
 https://cybersecuritynews.com/feed/
 https://bartblaze.blogspot.com/feeds/posts/default
-https://packetstormsecurity.com/feeds/news/
 https://seclists.org/rss/fulldisclosure.rss
 https://krebsonsecurity.com/feed/
 https://googleprojectzero.blogspot.com/feeds/posts/default
