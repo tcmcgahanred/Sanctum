@@ -384,8 +384,8 @@ rules — a threshold plus guaranteed inclusions, never a count.*
 
 ```yaml
 production:
-  # ---- Stage 3b (exploitation) — the domain's answers to ../EXPLOITATION.md ----
-  # The generic method lives in EXPLOITATION.md at the repo root. These are the
+  # ---- Stage 3b (exploitation) — the domain's answers to ../docs/EXPLOITATION.md ----
+  # The generic method lives in docs/EXPLOITATION.md at the repo root. These are the
   # only parts of it that are CTI-specific.
   audience: >
     Low-maturity State/Local/Tribal/Territorial (SLTT) organisations in the AOR —

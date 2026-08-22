@@ -3,7 +3,7 @@
 *Sanctum · CTI domain · the reasoning behind the word lists in `pnd.md`.*
 
 **Version:** v1 — first pass. Established 2026-08-17 when the vocabulary method
-(`../VOCABULARY.md`) was written down and `tools/vocab_check.py` was run against
+(`../docs/VOCABULARY.md`) was written down and `tools/vocab_check.py` was run against
 this domain for the first time.
 
 > **This file never repeats the term lists.** `pnd.md` is the single source of
@@ -101,7 +101,7 @@ county names are not California-exclusive:
 | `sierra county` | New Mexico |
 
 **What changed on 2026-08-17.** `geo` was wired into force-surface rule M1. Per
-`../VOCABULARY.md` §2, force-surface is the highest-cost position in Sanctum —
+`../docs/VOCABULARY.md` §2, force-surface is the highest-cost position in Sanctum —
 the only one where the score cannot correct a bad match, because overriding the
 score is the rule's entire purpose. Every collision in `geo` is now inherited by
 M1, and an out-of-state Lake County ransomware story will be force-surfaced.
@@ -162,7 +162,7 @@ which are not terms.*
 
 ## Verification status
 
-**Not yet validated against live output.** Per `../VOCABULARY.md` §7:
+**Not yet validated against live output.** Per `../docs/VOCABULARY.md` §7:
 
 - [x] `tools/vocab_check.py` passes with the accepted finding recorded
 - [x] Parity test confirms the boundary-list reduction changed no score

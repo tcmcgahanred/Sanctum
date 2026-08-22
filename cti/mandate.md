@@ -23,7 +23,7 @@
 |------|------|
 | **Monday 0500 PT** | **Collector runs. Collection cutoff = ICOD** ("information current as of"). Corpus windowed on the 7 days ending here. |
 | **Monday 0500** (same run) | **Staging document written** by `arbites.py` — 3a, machine, deterministic. Pushed to the staging store. |
-| **Monday ~0600** | **Vox created** from the staging document — 3b, operator plus a model, per `../EXPLOITATION.md`. |
+| **Monday ~0600** | **Vox created** from the staging document — 3b, operator plus a model, per `../docs/EXPLOITATION.md`. |
 | **Monday–Tuesday** | **Individual review / amend** — analyst verification and edits. |
 | **Wednesday** | **Team review.** |
 | **Thursday afternoon** | **Distribution** — finished report sent. This is the product's **title date**. |
@@ -54,16 +54,6 @@
 - **Verify every feed URL against the current host's actual egress** before loading (some sources 403 datacenter/server IPs even when they work from a browser).
 - **Collection window: the 7 days ending Monday 0500 PT (ICOD).** The window closes at the 0500 cutoff and the staging document is built from that closed corpus in the same run. The 0500 time exists so a 0600 pull sees a finished run, leaving the analyst until 0900 to review.
 - **Dropped and why:** 34 county Google News keyword feeds — keyword search on a general news index returns the county's whole news firehose, not its cyber incidents. Wrong instrument for precision local detection. Do not reintroduce keyword-query feeds.
-
-#### Sensors dropped 2026-08-19, after the first full health check
-
-All three found by `tools/sensor_check.py` run from the collector host. Each was diagnosed to a cause before removal — a sensor removed on a guess is a sensor someone re-adds next year.
-
-- **Packet Storm** (`packetstormsecurity.com/feeds/news/`) — the site moved to `packetstorm.news` and **every** feed path 404s there: `/feeds/news/`, `/news/rss`, and both paths on the dedicated `rss.packetstormsecurity.org` host. Was already at 1 new in 9 runs before the move. **Do not re-add without finding a live feed URL first.**
-- **Full Disclosure** (`seclists.org/rss/fulldisclosure.rss`) — reachable, but not by this collector. `curl` gets HTTP 200 from the same host; `feedparser` gets connection-reset every time, under the default user agent and under three others. The difference is below the user agent, somewhere in the HTTP client itself. **The fix would be swapping the fetch layer, which is not worth it for one sensor** — recorded here so the next person does not repeat the user-agent experiment. Genuine loss: Full Disclosure is a real source.
-- **MS-ISAC advisories** (`cisecurity.org/feed/advisories`) — broken at the publisher. Returns 200 with an "Object moved" stub pointing at a Sitecore internal URL, and that target serves a full web application rather than a feed. **MS-ISAC coverage survives** through the sibling `cisecurity.org/feed/alert`, which returns proper RSS and is still loaded. Worth re-testing occasionally; this looks like a site-side misconfiguration that someone may fix.
-
-**The general lesson:** a status code proves nothing. All three returned 200 or followed a redirect cleanly. Only the item count exposed them, and MS-ISAC advisories had been serving an HTML stub to a sensor list that claimed it as active coverage.
 
 ### Analysis / Scoring
 - **Multiplicative scoring** (tier weight × product of elevation multipliers). Convergence wins by design — a heavily-elevated lower-tier item can outrank a bare higher-tier item. This is intentional.

@@ -31,8 +31,8 @@ One file.
 <domain>/pnd.md
 ```
 
-`core/pnd.py` reads it, validates it, and resolves every runtime path from it.
-Nothing in `core/` opens any other file in a domain folder. That is the whole
+`../core/pnd.py` reads it, validates it, and resolves every runtime path from it.
+Nothing in `../core/` opens any other file in a domain folder. That is the whole
 machine contract, and it is deliberately that small — see tenet 2.
 
 Everything below is a **human** contract. It exists because a domain that only
@@ -172,4 +172,4 @@ tooling that discovers domains. `_template/` would otherwise be swept up and
 reported as a broken domain forever, since its groups are deliberately empty.
 
 **Convention: a leading underscore means "not a domain."** Applied in
-`tools/vocab_check.py`; apply it to any future tool that discovers domains.
+`../tools/vocab_check.py`; apply it to any future tool that discovers domains.

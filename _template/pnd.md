@@ -8,7 +8,7 @@ cares about; it never says how the engine behaves. Nothing here executes —
 it.
 
 **Before you fill this in:** run the Planning & Direction survey
-(`../PND_SURVEY.md`). Resist writing word lists first — see `../VOCABULARY.md`
+(`../docs/PND_SURVEY.md`). Resist writing word lists first — see `../docs/VOCABULARY.md`
 §3 for why vocabulary should derive from requirements, and note that the method
 there is marked **RECOMMENDED, NOT VALIDATED**.
 
@@ -63,39 +63,9 @@ domain; only the content differs.
 **An item takes the weight of the highest tier it qualifies for** — tiers are
 not additive with each other. Multipliers stack multiplicatively on top.
 
-**Placement matters as much as the term** (`../VOCABULARY.md` §2). A noisy term
+**Placement matters as much as the term** (`../docs/VOCABULARY.md` §2). A noisy term
 costs most inside a `force_surface` rule, where the score cannot correct it;
 least inside a multiplier, where junk stays near the floor.
-
-**Use proximity, not bare co-occurrence, for any condition needing two groups.**
-Requiring both groups anywhere in a full body is barely a condition — in
-production it matched one generic word and one platform word paragraphs apart,
-in unrelated stories. Prefer:
-
-```yaml
-      require:
-        any:
-          - {proximity: {a: group_one, b: group_two, window: 120}}
-          - all: [{group: group_one, scope: title}, {group: group_two, scope: title}]
-```
-
-The title branch is not optional. **Proximity searches the body only** and will
-miss a headline-only match without it. Two more behaviours you cannot infer:
-only the FIRST occurrence of each anchor-side term is tested, and the anchor
-side has NO word-boundary protection while the other side does — so a short term
-that was safe elsewhere can become unsafe as an anchor. Re-audit any group you
-promote to the `a:` side.
-
-**Watch groups that mix specific names with category nouns.** A designation says
-whose thing it is; "system" or "platform" does not. A tier built on both will
-surface your own side's stories, pass every check, and look correct — see
-`../VOCABULARY.md` §1.
-
-**Keep the multiplier stack under two tier steps.** Multiply every factor
-together: if the product exceeds the ratio between your top tier and the one two
-below it, a floor-tier item with all signals firing outranks genuinely relevant
-items and relevance has stopped ordering the queue. `tools/vocab_check.py`
-computes this and fails the commit if you cross it.
 
 ```yaml
 scoring:

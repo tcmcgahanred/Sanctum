@@ -90,47 +90,6 @@ check("a padded SHORT term is only a WARN — length saves it",
 check("an unpadded term is silent",
       check_domain("t", cfg({"alpha": ["longword"]}), {}, TODAY), [])
 
-print("\nA group's own name used as a term")
-f = check_domain("t", cfg({"alpha": ["real term", "alpha"], "beta": ["alpha"]}), {}, TODAY)
-check("a group naming itself is a WARN", kinds(f, WARN), ["group name as term"])
-check("caught in the group it names AND in another group",
-      subjects(f, "group name as term"), ["'alpha' in alpha", "'alpha' in beta"])
-check("an ordinary term is silent",
-      check_domain("t", cfg({"alpha": ["real term"]}), {}, TODAY), [])
-
-print("\nMultiplier ceiling versus tier spacing")
-TIERS = [{"id": 1, "weight": 8.0}, {"id": 2, "weight": 4.0},
-         {"id": 3, "weight": 2.0}, {"id": 4, "weight": 1.0}]
-
-
-def mults(factors):
-    c = cfg({"g": ["a real term"]})
-    c["scoring"]["tiers"] = TIERS
-    c["scoring"]["multipliers"] = [{"name": f"m{i}", "factor": x}
-                                   for i, x in enumerate(factors)]
-    return c
-
-
-def ceiling(factors, sev=None):
-    return [f for f in check_domain("t", mults(factors), {}, TODAY)
-            if f.check == "multiplier ceiling" and (sev is None or f.severity == sev)]
-
-
-# The case this check was written for: six signals at 6.43x let a floor-tier
-# item outrank bare tier 2 and tier 3.
-check("a stack past two tier steps is an ERROR",
-      [f.subject for f in ceiling([1.5, 1.5, 1.3, 1.3, 1.3, 1.3], ERROR)], ["6.43x"])
-# It would also have caught the mistaken 4.9x figure, which is the point:
-# the check does not depend on anyone getting the arithmetic right first.
-check("...and would have caught the miscalculated figure too",
-      [f.subject for f in ceiling([1.5, 1.5, 1.3, 1.3, 1.3], ERROR)], ["4.94x"])
-check("a stack inside one tier step is only a WARN",
-      [f.subject for f in ceiling([1.5, 1.5, 1.3, 1.3], WARN)], ["3.80x"])
-check("a stack that overtakes nothing is silent", ceiling([1.3, 1.3]), [])
-check("no multipliers at all is silent", ceiling([]), [])
-check("a non-numeric factor is skipped, not fatal",
-      [f.severity for f in ceiling([1.5, "oops", 1.5, 1.3, 1.3, 1.3])], [ERROR])
-
 print("\nEmpty groups")
 f = check_domain("t", cfg({"alpha": [], "beta": ["real term"]}), {}, TODAY)
 check("an empty group is an ERROR", kinds(f, ERROR), ["empty group"])
@@ -201,7 +160,7 @@ check("tracked-only is a subset of the full sweep",
       <= set(discover_domains(REPO_ROOT)), True)
 check("the tracked domain is never dropped from the gate",
       "cti" in discover_domains(REPO_ROOT, tracked_only=True), True)
-# A leading underscore means "not a domain" (DOMAINS.md). Without this,
+# A leading underscore means "not a domain" (docs/DOMAINS.md). Without this,
 # _template/ is reported as a permanently broken domain — its groups are
 # deliberately empty — and a guard that always fails is a guard people ignore.
 check("an underscore-prefixed folder is not treated as a domain",

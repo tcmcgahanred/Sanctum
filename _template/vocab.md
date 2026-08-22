@@ -8,14 +8,14 @@
 > truth for terms. This records *decisions about* terms — what was dropped and
 > why, what collides, when each group was last reviewed. Two copies of the same
 > words drift within a month, and the copy nobody runs is the one that gets
-> edited. See `../VOCABULARY.md`.
+> edited. See `../docs/VOCABULARY.md`.
 
 ---
 
 ## v1 changelog
 
 1. Initial vocabulary built. Record how — by enumeration, or derived from
-   indicators (`../VOCABULARY.md` §3). If by the indicator method, **say so** —
+   indicators (`../docs/VOCABULARY.md` §3). If by the indicator method, **say so** —
    that method has never been validated and someone needs to find out whether it
    works.
 
@@ -38,7 +38,7 @@ not in a maintenance pass.
 
 ## Collision table
 
-Checked against the classes in `../VOCABULARY.md` §1. The triage rule: **drop a
+Checked against the classes in `../docs/VOCABULARY.md` §1. The triage rule: **drop a
 noisy term only when an exact synonym exists.** Where none does, keep it, accept
 the noise, and note it here so the next reader knows it was a decision.
 
@@ -76,7 +76,7 @@ vocab:
 
 ## Verification status
 
-**Not validated until tested against live output** (`../VOCABULARY.md` §7):
+**Not validated until tested against live output** (`../docs/VOCABULARY.md` §7):
 
 - [ ] `tools/vocab_check.py <domain>` passes
 - [ ] Known-good items score where expected

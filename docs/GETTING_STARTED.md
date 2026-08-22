@@ -2,7 +2,7 @@
 
 **BLUF:** Sanctum collects open sources on a schedule, scores every item against requirements *you* define, and hands you a ranked candidate queue to review. It does not write your product. This guide takes you from a clone to a working domain in about an hour, most of which is spent thinking about your requirements rather than typing.
 
-**Who this is for:** anyone comfortable in a terminal who can edit a YAML block. You do not need to read or write Python. You will never edit a file under `core/`.
+**Who this is for:** anyone comfortable in a terminal who can edit a YAML block. You do not need to read or write Python. You will never edit a file under `../core/`.
 
 ---
 
@@ -10,7 +10,7 @@
 
 Sanctum has exactly two moving parts:
 
-- **`core/`** — the engine. Domain-agnostic, holds no knowledge of any subject. You do not touch it.
+- **`../core/`** — the engine. Domain-agnostic, holds no knowledge of any subject. You do not touch it.
 - **`<yourdomain>/pnd.md`** — your Planning & Direction file. One markdown document holding everything the engine needs: where things live, which sources to read, how to score what comes back, and what the output should look like.
 
 Standing up a domain means writing one `pnd.md`. That is the whole job.

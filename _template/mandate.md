@@ -47,7 +47,7 @@ body), and LTIOV (planning doctrine only, never printed).
 
 ### Production
 - Content standards, if this domain has a `policy.md`: **reference it, do not
-  reproduce it.** See `../DOMAINS.md`.
+  reproduce it.** See `../docs/DOMAINS.md`.
 
 ---
 

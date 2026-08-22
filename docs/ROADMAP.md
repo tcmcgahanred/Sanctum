@@ -28,7 +28,7 @@ Planning & Direction is the single configuration surface. You set the domain the
 
 A domain's sensor priorities are not a roadmap item in the abstract; they fall out of decomposing its requirements. Each pending sensor is the essential means of collecting one or more Essential Elements of Information, and the priority order is how much AOR-specificity each one unlocks.
 
-**The CTI domain's ordered list lives in [`cti/requirements.md`](cti/requirements.md) — Byproduct 1.** It is not repeated here; a second copy would drift. Summary of where it stands: a prerequisite engine fix (`process_page` re-collection) blocks the top two sensors, both of which are web portals rather than feeds.
+**The CTI domain's ordered list lives in [`cti/requirements.md`](../cti/requirements.md) — Byproduct 1.** It is not repeated here; a second copy would drift. Summary of where it stands: a prerequisite engine fix (`process_page` re-collection) blocks the top two sensors, both of which are web portals rather than feeds.
 
 ### A finding worth carrying across domains
 
@@ -52,7 +52,7 @@ Longer term, the collector can move off any shared/experimental host onto a dedi
 
 ## Corpus bridge
 
-The corpus is **permanent**, and that is load-bearing. `core/lexicanum.py` recomputes matches on demand rather than recording them at collection time, so a vocabulary group invented today can be run against everything collected last year. That property — retroactive analysis, and the ability to re-group a vocabulary later without losing the history — exists **only while the corpus is retained**. Pruning it would silently destroy the capability and would turn vocabulary granularity into a permanent build-time decision. See [`VOCABULARY.md`](VOCABULARY.md) §4 before changing retention.
+The corpus is **permanent**, and that is load-bearing. `../core/lexicanum.py` recomputes matches on demand rather than recording them at collection time, so a vocabulary group invented today can be run against everything collected last year. That property — retroactive analysis, and the ability to re-group a vocabulary later without losing the history — exists **only while the corpus is retained**. Pruning it would silently destroy the capability and would turn vocabulary granularity into a permanent build-time decision. See [`VOCABULARY.md`](VOCABULARY.md) §4 before changing retention.
 
 *Corrected 2026-08-17. This section previously described the corpus as "transient (a rolling window; it regenerates)," which was true of an early design and has not been true for some time. The collection **window** rolls — the corpus does not. The stale wording had propagated into `.gitignore` as well and was corrected there in the same pass.*
 
