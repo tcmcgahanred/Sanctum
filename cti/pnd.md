@@ -64,6 +64,17 @@ cycle** — `process_page` returns before recording the URL in `seen.txt`, so th
 suppression. Both of the above burned a fetch per cycle for nine cycles.
 
 
+Added 2026-08-19, verified from the collector host before loading (9 items, HTTP 200
+on `industrialcyber.co/feed/`; the `/rss/` path 307s to nothing and `/feed/rss/` 301s to
+the same content):
+
+- `industrialcyber.co/feed/` — industrial and operational-technology trade press. Serves
+  PIR-2 sector targeting, where coverage was thin: before this the only ICS/OT-relevant
+  sensors were the SANS Internet Storm Center feed and one California water-and-utility
+  news query. **Watch for two things** — whether it is additive or mostly re-reports what
+  The Record and Hacker News already carry, and whether its vendor-heavy items clear the
+  audience-portfolio filter. Re-assess after three cycles.
+
 ```sensors
 # --- National: government / CERT / SLTT ---
 https://www.cisa.gov/cybersecurity-advisories/all.xml
@@ -106,6 +117,7 @@ https://krebsonsecurity.com/feed/
 https://googleprojectzero.blogspot.com/feeds/posts/default
 https://www.bleepingcomputer.com/feed/
 https://statescoop.com/feed/
+https://industrialcyber.co/feed/
 
 # --- Regional AOR: official sources (example: California) ---
 https://www.news.caloes.ca.gov/feed/
