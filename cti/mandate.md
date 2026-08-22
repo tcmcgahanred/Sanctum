@@ -4,7 +4,7 @@
 
 *Standing planning & direction record. Lives with the collector. This document is the continuity mechanism for the weekly intelligence cycle: any chat session handed this Mandate can run the cycle at full quality without re-deriving decisions. It captures (1) standing directives that govern how the cycle runs, and (2) a dated log of lessons/decisions that shaped them and directions pending. Update it at the Feedback stage of every cycle; it feeds the Planning & Direction stage of the next.*
 
-*Relationship to other artifacts: the **Codex** holds the current analytical framework (KIQ/PIRs/scoring). This Mandate holds the directives and lesson-history that shape collection, analysis, production, and dissemination over time. When a lesson changes the framework, log it here AND update the Codex.*
+*Relationship to other artifacts: `requirements.md` holds the requirements tree (KIQ / PIR / SIR / EEI); `pnd.md` holds every number and term; `vox_policy.md` is the authority on the product. This Mandate holds the directives and lesson-history that shape collection, analysis, production and dissemination over time. When a lesson changes a requirement, revise `requirements.md` and log the decision here. (Corrected 2026-08-22: this line still named `codex.md`, retired on 08-17.)*
 
 ---
 

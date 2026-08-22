@@ -47,7 +47,7 @@ satisfies the machine is one nobody can maintain.
 | `pnd.md` | **REQUIRED** | Planning & Direction. Manifest, sensors, scoring model, production block. The only file the engine reads. |
 | `vocab.md` | **EXPECTED** | The reasoning behind the word lists — collisions, dropped terms, per-group review dates, known gaps. Never the terms themselves. See `VOCABULARY.md`. |
 | `README.md` | **EXPECTED** | What this domain is, who it serves, how to run it, how to adapt it. |
-| `requirements.md` | **EXPECTED** | The whole requirements tree — KIQ → PIR → SIR → EEI — each collectable fact mapped to the sensor that serves it. **This is the file that makes a coverage gap visible** — see `ROADMAP.md`. Owns no numbers. |
+| `requirements.md` | **EXPECTED** | The whole requirements tree — KIQ → PIR → SIR → EEI — each collectable fact mapped to the sensor that serves it. **This is the file that makes a coverage gap visible** — see below. Owns no numbers. |
 | `mandate.md` | **EXPECTED** | Standing operating directives plus the dated lessons log. The continuity mechanism: a fresh session handed this can run the cycle. |
 | `policy.md` | **EXPECTED** | The product specification — format, structure, locked content standards. CTI's is `vox_policy.md`. A domain can run without one; it just means the vox's standards live in someone's head instead of in git. |
 | `editions/` | **REQUIRED once the domain produces its first vox** | The committed record of what was actually put out, and the only way to answer "what did we say in August?" a year later. |
@@ -62,6 +62,22 @@ a machine artifact, reproducible from the corpus, and it is not committed. The
 vox is the deliverable, it is human-made, and it is what `editions/` records.
 What happens to the vox afterward — assessment, formatting, distribution — is
 stages 4 to 6 and is nobody's business here, in every domain equally.
+
+### Why this file is the one that finds the gaps
+
+Decomposing requirements down to the specific collectable fact is what makes a
+coverage gap visible. Ranking, weighting and tuning cannot reveal a requirement
+that nothing is collecting against — they operate only on what already arrived.
+
+The CTI domain found this the hard way. Three of the four collectable facts under
+its highest-priority requirement had no sensor at all, so the pipeline was
+answering that requirement largely by luck: whenever a broad query or a national
+outlet happened to name an in-area organisation. Scoring had been ready for
+months; collection was the ceiling, and nothing in the scoring model could have
+shown that.
+
+**Any new subject should expect to find at least one requirement it is answering
+by accident, and should go looking for it deliberately.**
 
 ---
 

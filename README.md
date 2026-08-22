@@ -49,12 +49,10 @@ That includes the schedule. Sanctum has no built-in cadence — weekly, monthly 
 
 | If you want to | Read |
 |---|---|
-| Stand it up on a machine | [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md) |
-| Set up a new subject | [`docs/PND_SURVEY.md`](docs/PND_SURVEY.md), then [`docs/DOMAINS.md`](docs/DOMAINS.md) |
+| Run it, or understand the engine | [`core/README.md`](core/README.md) |
+| Set up a new subject **(in development)** | [`docs/PND_SURVEY.md`](docs/PND_SURVEY.md), then [`docs/DOMAINS.md`](docs/DOMAINS.md) |
 | Build or maintain its word lists | [`docs/VOCABULARY.md`](docs/VOCABULARY.md) |
 | Turn the scored output into a vox | [`docs/EXPLOITATION.md`](docs/EXPLOITATION.md) |
-| Understand the engine itself | [`core/README.md`](core/README.md) |
-| See where this is headed | [`docs/ROADMAP.md`](docs/ROADMAP.md) |
 
 A worked example lives in `cti/` — a weekly cyber threat brief for local government. Copy `_template/` to start your own.
 
