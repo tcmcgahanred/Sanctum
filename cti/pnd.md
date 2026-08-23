@@ -53,8 +53,14 @@ without new evidence:
 
 - `thecyberwire.com/feeds/rss.xml` — 0 new in 9 runs, and **0 lifetime**. Returns no parseable
   feed entries, so Acolyte falls through to `process_page`, which then extracts no text either.
-  Logs `WARNING no text` on every single cycle from 2026-08-05 onward. The publisher (now N2K
-  CyberWire) no longer advertises any RSS feed on its site; this path appears retired.
+  Logs `WARNING no text` on every single cycle from 2026-08-05 onward. This path is retired.
+  **Corrected 2026-08-23:** a live feed does exist at `feeds.megaphone.fm/cyberwire-daily-podcast`,
+  publishing daily with substantive descriptions. It was refused for a different and better
+  reason: every item is a multi-story daily roundup. One item would fire `kev`, `incident`,
+  `ransom` and `supplychain` at once and ride the multiplier stack to a high score every day,
+  with no single event to place in a section and no per-story URL to cite. Its selected-reading
+  list is also drawn from outlets already collected here. Do not reintroduce on the grounds
+  that "a feed exists now" — the shape is the objection.
 - Google-News query `("CISA Region 9" OR "CISA California")` — 0 new in 9 runs, 0 lifetime, and
   the identical `no text` failure every cycle. The query matches nothing, so Google returns an
   empty feed, which falls to the page path and yields nothing extractable. Too narrow.
@@ -117,6 +123,15 @@ https://krebsonsecurity.com/feed/
 https://googleprojectzero.blogspot.com/feeds/posts/default
 https://www.bleepingcomputer.com/feed/
 https://statescoop.com/feed/
+# Added 2026-08-23. Found by auditing which outlets a CyberWire daily roundup cited:
+# five of ten stories came from these two, and neither was collected here.
+# SecurityWeek: use the first-party path, not feeds.feedburner.com/securityweek (same
+# content behind a 302, and no reason to add a Feedburner dependency). NOTE: its feed
+# window holds only 10 items — safe while collection runs daily, not if that changes.
+https://www.securityweek.com/feed/
+# The Register: SECTION feed only. The whole-site feed at /headlines.atom is a general
+# tech magazine — git tooling, Microsoft trivia — and does not belong in this corpus.
+https://www.theregister.com/security/headlines.atom
 https://industrialcyber.co/feed/
 
 # --- National: breach registry ---
@@ -129,6 +144,16 @@ https://haveibeenpwned.com/feed/breaches/
 # --- Regional AOR: official sources (example: California) ---
 https://www.news.caloes.ca.gov/feed/
 https://www.cdt.ca.gov/newsroom/feed/
+
+# --- Regional AOR: municipal press (example: California) ---
+# California City News, cybersecurity section. EXPECTED YIELD IS ~3 ITEMS PER YEAR:
+# 12 items span Sep 2022 to Mar 2026. A column of `0 new of 12 returned` in the log is
+# NORMAL for this sensor and is not a failure — it serves its whole back catalogue every
+# fetch. Kept because nothing else here emits a named California municipal victim
+# (Long Beach, El Cerrito, Contra Costa), and because it carries local-government policy
+# items — closed-session law, grant programs — that no general news query surfaces.
+# Review yield 2026-11-23.
+https://www.californiacitynews.org/taxonomy/term/1717/feed
 
 # --- Regional AOR: statewide / sector queries (example: California) ---
 https://news.google.com/rss/search?q=%22California%22%20(ransomware%20OR%20%22data%20breach%22%20OR%20cyberattack)&hl=en-US&gl=US&ceid=US:en

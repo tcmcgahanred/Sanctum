@@ -2,6 +2,14 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-23] Three sensors added, and a drop note that had gone half-wrong
+
+- **A roundup's citation list is a free survey of somebody else's source diet.** Auditing the ten stories a CyberWire daily roundup linked showed five came from The Register and SecurityWeek — neither collected here. That is not an opinion about what is worth reading; it is evidence from someone whose whole job is curating the day's cyber news. **Both added.** The method generalises: when a source is refused, its bibliography may still be worth reading.
+- **Feed variants were compared rather than assumed.** SecurityWeek's Feedburner path returns identical content behind a 302 — the first-party path was taken instead, since a Feedburner dependency buys nothing. The Register's whole-site feed leads with git tooling and Microsoft trivia while its security section leads with a CISA patch directive; the section feed was taken and the reason written beside it, because the two paths differ by one word and the wrong one looks correct.
+- **SecurityWeek's feed window holds only 10 items**, which is safe solely because collection runs daily — confirmed by counting log entries per day rather than assuming a cadence. Written into the sensor list, because if the schedule ever slackens this sensor loses articles with no error anywhere.
+- **California City News added with its low yield stated as the reason to keep it**, not buried. Twelve items in three and a half years, so a column of `0 new of 12 returned` is this sensor working correctly. Nothing else here emits a named California municipal victim, and its local-government policy coverage — closed-session law, grant programs — is invisible to a general news query. Yield review dated in the file.
+- **The CyberWire drop note was half wrong and is corrected.** It recorded that the publisher advertises no feed; a live one does exist and publishes daily. The refusal stands on a better reason: every item is a multi-story roundup that would fire four scoring groups at once, outrank real single-event items, and offer nothing citable. **A drop note that records the wrong reason invites the same investigation again in three months** — the correction is the deliverable, not the verdict.
+
 ## [2026-08-23] A fourth guard, and the first sensor that names the victim
 
 - **Three changelog entries were written, reported written, and never reached the file.** The scripts that wrote them printed "ok" whether or not the text they were replacing existed. Nothing noticed for days. The entries were restored on 2026-08-22; this is the guard that stops it recurring.
