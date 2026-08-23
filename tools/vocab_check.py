@@ -206,7 +206,7 @@ def check_domain(domain, cfg, vocab, today):
     # --- staleness -----------------------------------------------------
     # A WARN, never an ERROR. A date passing is not a reason to block a commit;
     # it is a reason to look. Blocking here would train people to --no-verify,
-    # which would disable the scrub guard too.
+    # which switches off every other check with it.
     default_interval = vocab.get("review_interval_days")
     gmeta = vocab.get("groups") or {}
     for gname in sorted(groups):
@@ -232,7 +232,7 @@ def check_domain(domain, cfg, vocab, today):
 
     # --- acknowledged findings -----------------------------------------
     # A guard nobody can satisfy is a guard people route around, and here the
-    # route around is `--no-verify`, which also disables the scrub check. So a
+    # route around is `--no-verify`, which disables every other check too. So a
     # finding the domain has consciously accepted is downgraded to NOTED rather
     # than left blocking — but it must be written down, with a reason, and it
     # keeps printing. Silence is not on the menu; that is the whole point.
@@ -271,7 +271,7 @@ def discover_domains(repo_root, tracked_only=False):
     `tracked_only` skips domains git does not track. The commit gate uses it:
     a gitignored domain cannot reach the public repo, so it cannot be the gate's
     business, and blocking a commit over a file git will never see just teaches
-    people to reach for --no-verify — which would disable the scrub check too.
+    people to reach for --no-verify — which switches off every other check too.
 
     A manual run still checks everything, because an untracked domain's defects
     are real and the operator should be able to see them.

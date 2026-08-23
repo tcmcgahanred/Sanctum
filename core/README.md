@@ -63,15 +63,19 @@ Several publishers serve a browser normally and refuse a datacentre address.
 ```
 git config core.hooksPath .githooks
 mkdir -p .githooks && ln -sf ../tests/pre_commit.sh .githooks/pre-commit
-cp .scrub-denylist.example .scrub-denylist    # then edit it
 ```
 
 On Windows, copy `pre_commit.sh` into `.githooks/` rather than linking it.
 
-Three guards run on every commit: nothing identifying reaches the repo, no
-subject file contains logic, and no word list has quietly decayed. Any of them
-can be overridden with `git commit --no-verify`, which should be rare enough to
-feel wrong.
+Three checks run on every commit: no subject file contains logic, no word list
+has quietly decayed, and — a warning only — you changed something without
+writing it down. The first two can be overridden with `git commit --no-verify`,
+which should be rare enough to feel wrong.
+
+**Nothing here scans for private detail.** A scrub check used to, and was removed
+because it demanded a local denylist file before any clone could commit — a
+per-user secret standing between a stranger and a working engine. Tenet 8 still
+holds; it is now yours to keep, not the gate's.
 
 ## Stack and portability
 

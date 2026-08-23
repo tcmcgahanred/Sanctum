@@ -147,8 +147,8 @@ check("an unparseable review date is treated as no date, not a crash",
 print("\nTracked-only discovery — the commit gate must not block on gitignored domains")
 # A second effort held out of the public repo, or a stub that is not
 # operational, cannot reach the repo the gate protects. Blocking a commit over
-# one teaches people to reach for --no-verify, which disables the scrub check
-# too. Manual runs still see them.
+# one teaches people to reach for --no-verify, which switches off every other
+# check too. Manual runs still see them.
 from tools.vocab_check import git_tracked, discover_domains, REPO_ROOT  # noqa: E402
 
 check("a tracked file is reported tracked",

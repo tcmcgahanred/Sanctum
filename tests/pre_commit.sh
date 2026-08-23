@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 # Sanctum · tests/pre_commit.sh · the commit gate
 #
-# Runs every guard before work leaves this machine. The first three fail closed
-# and can be overridden deliberately with `git commit --no-verify`. The fourth
+# Runs every check before work leaves this machine. The first two fail closed
+# and can be overridden deliberately with `git commit --no-verify`. The third
 # only ever warns.
 #
-#   scrub_check.sh       nothing identifying goes in the repo
 #   domain_check.py      a domain file declares settings, never behaviour
 #   vocab_check.py       no silent decay in a domain's word lists
 #   changelog_check.sh   you changed something — did you write it down? (warns)
+#
+# There is no scrub check. It was removed 2026-08-23: it required every clone to
+# author a local denylist before it could commit at all, which made a per-user
+# secret a precondition for using the engine. Keeping what is private out of the
+# repo is still a rule — it is tenet 8 — it is just not enforced by a script.
 #
 # The rules are named here in words rather than by tenet number on purpose. The
 # numbering lives in README.md, and a number restated in a second file is a
@@ -17,7 +21,6 @@
 # INSTALL (once per clone):
 #     git config core.hooksPath .githooks
 #     mkdir -p .githooks && ln -sf ../tests/pre_commit.sh .githooks/pre-commit
-#     cp .scrub-denylist.example .scrub-denylist   # then edit it
 #
 #   Git-for-Windows: same commands in Git Bash; copy instead of link if symlinks
 #   are awkward.
@@ -32,8 +35,6 @@ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
 cd "$REPO_ROOT"
 
 STATUS=0
-
-bash "$REPO_ROOT/tests/scrub_check.sh" --staged || STATUS=1
 
 if command -v python3 >/dev/null 2>&1; then
     python3 "$REPO_ROOT/tests/domain_check.py" --staged || STATUS=1
