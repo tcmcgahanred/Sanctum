@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 # Sanctum · tests/pre_commit.sh · the commit gate
 #
-# Runs every guard that must pass before work leaves this machine. All three
-# fail closed and can be overridden deliberately with `git commit --no-verify`.
+# Runs every guard before work leaves this machine. The first three fail closed
+# and can be overridden deliberately with `git commit --no-verify`. The fourth
+# only ever warns.
 #
-#   scrub_check.sh    tenet 11 — no identifying or infra detail reaches the public repo
-#   domain_check.py   tenet  3 — no domain file contains behavior
-#   vocab_check.py    tenet  8 — no silent decay in a domain's word lists
+#   scrub_check.sh       nothing identifying goes in the repo
+#   domain_check.py      a domain file declares settings, never behaviour
+#   vocab_check.py       no silent decay in a domain's word lists
+#   changelog_check.sh   you changed something — did you write it down? (warns)
+#
+# The rules are named here in words rather than by tenet number on purpose. The
+# numbering lives in README.md, and a number restated in a second file is a
+# number that goes stale in one of them.
 #
 # INSTALL (once per clone):
 #     git config core.hooksPath .githooks
@@ -44,5 +50,10 @@ else
     echo "pre-commit: BLOCKED — python3 not found, cannot check domain files" >&2
     STATUS=1
 fi
+
+# Warns, never blocks — `|| true` is belt and braces on top of the script's own
+# unconditional exit 0, so a future edit that introduces a non-zero path there
+# still cannot stop a commit.
+bash "$REPO_ROOT/tests/changelog_check.sh" || true
 
 exit "$STATUS"

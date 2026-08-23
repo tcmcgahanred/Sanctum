@@ -119,6 +119,13 @@ https://www.bleepingcomputer.com/feed/
 https://statescoop.com/feed/
 https://industrialcyber.co/feed/
 
+# --- National: breach registry ---
+# Named-victim breach disclosure. Low volume (~2-3 per cycle). NOTE: the item
+# date is the date the breach was LOADED, not the date it happened, so the
+# recency gate will not flag a years-old breach loaded yesterday. The first
+# sentence of every description states the actual breach month — read it.
+https://haveibeenpwned.com/feed/breaches/
+
 # --- Regional AOR: official sources (example: California) ---
 https://www.news.caloes.ca.gov/feed/
 https://www.cdt.ca.gov/newsroom/feed/

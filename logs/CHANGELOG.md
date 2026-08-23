@@ -2,6 +2,15 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-23] A fourth guard, and the first sensor that names the victim
+
+- **Three changelog entries were written, reported written, and never reached the file.** The scripts that wrote them printed "ok" whether or not the text they were replacing existed. Nothing noticed for days. The entries were restored on 2026-08-22; this is the guard that stops it recurring.
+- **`tests/changelog_check.sh` is deliberately dumb.** It does not read the changelog, judge the entry, or care what it says. It asks one thing: you changed something, did you write it down? A smarter check would need maintaining, and the failure it prevents is not subtle.
+- **It never blocks — exit is always 0**, and the commit gate calls it with `|| true` on top of that. A warning you can ignore is the right weight for a habit; a gate that stopped a commit over a missing note would be bypassed within a week and then ignored entirely. Published editions and collected material are exempt — a changelog entry for an edition is noise.
+- **The commit gate stopped citing tenet numbers.** Its header named tenets 11, 3 and 8 — numbering that died when the doctrine went from eleven rules to eight. The rules are now stated in words. **A number restated in a second file is a number that goes stale in one of them**, which is the ownership rule the domain contract already enforces, applied to a script header nobody thought to check.
+- **Have I Been Pwned added as a sensor** — `haveibeenpwned.com/feed/breaches/`. Around two or three items per cycle, first-party, and the only source in the list that emits a named victim organisation with a record count. Consumer web-service breaches fall to the bottom tier and drop on their own; a district or county in the registry takes a top tier without any tuning.
+- **Its known limit is written beside it in the sensor list.** The feed's item date is the date a breach was *loaded*, not the date it happened, so a years-old breach loaded yesterday arrives looking new and the recency gate will not flag it. That is an inversion of the gate rather than a way around it, and the mitigation is one glance: every description opens with the month the breach actually occurred. **A sensor with a known failure mode is fine; a sensor with an unwritten one is not.**
+
 ## [2026-08-22] Roadmap and getting-started removed until the thing is settled
 
 - **Both documents described a finished product Sanctum is not yet.** A polished install guide and a forward-looking roadmap promise stability that the vocabulary method, the survey and the second subject have not earned — the indicator method has still never been run end to end. They come back when it is tuned; git keeps them until then.
