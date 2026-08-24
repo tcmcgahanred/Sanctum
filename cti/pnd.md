@@ -65,6 +65,18 @@ without new evidence:
   the identical `no text` failure every cycle. The query matches nothing, so Google returns an
   empty feed, which falls to the page path and yields nothing extractable. Too narrow.
 
+Wanted but not collectable — checked 2026-08-23, do not re-search without new evidence:
+
+- **Dragos** (`dragos.com`) publishes no RSS feed. Ten conventional paths tested from the
+  collector host — `/blog/feed/`, `/feed/`, `/blog/rss.xml`, `/blog/index.xml`, `/rss.xml`,
+  `/blog/atom.xml`, `/index.xml`, `/blog/rss/`, `dragos.com/feed`, `/resources/feed/` — all
+  404 or redirect to nothing. This is the one vendor whose telemetry covers the water,
+  wastewater and utility sectors named in the `sector` group, and its OT threat landscape
+  reporting is the reference work in that space, so the loss is real and worth recording.
+  **It is blocked on the same engine gap as Cal-CSIC:** `process_page` never revisits a page
+  source, so page-type collection is a one-shot. That fix now has a second use case forcing
+  it, which is the bar this repo sets for building something.
+
 Note: a source that returns neither feed entries nor extractable text is **retried in full every
 cycle** — `process_page` returns before recording the URL in `seen.txt`, so there is no
 suppression. Both of the above burned a fetch per cycle for nine cycles.
@@ -133,6 +145,34 @@ https://www.securityweek.com/feed/
 # tech magazine — git tooling, Microsoft trivia — and does not belong in this corpus.
 https://www.theregister.com/security/headlines.atom
 https://industrialcyber.co/feed/
+
+# --- National: vendor telemetry ---
+# Added 2026-08-23, every path verified from the collector host first. These
+# vendors run incident response and sensor networks this effort will never have.
+# When they publish, it is primary source. Marketing overhead is the price and
+# the scorer sorts it out.
+#
+# Huntress: SMB and MSP telemetry — the closest commercial visibility there is
+# to a low-maturity SLTT environment. Its output lands directly on vocabulary
+# already declared here: n-able, n-central, kaseya, connectwise, screenconnect
+# in lowmat_tech; rmm, msp, managed service provider in supplychain.
+# NOTE: the feed window is 680 items — the whole blog archive, served every
+# fetch. That is a ONE-TIME intake, not a rate; steady state is a few a week.
+# Roughly half the archive is company news and educational content, which will
+# score low and drop. That was a decision, not an oversight.
+https://www.huntress.com/blog/rss.xml
+# Google Threat Intelligence (absorbed Mandiant). Use the cloudblog host: the
+# cloud.google.com path returns HTTP 200 with ZERO entries — live URL, no
+# content, the exact failure the item count exists to catch.
+https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/
+# Cisco Talos research. Distinct from the Cisco PSIRT advisory feed above —
+# that is disclosures, this is investigation. First-party path, not the
+# Feedburner mirror, which serves identical content.
+https://blog.talosintelligence.com/rss/
+# Microsoft Threat Intelligence. Distinct from the MSRC feed above, which is
+# the patch catalogue. Low volume and a real marketing fraction — the weakest
+# of these four and the first to drop at review. The old msrc-blog host is dead.
+https://www.microsoft.com/en-us/security/blog/feed/
 
 # --- National: breach registry ---
 # Named-victim breach disclosure. Low volume (~2-3 per cycle). NOTE: the item
