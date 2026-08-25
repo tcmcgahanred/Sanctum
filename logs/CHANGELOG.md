@@ -2,6 +2,14 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-25] Staging documents are dated when they were built, and that is now written down
+
+- **No code changed.** `staging_target` has always used the run date, and that is the behaviour P&D confirmed. What was missing was a rule saying so.
+- **The conflict I flagged was not a conflict.** I reported that the staging filename contradicted Vox Policy §3's "distribution (Thursday) date". Re-reading it: §3's filename clause governs the **product**, and the mandate already separates the two — *"No `_STAGING` suffix on a vox — that suffix belongs to the other document entirely."* The staging document's naming was simply never specified. **An unwritten rule is not the same as a broken one**, and reporting it as a contradiction was the wrong call.
+- **§3 now names both documents and says why they are dated differently.** The product's date tells the reader when it reached them; the staging document's date tells the analyst when the queue was built. **The intelligence cycle week is tracked by the analyst, not encoded in the artifact name.**
+- **The consequence is deliberate, not a side effect.** Regenerating a cycle after a scoring change produces a second, distinctly named file rather than overwriting the first — which is what happened today: `WCTI_20260824_STAGING.md` was built from the old scoring model and `WCTI_20260825_STAGING.md` from the corrected one, and having both is the audit trail.
+- **The compliance report inherits the staging document's date**, so a queue and the gate that reports on it always carry the same stamp.
+
 ## [2026-08-25] Two vox standards moved out of the analyst's head and into the document
 
 Vox Policy §5 and §6.2 were rules a person had to remember. They are now annotations on the staging document, and §8's production gate is an artifact the pipeline emits rather than a checklist someone keeps. **All three are advisory: nothing here touches a score, a tier, the ordering, or the surface-vs-drop decision.**

@@ -19,7 +19,15 @@
 ## 3. Naming
 
 - Reader-facing heading: **"WCTI — Weekly Cyber Threat Intelligence."** The word "vox" is internal shorthand only and never appears in the reader-facing document.
-- Filename: `WCTI_v[YYYYMMDD]` — date is the distribution (Thursday) date.
+- Filename of the PRODUCT: `WCTI_v[YYYYMMDD]` — date is the distribution (Thursday) date.
+- Filename of the STAGING DOCUMENT: `WCTI_[YYYYMMDD]_STAGING` — date is the date it was
+  **created**, not the distribution date. The two documents are dated on different
+  principles because they answer different questions. The product's date tells the reader
+  when it reached them. The staging document's date tells the analyst when this queue was
+  built — so regenerating a cycle after a scoring change produces a second, distinctly
+  named file rather than silently overwriting the first. **The intelligence cycle week is
+  tracked by the analyst, not encoded in the artifact name.** The compliance report takes
+  the same date as the staging document it reports on.
 - No "CCIC" prefix until AOR-direct sensors exist and the product can genuinely focus on a single AOR.
 
 ## 4. Header (reader-facing only — no internal plumbing)
