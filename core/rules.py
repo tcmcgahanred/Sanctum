@@ -62,7 +62,13 @@ def _scopes(art):
     title_l = title.lower()
     text_l = str(art.get("text", "")).lower()
     blob = (title + "  " + str(art.get("text", ""))).lower()
-    return title, {"title": title_l, "text": text_l, "blob": blob}, text_l
+    # `source` is the article's ORIGIN, not its content: feed URL plus source
+    # label. It lets a rule require the authoritative publisher rather than any
+    # article that mentions one - "CISA ordered a patch" in a trade write-up is
+    # not the same signal as the directive from cisa.gov.
+    source = (str(art.get("url", "")) + " " + str(art.get("source", ""))).lower()
+    return title, {"title": title_l, "text": text_l, "blob": blob,
+                   "source": source}, text_l
 
 
 # ------------------------------------------------------------------
@@ -90,15 +96,34 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
         a_terms = groups[p["a"]]
         b_terms = groups[p["b"]]
         window = int(p.get("window", 120))
-        # Faithful to the original: locate the 'a' term by RAW substring find
-        # in the body text, take a +/-window slice, match 'b' inside it.
+        # SCOPE. Default "text" is the original: body only, title never seen.
+        # "blob" prepends the title. Opt-in, so older rules are untouched.
+        hay = scopes.get(p.get("scope", "text"), text_l)
+        # OCCURRENCES. Default False is the original and a real limitation:
+        # only the FIRST occurrence of each a-term is tested, so a term in
+        # boilerplate masks the same term beside an incident word.
+        all_occ = bool(p.get("all_occurrences", False))
+        max_occ = int(p.get("max_occurrences", 40))
+        # The term is used VERBATIM, padding included. `geo` carries ' calif ',
+        # 'uc ' and 'csu ' precisely so the spaces act as the boundary here.
+        # Stripping them turns 'uc ' into a bare substring matching inside
+        # "product" and "reduce", which fired M1 on 190 articles with no AOR
+        # content at all. Found on the live corpus, by nothing else.
         for ct in a_terms:
-            idx = text_l.find(ct)
-            if idx == -1:
+            if not ct:
                 continue
-            slice_ = text_l[max(0, idx - window): idx + window]
-            if matcher(slice_, b_terms) is not None:
-                return True
+            idx = hay.find(ct)
+            seen = 0
+            while idx != -1:
+                slice_ = hay[max(0, idx - window): idx + window]
+                if matcher(slice_, b_terms) is not None:
+                    return True
+                if not all_occ:
+                    break
+                seen += 1
+                if seen >= max_occ:
+                    break
+                idx = hay.find(ct, idx + 1)
         return False
 
     # combinators
@@ -141,7 +166,13 @@ def _rule_matched_terms(atom, groups, matcher, scopes, text_l):
         p = atom["proximity"]
         return f"{p['a']}~{p['b']}"
     if "any" in atom:
-        return " or ".join(_rule_matched_terms(x, groups, matcher, scopes, text_l) for x in atom["any"])
+        # Render only branches that fired. Rendering all of them printed
+        # "sector:'None'@title" beside a rule that matched on proximity - a
+        # reason naming a match that did not happen sends the analyst to
+        # check the wrong thing (tenet 3).
+        sat = [x for x in atom["any"] if _eval_atom(x, groups, matcher, scopes, text_l)]
+        return " or ".join(_rule_matched_terms(x, groups, matcher, scopes, text_l)
+                           for x in (sat or atom["any"]))
     if "all" in atom:
         return " and ".join(_rule_matched_terms(x, groups, matcher, scopes, text_l) for x in atom["all"])
     if "not" in atom:
@@ -205,6 +236,18 @@ def score_article(art, scoring):
         if _eval_atom(m["when"], groups, matcher, scopes, text_l):
             score *= float(m["factor"])
             reasons.append(f"x{m['factor']} {m.get('name','mult')}")
+
+    # FLOORS raise a score to a stated minimum and never lower one. A floor is
+    # deliberately weaker than force-surface: the item becomes visible at the
+    # bottom of the surface rather than guaranteed a place. For signals that
+    # are authoritative but of unproven relevance - an official directive about
+    # a product not on this domain's technology list.
+    for f in scoring.get("floors", []) or []:
+        if _eval_atom(f["when"], groups, matcher, scopes, text_l):
+            fl = float(f.get("score", 0))
+            if score < fl:
+                reasons.append(f"floor {fl} {f.get('name','floor')}")
+                score = fl
 
     return round(score, 2), tier_id, reasons
 

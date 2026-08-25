@@ -276,27 +276,38 @@ scoring:
       name: "AOR-direct (CA subject of an incident)"
       weight: 8.0
       require:
-        any:
-          - all:
-              - {group: geo, scope: title}
-              - {group: incident, scope: blob}
-          - all:
-              - {group: geo, scope: blob}
-              - {group: incident, scope: blob}
-              - {proximity: {a: geo, b: incident, window: 120}}
+        all:
+          - {not: {group: listicle, scope: title}}
+          - any:
+              - all:
+                  - {group: geo, scope: title}
+                  - {group: incident, scope: blob}
+              - all:
+                  - {group: geo, scope: blob}
+                  - {group: incident, scope: blob}
+                  - {proximity: {a: geo, b: incident, window: 120}}
     - id: 2
-      name: "SLTT-sector targeting"
+      name: "SLTT-sector targeting (sector as subject)"
       weight: 4.0
       require:
-        any:
-          - {group: sector, scope: blob}
+        all:
+          - {not: {group: listicle, scope: title}}
+          - any:
+              - all:
+                  - {group: sector, scope: title}
+                  - {group: incident_broad, scope: blob}
+              - {proximity: {a: sector, b: incident_broad, window: 80,
+                             scope: blob, all_occurrences: true}}
     - id: 3
-      name: "KEV in SLTT-common tech"
+      name: "Exploited flaw in SLTT-common tech"
       weight: 2.0
       require:
         all:
-          - {group: kev, scope: blob}
+          - {not: {group: listicle, scope: title}}
+          - {group: exploit_strong, scope: blob}
           - {group: lowmat_tech, scope: blob}
+          - {proximity: {a: lowmat_tech, b: exploit_strong, window: 200,
+                         scope: blob, all_occurrences: true}}
     - id: 4
       name: "broad/national with SLTT relevance"
       weight: 1.0
@@ -305,82 +316,109 @@ scoring:
   multipliers:
     - name: "KEV / actively exploited"
       factor: 1.5
-      when: {group: kev, scope: blob}
+      when:
+        all:
+          - {not: {group: listicle, scope: title}}
+          - {group: exploit_strong, scope: blob}
+          - any:
+              - {proximity: {a: exploit_strong, b: cve, window: 200,
+                             scope: blob, all_occurrences: true}}
+              - {proximity: {a: exploit_strong, b: lowmat_tech, window: 200,
+                             scope: blob, all_occurrences: true}}
     - name: "low-maturity SLTT tech"
       factor: 1.5
-      when: {group: lowmat_tech, scope: blob}
+      when:
+        all:
+          - {not: {group: listicle, scope: title}}
+          - any:
+              - {group: lowmat_tech, scope: title}
+              - {proximity: {a: lowmat_tech, b: exploit_strong, window: 200,
+                             scope: blob, all_occurrences: true}}
+              - {proximity: {a: lowmat_tech, b: incident_broad, window: 120,
+                             scope: blob, all_occurrences: true}}
     - name: "supply-chain / procurement"
       factor: 1.3
-      when: {group: supplychain, scope: blob}
+      when:
+        all:
+          - {not: {group: listicle, scope: title}}
+          - any:
+              - {group: supplychain, scope: title}
+              - {proximity: {a: supplychain, b: incident_broad, window: 120,
+                             scope: blob, all_occurrences: true}}
     - name: "ransomware vs public-sector/CI"
       factor: 1.3
-      when: {all: [{group: ransom, scope: blob}, {group: ci, scope: blob}]}
+      when:
+        all:
+          - {not: {group: listicle, scope: title}}
+          - {proximity: {a: ransom, b: ci, window: 150,
+                         scope: blob, all_occurrences: true}}
 
-  # ---------------------------------------------------------------------
-  # FORCE-SURFACE — Vox Policy §7 mandatory-surface rule. Inclusion, not
-  # ranking: a match guarantees the item reaches the surface regardless of
-  # score. Score still orders everything, so a forced low-score item sits at
-  # the bottom of the surface, marked — a visible ranking/relevance
-  # disagreement, which is a tuning signal rather than a miss.
-  #
-  # ⚠ M1 and M3 ARE APPROXIMATIONS. The policy specifies "subject-of-incident
-  # logic" — that the AOR entity is the SUBJECT of the attack. Sanctum has no
-  # subject detection; these rules fire on CO-OCCURRENCE of a place (or sector)
-  # and an incident word in the same article. They will over-fire on national
-  # round-ups that mention California in passing. Over-firing is the safe
-  # direction (tenet 8) but the surface will carry noise until subject-of
-  # detection exists. This is a Planning & Direction item, not a config tweak.
-  #
-  # ⚠ M2 IS PARTIAL. The policy wants in-the-wild exploitation OR a weaponised
-  # public PoC OR a KEV addition. Only `kev` exists as a group today; there is
-  # no exploitation vocabulary. M2 therefore fires on KEV + SLTT-relevant tech
-  # and misses the other two triggers.
+  # FLOORS raise a score to a minimum. They never lower one and never force the
+  # surface - the item becomes visible for review at the bottom of the surface
+  # instead of being guaranteed a place. Use where the signal is authoritative
+  # but its relevance to this domain is unproven.
+  floors:
+    - name: "CISA directive on technology not on the SLTT list"
+      score: 2.0
+      when:
+        all:
+          - {not: {group: listicle, scope: title}}
+          # AUTHORITATIVE SOURCE ONLY. A trade write-up saying "CISA ordered a
+          # patch" is a secondary mention; this must be the directive itself.
+          - {group: cisa_source, scope: source}
+          - {group: exploit_strong, scope: blob}
+          # Only when the product is NOT on the low-maturity list. When it is,
+          # tier 3 and force-surface M2 already handle it and score higher.
+          - {not: {group: lowmat_tech, scope: blob}}
+
   force_surface:
     - name: "M1 in-AOR entity in an incident"
-      when: {all: [{group: geo, scope: blob}, {group: incident, scope: blob}]}
-    - name: "M2 KEV listing affecting SLTT-relevant technology"
-      when: {all: [{group: kev, scope: blob}, {group: lowmat_tech, scope: blob}]}
+      when:
+        all:
+          - {not: {group: listicle, scope: title}}
+          - any:
+              - all:
+                  - {group: geo, scope: title}
+                  - {group: incident, scope: blob}
+              - {proximity: {a: geo, b: incident, window: 120,
+                             scope: blob, all_occurrences: true}}
+    - name: "M2 exploited flaw affecting SLTT-relevant technology"
+      when:
+        all:
+          - {not: {group: listicle, scope: title}}
+          - {group: exploit_strong, scope: blob}
+          - {group: lowmat_tech, scope: blob}
+          - {proximity: {a: lowmat_tech, b: exploit_strong, window: 200,
+                         scope: blob, all_occurrences: true}}
     - name: "M3 SLTT sector in an incident"
-      when: {all: [{group: sector, scope: blob}, {group: incident, scope: blob}]}
+      when:
+        all:
+          - {not: {group: listicle, scope: title}}
+          - any:
+              - all:
+                  - {group: sector, scope: title}
+                  - {group: incident_broad, scope: blob}
+              - {proximity: {a: sector, b: incident_broad, window: 80,
+                             scope: blob, all_occurrences: true}}
 
   settings:
-    # SURFACE-VS-DROP is a score threshold, never a count. Vox Policy §7
-    # forbids a cap: "the count is an OUTPUT of the scoring and rules, never a
-    # target imposed on top of them." `surface_n: 55` was exactly such a cap,
-    # and it also made the force-surface guarantee below impossible.
-    #
-    # PROVISIONAL VALUE — 2.0 is the tier-3 weight, so an item surfaces if it
-    # reached tier 3 or better, or if multipliers lifted a tier-4 item to 2.0.
-    # This has never been measured against the live corpus. Check the surfaced
-    # count on the first real run and tune. If the surface is too big, tune the
-    # weights or the vocabulary; do NOT reintroduce a cap.
     surface_min_score: 2.0
-    empty_title: {score: 0.5, tier: 4, flag: "FLAG: empty title (feed artifact — verify source)"}
-    recency:                       # Codex Layer 4 — flag stale-by-publish-date, never drop
+    empty_title: {score: 0.5, tier: 4, flag: "FLAG: empty title (feed artifact - verify source)"}
+    recency:
       enabled: true
-      window_days: 7               # cycle window length (ends at the cutoff below)
-      cutoff_weekday: monday       # ICOD day
-      cutoff_time: "05:00"         # ICOD time — matches the 0500 collector run
+      window_days: 7
+      cutoff_weekday: monday
+      cutoff_time: "05:00"
       timezone: America/Los_Angeles
-    grouping:                      # near-duplicate EVENT grouping — display only
-      enabled: true                # never merges, never drops, never re-scores
-      similarity: 0.15             # IDF-weighted Jaccard on titles; >= this joins a group head
-      min_shared_tokens: 3         # ...and at least this many words in common, as a floor
-      min_evidence: 8.0            # ...and the shared words must carry this much information
-                                   #    (blocks formulaic advisory titles that overlap heavily
-                                   #     but say nothing distinctive in common)
-      max_group_size: 25           # a cluster bigger than this is template-matching, not an
-                                   #    event — dissolved, items shown normally, noted in header
-      max_group_display: 12        # cap children shown per group; the rest stay in the drop list
+    grouping:
+      enabled: true
+      similarity: 0.15
+      min_shared_tokens: 3
+      min_evidence: 8.0
+      max_group_size: 25
+      max_group_display: 12
 
-  # Only terms that are BOTH live in a group AND longer than 4 characters
-  # belong here — core/rules.py applies boundaries automatically at <=4, so a
-  # shorter entry does nothing. Seven of the previous eleven entries were dead:
-  # "hack", "leak" and "war" matched no live term at all, and "ics", "grid",
-  # "uc", "csu" were already covered by the length rule. All seven removals are
-  # provable no-ops and the parity test confirms scoring is unchanged.
-  # Verified by tools/vocab_check.py — reasoning in cti/vocab.md.
-  word_boundary_terms: ["scada", "ransom", "court", "cisco"]
+  word_boundary_terms: ["scada", "ransom", "cisco", "how to", "what is", "hacker"]
 
   groups:
     geo: ["california", "californian", " calif ", "sacramento", "fresno",
@@ -395,29 +433,91 @@ scoring:
           "shasta county", "sierra county", "stanislaus county", "sutter county",
           "tehama county", "trinity county", "tulare county", "tuolumne county",
           "yolo county", "yuba county"]
+    # CONFIDENTIALITY language only, by decision. Availability terms (outage,
+    # denial of service, ddos) are deliberately NOT here - see `targeting`.
+    # This group feeds tier 1 and force-surface M1, which need only a place
+    # name plus one of these words, so a California wildfire or public safety
+    # power shutoff would become an AOR cyber incident.
+    # P&D work order 2026-08-24, decision 4.
     incident: ["breach", "ransomware", "cyberattack", "cyber attack", "hacked",
+               "hackers", "stolen data", "data theft", "blackmail", "defaced",
+               "defacement",
                "data breach", "compromise", "exfiltrat", "extortion", "data leak",
                "data stolen", "records stolen", "security incident"]
-    sector: ["water", "wastewater", "utility", "utilities", "school district",
-             "k-12", "k12", "higher ed", "university", "college", "municipal",
-             "city government", "county government", "local government", "tribal",
-             "public sector", "election", "registrar of voters", "transit",
-             "special district", "sheriff", "police department", "court"]
+    # Attack, disruption and availability language. Reaches rules ONLY through
+    # `incident_broad`, which is used where the sector must already be the
+    # subject - so availability terms can never reach tier 1.
+    targeting: ["active threat", "outage", "denial of service", "ddos",
+                "exploited against", "attacks against", "attack against",
+                "campaign against", "targeted", "target of", "attack on",
+                "attacks on", "hit by", "struck by", "victim of", "taken offline",
+                "forced offline", "systems offline", "service disruption",
+                "state of emergency", "disrupted operations", "shut down its",
+                "knocked offline"]
+    # The union of `incident` and `targeting`, PLUS the singular "hacker".
+    # Keep it as that union: a term added to either parent belongs here too.
+    # "hacker" lives ONLY here, never in `incident`, because it is noise-prone
+    # - "ethical hacker", "hacker conference", the feed name "The Hacker News".
+    # Confined here it can only fire where the sector is already the subject.
+    # ON WATCH: if it over-fires next cycle, drop it and keep only "hackers".
+    incident_broad: ["breach", "ransomware", "cyberattack", "cyber attack", "hacked",
+                     "hackers", "hacker", "stolen data", "data theft", "blackmail",
+                     "defaced", "defacement",
+                     "data breach", "compromise", "exfiltrat", "extortion", "data leak",
+                     "data stolen", "records stolen", "security incident",
+                     "active threat", "outage", "denial of service", "ddos",
+                     "exploited against", "attacks against", "attack against",
+                     "campaign against", "targeted", "target of", "attack on",
+                     "attacks on", "hit by", "struck by", "victim of", "taken offline",
+                     "forced offline", "systems offline", "service disruption",
+                     "state of emergency", "disrupted operations", "shut down its",
+                     "knocked offline"]
+    sector: ["water utility", "water utilities", "water district", "water authority",
+             "water sector", "utility sector", "public works", "transit authority",
+             "school system", "public schools",
+             "water treatment", "water system", "drinking water", "wastewater",
+             "utility district", "public utility", "electric utility",
+             "school district", "k-12", "k12", "higher ed", "community college",
+             "university", "municipal", "city government", "county government",
+             "local government", "tribal government", "tribal nation",
+             "public sector", "election office", "election systems",
+             "registrar of voters", "transit agency", "special district",
+             "sheriff's office", "sheriff's department", "police department",
+             "superior court", "county court"]
     lowmat_tech: ["fortinet", "fortigate", "sonicwall", "mikrotik", "routeros", "openwrt",
                   "sharepoint", "exchange server", "vpn", "rdp", "n-able", "n-central",
                   "kaseya", "connectwise", "screenconnect", "wordpress", "plc",
                   "programmable logic controller", "scada", "ics", "operational technology",
                   "cisco", "netgear", "tp-link", "router", "firewall"]
+    exploit_strong: ["actively exploited", "exploited in the wild", "in-the-wild",
+                     "under active exploitation", "added to its known exploited",
+                     "added to the known exploited", "kev catalog", "cisa kev",
+                     "exploitation in the wild", "weaponized exploit",
+                     "public proof-of-concept", "proof-of-concept exploit",
+                     "exploit code is available", "being exploited",
+                     "active threat", "active exploitation", "ongoing exploitation",
+                     "observed exploitation", "actively targeting"]
     kev: ["cisa kev", "known exploited", "actively exploited", "exploited in the wild",
           "in-the-wild", "added to its known exploited", "kev catalog",
           "zero-day", "0-day", "under active exploitation"]
+    cve: ["cve-"]
+    # Matched against the `source` scope, never the article text.
+    cisa_source: ["cisa.gov"]
+    listicle: ["top 5", "top 7", "top 10", "top 12", "top 15", "top 20", "top 25",
+               "biggest", "ranked", "you should know", "ultimate guide",
+               "buyer's guide", "buyers guide", "roundup", "round-up",
+               "best solutions", "best software", "best tools", "best vpn",
+               "best antivirus", "best firewall", "best wireless", "best wi-fi",
+               "best security", "cheat sheet", "what is", "how to",
+               "explained:", "a beginner's guide", "everything you need to know"]
     supplychain: ["supply chain", "supply-chain", "npm", "pypi", "package", "dependency",
                   "third-party", "vendor compromise", "msp", "managed service provider",
                   "rmm", "procurement", "software supply"]
     ransom: ["ransomware", "ransom", "extortion", "encrypt", "leak site", "double extortion"]
-    ci: ["critical infrastructure", "water", "wastewater", "power", "grid",
-         "hospital", "healthcare", "public sector", "government", "municipal",
-         "school", "utility"]
+    ci: ["critical infrastructure", "water utility", "water district", "water treatment",
+         "wastewater", "drinking water", "power grid", "electric grid",
+         "hospital", "healthcare", "public sector", "local government",
+         "municipal", "school district", "public utility"]
 ```
 
 ---

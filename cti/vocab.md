@@ -29,6 +29,87 @@ this domain for the first time.
 
 ---
 
+## v2 changelog - 2026-08-24, scoring precision
+
+Two P&D work orders in one day. The first tightened matching after the staging
+queue's top filled with false positives; the second approved the vocabulary that
+stops the tightening from creating misses. **Every change is a precision change.
+No requirement was dropped.**
+
+1. **`sector` rewritten from bare nouns to compound terms.** The worst entry was
+   `water`, which gave tier 2 (weight 4.0) to an Australian hotel with a water
+   park and to a Comcast release about a water-cooled data centre. Dropped:
+   `water`, `utility`, `utilities`, `college`, `tribal`, `election`, `transit`,
+   `court`, `sheriff`. Added: `water utility`, `water district`,
+   `water authority`, `water treatment`, `water system`, `water sector`,
+   `drinking water`, `utility district`, `public utility`, `electric utility`,
+   `utility sector`, `community college`, `school system`, `public schools`,
+   `public works`, `tribal government`, `tribal nation`, `election office`,
+   `election systems`, `transit agency`, `transit authority`, `superior court`,
+   `county court`, `sheriff's office`, `sheriff's department`. **An ordinary
+   English word cannot carry a sector requirement.**
+2. **`ci` rewritten the same way**, for the same reason: it feeds the
+   ransomware-versus-critical-infrastructure multiplier, where bare `water`,
+   `utility`, `power`, `grid`, `school` and `government` fired on nearly
+   anything.
+3. **`kev` was doing two jobs**, mixing exploitation evidence with generic
+   vulnerability vocabulary, so a buyer's guide saying "a zero-day is always a
+   possibility" scored as an exploited flaw. **New group `exploit_strong`**
+   carries only exploitation evidence. `kev` is retained, used by no rule.
+   **When a group turns out to be two groups, split it; do not delete half.**
+4. **`incident` gained theft and intrusion language** - `hackers`, `stolen data`,
+   `data theft`, `blackmail`, `defaced`, `defacement`. The trigger was a real
+   miss: *"Hackers Release Stolen Data From State's Largest School District"*
+   matched `school district` in the title and then failed for want of an
+   incident word, because the group held `hacked` (not "hackers") and
+   `data stolen` (not "stolen data"). **Word order and plurality are not
+   details here.**
+5. **Availability language deliberately kept OUT of `incident`.** `outage`,
+   `denial of service` and `ddos` live in `targeting` only. `incident` feeds
+   tier 1 and force-surface M1, which need a place name plus one incident word,
+   so `outage` there would turn every California wildfire or public safety power
+   shutoff into an AOR cyber incident. In `targeting` the same words fire only
+   where the sector is already the subject. Genuine cyber-caused outages still
+   reach M1 through `ransomware`, `breach`, `hacked` and the new theft terms.
+   P&D work order 2026-08-24, decision 4.
+6. **`hacker` singular is confined to `incident_broad`, and is ON WATCH.** It is
+   noise-prone - *ethical hacker*, *hacker conference*, the feed name *The Hacker
+   News*. Held there it can only fire where the sector is already the subject and
+   can never reach tier 1. **If it over-fires next cycle, drop the singular and
+   keep only `hackers`.**
+7. **New groups `targeting` and `incident_broad`.** The second is the union of
+   the first two plus `hacker`, needed because the `proximity` atom takes one
+   group per side. Keep it as that union.
+8. **New group `listicle`** - headline shapes that are never incident reporting.
+   Title-matched, used through `not`, so it withholds a tier rather than
+   dropping anything.
+9. **New groups `cve` and `cisa_source`.** `cve` tests whether exploitation
+   language sits near a real identifier. `cisa_source` is matched against the
+   article's SOURCE, never its text, so an official directive can be told apart
+   from a trade write-up about one.
+10. **Boundary list is now `scada`, `ransom`, `cisco`, `how to`, `what is`,
+    `hacker`.** `court` was orphaned when bare `court` left `sector`; `cve-` is
+    four characters and gets boundaries automatically. **The guard caught all of
+    these** - none was found by reading.
+
+### Still open after this pass
+
+- **`incident` remains incomplete** - see Open finding 1. This pass closed the
+  theft and defacement gap; wipers, destruction and recovery-inhibition are
+  still absent, and availability language is confined to `targeting` by design.
+  **Expect a few more gaps per cycle. The fix is always a term add, never a rule
+  loosening.**
+- **No education-sector term.** *"ShinyHunters Targets Education Sector with
+  Oracle PeopleSoft Exploit"* falls from 15.21 to 1.0: `sector` has
+  `school district`, `university` and `community college`, but not
+  `education sector` or `higher education`. Raised before the work order and not
+  among the approved terms, so not added. **P&D decision.**
+- **`geo` does not cover the whole state, by design, and that now shows.**
+  *"El Cerrito Blackmailed by Notorious Cyber Gang"* cannot surface: El Cerrito
+  is in Contra Costa County, which is not among the 34 counties in `geo`. Adding
+  `blackmail` did not help, because **the failure is geographic, not lexical**.
+  Whether the AOR is 34 counties or wider is a P&D decision.
+
 ## Open finding 1 — the `incident` group covers one third of the problem
 
 **Severity: high. Unresolved. P&D decision.**
@@ -129,9 +210,12 @@ vocab:
       reviewed: 2026-08-17
       review_interval_days: 90    # see Open finding 1 — known incomplete
     sector:
-      reviewed: 2026-08-17
+      reviewed: 2026-08-24          # rewritten to compound terms, v2 changelog
     ci:
-      reviewed: 2026-08-17
+      reviewed: 2026-08-24          # rewritten to compound terms, v2 changelog
+    incident:
+      reviewed: 2026-08-24          # theft/hacker terms added, v2 changelog
+      review_interval_days: 90
     ransom:
       reviewed: 2026-08-17
       review_interval_days: 90    # actor and brand names turn over fast
@@ -143,6 +227,24 @@ vocab:
       review_interval_days: 90    # Vox Policy §7 calls this a maintained lexicon
     supplychain:
       reviewed: 2026-08-17
+    targeting:
+      reviewed: 2026-08-24
+      review_interval_days: 90    # attack-verb phrasing follows the press, not the threat
+    incident_broad:
+      reviewed: 2026-08-24
+      review_interval_days: 90    # keep as union of incident + targeting, plus 'hacker'
+    exploit_strong:
+      reviewed: 2026-08-24
+      review_interval_days: 90    # the line between real exploitation and trend talk moves
+    cve:
+      reviewed: 2026-08-24
+      review_interval_days: 365   # identifier format, not vocabulary
+    cisa_source:
+      reviewed: 2026-08-24
+      review_interval_days: 365   # a hostname, not vocabulary
+    listicle:
+      reviewed: 2026-08-24
+      review_interval_days: 90    # headline fashions change; new shapes will appear
 
   accepted:
     - check: padded term
