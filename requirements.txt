@@ -2,4 +2,23 @@
 #   /opt/ravenor/venv/bin/pip install -r requirements.txt
 feedparser
 trafilatura
-pyyaml          # NEW: P&D config parsing (core/pnd.py). rclone stays a system binary.
+pyyaml          # P&D config parsing (core/pnd.py). rclone stays a system binary.
+
+# --- collection extras (added 2026-08-25) ---------------------------------
+# Each of these buys one fetch strategy in core/fetch.py, and each is imported
+# defensively: if it is absent, that strategy is skipped and collection still
+# runs. Nothing here is required for the engine to work — they are the
+# difference between a sensor that yields bodies and one that yields nothing.
+#
+#   curl_cffi          refetch with a real browser's TLS/HTTP2 fingerprint.
+#                      Several publishers ignore the user-agent string and
+#                      look at the handshake instead; a plain Python client
+#                      is refused before it sends a single header.
+#   googlenewsdecoder  resolve news.google.com/rss/articles/... wrappers to
+#                      the publisher's own URL. Without it those items can
+#                      never produce a body, only a headline.
+#   readability-lxml   extractor of last resort when trafilatura finds
+#                      nothing in HTML that plainly contains an article.
+curl_cffi
+googlenewsdecoder
+readability-lxml

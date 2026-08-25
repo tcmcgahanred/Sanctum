@@ -33,6 +33,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from core.pnd import load_domain
+from core.fetch import nobody_reason
 from core.rules import (score_article, compute_cycle_window, recency_tag,
                         make_matcher, _eval_atom, _scopes)
 
@@ -410,9 +411,26 @@ def build_compliance_report(cfg, ann_cfg, stats, nobody_items, section_counts):
                  "body or drop the item — Vox Policy §6.2 forbids writing one up from its "
                  "headline.")
         L.append("")
-        for score, title, url in nobody_items:
+        # Split by cause. A blocked publisher is an engineering ticket; a short
+        # article is an editorial judgement. Listing them together taught the
+        # reader to treat both as normal attrition, which is how four broken
+        # sensors stayed invisible.
+        sensor_faults = [i for i in nobody_items
+                         if i[4] in ("blocked", "challenge", "js_shell", "error")]
+        if sensor_faults:
+            hosts = {}
+            for i in sensor_faults:
+                hosts[source_name(i[2])] = hosts.get(source_name(i[2]), 0) + 1
+            L.append(f"> ⚠ **{len(sensor_faults)} of these are collection failures, not "
+                     f"thin articles** — "
+                     + ", ".join(f"{h} ({n})" for h, n in sorted(hosts.items()))
+                     + ". That is a sensor to repair, not an item to cut.")
+            L.append("")
+        for score, title, url, reason, _status in nobody_items:
             L.append(f"- [{score}] {title}")
             L.append(f"  - {url}")
+            if reason:
+                L.append(f"  - *{reason}*")
     L.append("")
     L.append("## Edition-level checks")
     L.append("")
@@ -642,7 +660,13 @@ def main():
         lines.append(f"- **Source:** {source_name(a.get('source',''))} · {a.get('published','?')}")
         if sec:
             lines.append(f"- **Suggested section:** {sec}{'?' if low else ''}")
+        if nb:
+            why = nobody_reason(a)
+            if why:
+                lines.append(f"- **No body because:** {why}")
         lines.append(f"- **URL:** {a.get('url','')}")
+        if a.get("final_url"):
+            lines.append(f"- **Publisher URL:** {a['final_url']}")
         lines.append(f"- **Score reasoning:** {' | '.join(reasons)}")
         shown = kids[:max_group_display]
         hidden = len(kids) - len(shown)
@@ -678,7 +702,8 @@ def main():
     # Vox Policy §8 production gate. Emitted with every edition, alongside the
     # staging document it reports on.
     if annotations:
-        nobody_items = [(x[0], x[3].get("title", "(no title)"), x[3].get("url", ""))
+        nobody_items = [(x[0], x[3].get("title", "(no title)"), x[3].get("url", ""),
+                         nobody_reason(x[3]), x[3].get("fetch_status", ""))
                         for x in surfaced_pre
                         if ann_by_id.get(id(x[3]), (False,))[0]]
         stats = [

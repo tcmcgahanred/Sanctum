@@ -34,9 +34,41 @@ manifest:
     filename: "WCTI_{date}_STAGING.md"   # {date} -> YYYYMMDD (collection date)
   collection:
     window_days: 7                  # rolling collection window
+    max_publish_age_days: 7         # reports older than this never enter the corpus
     min_title_len: 15               # below this, don't title-dedup
     suffix_separators: [" - ", " | ", " — "]
+    fetch:
+      user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+      timeout: 20                   # seconds per request
+      sleep_time: 1.0               # polite pause between requests to one host
+      max_redirects: 5
+      min_extracted_size: 80        # characters; below this trafilatura returns nothing
+      impersonate: chrome           # curl_cffi profile for the retry; "" disables it
+      decode_google_news: true      # resolve news.google.com wrappers to the publisher
+      gnews_interval: 1             # seconds between Google News resolutions
 ```
+
+**`max_publish_age_days` — reports from outside the cycle window do not enter
+the corpus.** Standing direction, 2026-08-25. Enforced at collection, before
+any HTTP request is made, so a back catalogue costs nothing and never reaches
+the archive. The audit that prompted it found 58 of 96 Google News items and
+512 of 680 Huntress items published before 2026 — one of them a February 2023
+article that force-surfaced at the top of the candidate queue.
+
+Two deliberate exceptions. An entry whose publication date cannot be parsed is
+**kept**, because dropping on a date we failed to read would silently delete a
+whole feed the first time a publisher changed its format. And rejected items
+are **not** written to `seen.txt`: re-testing a date each run costs no requests,
+whereas marking them seen would make this policy irreversible.
+
+**`fetch` — how a body is retrieved, and how failure is recognised.** The
+collector previously stored whatever came back, which was frequently not an
+article: a Cloudflare interlude, a JavaScript shell, or a raw `<a href=...>`
+tag from a feed summary. Those are now detected and discarded, and each item
+records *why* its body is missing. See `core/fetch.py` for the strategy order.
+`impersonate` and `decode_google_news` need optional packages from
+`requirements.txt`; without them those strategies are skipped and collection
+still runs.
 
 ---
 
@@ -196,17 +228,17 @@ https://www.cdt.ca.gov/newsroom/feed/
 https://www.californiacitynews.org/taxonomy/term/1717/feed
 
 # --- Regional AOR: statewide / sector queries (example: California) ---
-https://news.google.com/rss/search?q=%22California%22%20(ransomware%20OR%20%22data%20breach%22%20OR%20cyberattack)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20(%22community%20college%22%20OR%20university%20OR%20CSU%20OR%20UC)%20(ransomware%20OR%20%22data%20breach%22)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20%22school%20district%22%20(ransomware%20OR%20cyberattack%20OR%20%22data%20breach%22)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20(%22special%20district%22%20OR%20%22transit%20agency%22%20OR%20%22public%20works%22)%20(cyberattack%20OR%20ransomware%20OR%20breach)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20(city%20OR%20county)%20(ransomware%20OR%20cyberattack%20OR%20%22data%20breach%22)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20(court%20OR%20%22superior%20court%22%20OR%20sheriff%20OR%20%22police%20department%22)%20(ransomware%20OR%20cyberattack%20OR%20breach)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20(election%20OR%20%22registrar%20of%20voters%22)%20(cyberattack%20OR%20breach%20OR%20hack)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20government%20(ransomware%20OR%20cyberattack)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20(hospital%20OR%20health%20OR%20clinic)%20(ransomware%20OR%20%22data%20breach%22)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20tribal%20(casino%20OR%20nation%20OR%20government)%20(ransomware%20OR%20cyberattack%20OR%20breach)&hl=en-US&gl=US&ceid=US:en
-https://news.google.com/rss/search?q=California%20(water%20OR%20wastewater%20OR%20utility)%20(cyberattack%20OR%20hack%20OR%20breach)&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=%22California%22%20(ransomware%20OR%20%22data%20breach%22%20OR%20cyberattack)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20(%22community%20college%22%20OR%20university%20OR%20CSU%20OR%20UC)%20(ransomware%20OR%20%22data%20breach%22)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20%22school%20district%22%20(ransomware%20OR%20cyberattack%20OR%20%22data%20breach%22)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20(%22special%20district%22%20OR%20%22transit%20agency%22%20OR%20%22public%20works%22)%20(cyberattack%20OR%20ransomware%20OR%20breach)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20(city%20OR%20county)%20(ransomware%20OR%20cyberattack%20OR%20%22data%20breach%22)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20(court%20OR%20%22superior%20court%22%20OR%20sheriff%20OR%20%22police%20department%22)%20(ransomware%20OR%20cyberattack%20OR%20breach)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20(election%20OR%20%22registrar%20of%20voters%22)%20(cyberattack%20OR%20breach%20OR%20hack)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20government%20(ransomware%20OR%20cyberattack)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20(hospital%20OR%20health%20OR%20clinic)%20(ransomware%20OR%20%22data%20breach%22)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20tribal%20(casino%20OR%20nation%20OR%20government)%20(ransomware%20OR%20cyberattack%20OR%20breach)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=California%20(water%20OR%20wastewater%20OR%20utility)%20(cyberattack%20OR%20hack%20OR%20breach)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
 ```
 
 ---

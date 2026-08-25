@@ -7,6 +7,8 @@
 #
 #   domain_check.py      a domain file declares settings, never behaviour
 #   vocab_check.py       no silent decay in a domain's word lists
+#   fetch_test.py        failure pages never become article bodies, and old
+#                        reports never enter the corpus
 #   changelog_check.sh   you changed something — did you write it down? (warns)
 #
 # There is no scrub check. It was removed 2026-08-23: it required every clone to
@@ -47,6 +49,11 @@ if command -v python3 >/dev/null 2>&1; then
     # repo this gate protects, so it must not be able to block a commit. Run the
     # tool by hand, with no flag, to see those domains too.
     python3 "$REPO_ROOT/tools/vocab_check.py" --tracked-only || STATUS=1
+    # Collection guards. Offline by design — a guard that needs the internet
+    # is a guard that gets skipped on the day it matters.
+    python3 "$REPO_ROOT/tests/fetch_test.py" >/dev/null || {
+        echo "pre-commit: BLOCKED — tests/fetch_test.py failed; run it to see which check" >&2
+        STATUS=1; }
 else
     echo "pre-commit: BLOCKED — python3 not found, cannot check domain files" >&2
     STATUS=1
