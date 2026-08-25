@@ -98,14 +98,29 @@ CASES = [
 ]
 
 
-def fuzz_articles(n=500, seed=1337):
-    rng = random.Random(seed)
+def token_pool():
+    """The vocabulary the fuzz draws from, built from the live config."""
     tokens = []
     for g in cfg["groups"].values():
         tokens += [t.strip() for t in g]
     tokens += ["the", "a", "report", "system", "update", "vendor", "issue",
                "san francisco", "physics", "network", "and", "of", "new"]
-    tokens.sort()  # deterministic regardless of group ordering in the config
+    return sorted(set(tokens))
+
+
+def fuzz_articles(tokens, n=500, seed=1337):
+    """
+    THE POOL IS AN ARGUMENT, NOT A GLOBAL, and the baseline stores the pool it
+    was generated with. Deriving it from the live config looked tidier and was
+    wrong: adding one advisory group — `ttp`, which feeds no tier, multiplier
+    or force-surface rule — changed the token pool, changed every generated
+    article, and reported 428 mismatches against a scoring model that had not
+    moved. **A test that fails when the vocabulary grows teaches people to
+    re-baseline reflexively, which is exactly how a real regression gets waved
+    through.** Comparing against the stored pool keeps the fuzz measuring what
+    it is for: the blast radius of a RULE change.
+    """
+    rng = random.Random(seed)
     for _ in range(n):
         ntitle = rng.randint(0, 6)
         nbody = rng.randint(0, 14)
@@ -113,9 +128,11 @@ def fuzz_articles(n=500, seed=1337):
                "text": " ".join(rng.choice(tokens) for _ in range(nbody))}
 
 
-def build():
-    return {"cases": [score(c) for c in CASES],
-            "fuzz": [score(a) for a in fuzz_articles()]}
+def build(tokens=None):
+    toks = tokens if tokens is not None else token_pool()
+    return {"tokens": toks,
+            "cases": [score(c) for c in CASES],
+            "fuzz": [score(a) for a in fuzz_articles(toks)]}
 
 
 def check_requirements():
@@ -149,8 +166,22 @@ def check_baseline():
         print("\nNO BASELINE at %s - run with --update to create it." % BASELINE)
         return 1
     want = json.loads(BASELINE.read_text())
-    have = build()
+    stored = want.get("tokens")
+    have = build(stored)
     fails = 0
+    if stored is not None:
+        live = token_pool()
+        if live != stored:
+            added = sorted(set(live) - set(stored))
+            removed = sorted(set(stored) - set(live))
+            print(f"note: vocabulary has moved since the baseline "
+                  f"(+{len(added)} / -{len(removed)} terms). The fuzz below still "
+                  f"compares like for like, against the stored pool.")
+            if added:
+                print("      added:   " + ", ".join(added[:12]) + (" …" if len(added) > 12 else ""))
+            if removed:
+                print("      removed: " + ", ".join(removed[:12]) + (" …" if len(removed) > 12 else ""))
+            print()
     print("\n=== hand-built cases vs baseline ===")
     for c, w, h in zip(CASES, want["cases"], have["cases"]):
         ok = (w == h)

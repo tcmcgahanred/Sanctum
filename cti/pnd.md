@@ -501,6 +501,19 @@ scoring:
           "in-the-wild", "added to its known exploited", "kev catalog",
           "zero-day", "0-day", "under active exploitation"]
     cve: ["cve-"]
+    # Tradecraft language - how an adversary operates, as distinct from what
+    # happened to a victim (`incident`) or what is being exploited
+    # (`exploit_strong`). Used only to suggest the CTA TTPs section; it feeds
+    # no tier, no multiplier and no force-surface rule, so a false match costs
+    # a section suggestion the analyst overrides, nothing more.
+    ttp: ["lateral movement", "living off the land", "lolbin", "initial access",
+          "privilege escalation", "persistence mechanism", "command and control",
+          "credential harvesting", "credential theft", "web shell", "webshell",
+          "infostealer", "info-stealer", "loader", "dropper", "beacon",
+          "att&ck", "mitre att", "tradecraft", "tactics, techniques",
+          "spearphishing", "spear-phishing", "social engineering",
+          "defense evasion", "obfuscation", "dll sideloading", "dll side-loading",
+          "process injection", "living-off-the-land"]
     # Matched against the `source` scope, never the article text.
     cisa_source: ["cisa.gov"]
     listicle: ["top 5", "top 7", "top 10", "top 12", "top 15", "top 20", "top 25",
@@ -581,6 +594,65 @@ production:
   # an automated cap on what surfaces for review.
   distributed_item_target: [5, 8]      # Thursday product — OUTSIDE Sanctum's scope; recorded for reference only
   sections: ["NEWS", "CTA TTPs", "LATEST ATTACKS OR RISKS", "KEYWORDS"]
+
+  # ---- Staging annotations (Vox Policy §5 and §6.2) ----
+  # Advisory only. Nothing here touches the score, the tier, the ordering or
+  # the surface-vs-drop decision. These exist so two standards the analyst was
+  # expected to remember become visible in the document instead.
+  staging_annotations:
+    # §6.2 "body, not headline". Below this many words of extracted text there
+    # is nothing to write an entry FROM, and the item is marked [NO BODY].
+    # 40 words is about two sentences - enough to tell a real article from a
+    # feed stub or a failed extraction, low enough not to flag terse advisories.
+    min_body_words: 40
+
+    # §5 section suggestion. ORDERED - first match wins, and the last entry is
+    # the catch-all. Rules use the same grammar as the scoring above, so a
+    # section can be retuned exactly like a tier and the engine stays ignorant
+    # of what CTI's sections are. S2 defines its own list in its own pnd.md.
+    #
+    # KEYWORDS is deliberately NOT here. Policy §5 describes it as wave-top
+    # only - vendor and sector names, not items - so it is a summary block the
+    # analyst writes, not a destination candidates get assigned to. The
+    # compliance report still checks it appears in the edition.
+    sections:
+      - name: "LATEST ATTACKS OR RISKS"
+        when:
+          any:
+            - {group: exploit_strong, scope: blob}
+            - {group: cve, scope: blob}
+      - name: "CTA TTPs"
+        when: {group: ttp, scope: blob}
+      # NEWS twice, deliberately. The first is a POSITIVE match - something
+      # happened to somebody - and gets a clean tag. The second is the
+      # catch-all and gets the "?" marker, so an item that merely failed to
+      # match anything is visibly different from an item that is genuinely a
+      # news event. Without the split every NEWS item would carry a "?" and
+      # the marker would stop meaning anything.
+      - name: "NEWS"
+        when: {group: incident_broad, scope: blob}
+      - name: "NEWS"
+        when: always
+
+    # §8 production gate. The pipeline fills the countable fields of the
+    # compliance report; these are the judgments only a person can sign off.
+    # Each is a locked standard from the Vox Policy, restated here as a check
+    # rather than left for the analyst to recall.
+    compliance_checklist:
+      - "Every entry written from the article BODY, never the headline (§6.2)."
+      - "One event, one entry - same-event reports folded, each event placed once (§7)."
+      - "Every entry carries a 'why an SLTT organization should care' clause, framed as vendor accountability, procurement or IG1 controls (§6.3)."
+      - "Citations nested per entry, as live links the reader can actually open (§6.5)."
+      - "Serious-impact claims verified against a primary or authoritative source; wording does not inflate the source (§7)."
+      - "Attribution discipline: suspected is not confirmed; the state of evidence is represented as it stands (§7)."
+      - "Out-of-window items either carry a fresh this-week hook or are cut - not silently kept (§7)."
+      - "Audience-portfolio filter applied: developer-only and defence-industrial-only items excluded unless they reach SLTT through a vendor (§7)."
+      - "Product-specific items are relevant only if this audience uses the product (§7)."
+      - "Acronyms spelled out on first use; mechanisms named but translated (§7)."
+      - "All four sections present; an empty one says 'none this cycle' rather than being omitted (§5)."
+      - "Three dates correct: title = distribution Thursday, ICOD in the header, LTIOV absent (§2)."
+      - "Staging draft carries no handling markings (§1)."
+      - "Reader-facing heading is 'WCTI - Weekly Cyber Threat Intelligence'; the word 'vox' appears nowhere (§3)."
   deliverable_name: "WCTI_v[YYYYMMDD]"           # 3b output, filename. date = distribution (Thu)
   notes: >
     Staging document and vox are content only, no handling markings, and are

@@ -245,6 +245,9 @@ vocab:
     listicle:
       reviewed: 2026-08-24
       review_interval_days: 90    # headline fashions change; new shapes will appear
+    ttp:
+      reviewed: 2026-08-25
+      review_interval_days: 90    # tradecraft naming follows the research, fast
 
   accepted:
     - check: padded term

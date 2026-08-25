@@ -2,6 +2,27 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-25] Two vox standards moved out of the analyst's head and into the document
+
+Vox Policy §5 and §6.2 were rules a person had to remember. They are now annotations on the staging document, and §8's production gate is an artifact the pipeline emits rather than a checklist someone keeps. **All three are advisory: nothing here touches a score, a tier, the ordering, or the surface-vs-drop decision.**
+
+- **`[NO BODY]` marks a candidate with no usable article text.** Policy §6.2 says an entry is written from the body, never the headline, and an item with no body is dropped or its body fetched. Until now nothing showed which items those were — the analyst had to notice. The floor is 40 words of extracted text, configurable, roughly two sentences: enough to tell a real article from a feed stub or a failed extraction, low enough not to flag a terse advisory.
+- **Every candidate carries a suggested section**, matched from an ordered list of rules in `cti/pnd.md` using the same grammar as the scoring — `group`, `any`, `all`, `proximity`, `not`, `always`. First match wins. **The engine does not know what CTI's sections are**, which is the point: S2 will declare its own and share the code unchanged.
+- **A trailing `?` means the suggestion is weak** — it fell through to the catch-all, or the item has no body and the guess came from a headline alone.
+- **NEWS is declared twice, deliberately.** The first entry is a positive match — something happened to somebody — and gets a clean tag; the second is the catch-all and gets the `?`. Without the split every NEWS item would carry a `?` and **the marker would stop meaning anything**.
+- **KEYWORDS is not a section candidates get assigned to.** Policy §5 describes it as wave-top only — vendor and sector names, not items — so it is a summary block the analyst writes. It is excluded from the tagger and still checked for presence by the compliance report. Recorded because the reasoning is not obvious from the section list alone.
+- **New group `ttp`** for tradecraft language — lateral movement, living off the land, web shell, ATT&CK. It feeds no tier, no multiplier and no force-surface rule, so a false match costs a section suggestion the analyst overrides and nothing else.
+- **The §8 production gate is now an emitted artifact.** `compliance_report.md` is written beside the staging document every run and pushed with it. The pipeline pre-fills what it can count — articles scored, candidates surfaced, distinct events, force-surfaced below the cut, STALE, no-body, drop-list size, and candidates per section. **The fields only a person can answer are left blank on purpose**: bodies read, entries written, exclusions with reason, drop list reviewed. A number the machine invented there would defeat the gate. The fourteen edition-level checks come from `cti/pnd.md`, not the engine, each citing its policy section.
+- **A zero in the section table is called out in words**, because an empty section that is *deliberately* empty and one that was *forgotten* look identical in a finished document.
+- **The fuzz test was measuring the wrong thing, and adding one advisory group exposed it.** `ttp` feeds no rule, yet `diff_scores.py` reported **428 mismatches** — because the fuzz built its token pool from the live config, so a new group changed every generated article. The scoring model had not moved: all twenty hand cases and all fourteen requirements passed throughout. **The baseline now stores the token pool it was generated with**, and the test compares against that, reporting vocabulary drift as a note rather than a failure. **A test that fails whenever the vocabulary grows teaches people to re-baseline reflexively, which is precisely how a real regression gets waved through.**
+
+### Two clauses in the Vox Policy have gone stale — flagged, not changed
+
+Both are Planning & Direction decisions under §9 and are recorded here rather than edited.
+
+- **§7's interim clause is obsolete.** It reads *"Interim (until the pipeline implements M1–M3): the analyst applies the mandatory-surface rule by hand."* The pipeline implements all three and has since the force-surface work. That sentence now asks the analyst to duplicate a guarantee the engine already makes.
+- **§5 declares four sections; the section tagger covers three.** `KEYWORDS` is excluded for the reason above. If P&D intends it as a destination for items, the tagger needs a rule for it.
+
 ## [2026-08-24] Scoring precision: the sector must be the subject, not a word in the article
 
 Two Planning & Direction work orders in one day. The first tightened matching after the staging queue's top filled with false positives; the second approved the vocabulary that stops the tightening from creating misses. **Nothing was weakened - M1, M2 and M3 all still fire. What changed is what counts as a match.** On the live corpus: 496 surfaced items became 94.

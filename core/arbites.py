@@ -274,6 +274,157 @@ def push_staging(manifest, out_path, today, log=print):
         return None
 
 
+def body_words(art):
+    """Word count of the extracted body. Title deliberately excluded."""
+    return len(str(art.get("text", "")).split())
+
+
+def annotate(art, ann, groups, matcher):
+    """
+    Return (no_body, section, low_confidence) for one article.
+
+    ADVISORY ONLY. Neither value touches the score, the tier, the ordering or
+    the surface-vs-drop decision. They exist so two standards the analyst was
+    expected to remember — "written from the body, never the headline" and
+    "every section is populated or deliberately empty" — become visible in the
+    document instead of being carried in someone's head.
+
+    no_body        the extracted text is shorter than the configured floor, so
+                   there is nothing to write an entry FROM. Vox Policy §6.2.
+    section        a SUGGESTION, matched from an ordered list of rules in the
+                   domain config. First match wins. The analyst confirms or
+                   overrides; nothing downstream reads it.
+    low_confidence the suggestion came from the fallback rather than a positive
+                   match, or the item has no usable body — a section guessed
+                   from a headline alone is a guess, and says so.
+    """
+    if not ann:
+        return False, None, False
+    floor = int(ann.get("min_body_words", 0) or 0)
+    nb = floor > 0 and body_words(art) < floor
+
+    section, low = None, False
+    _t, scopes, text_l = _scopes(art)
+    for entry in ann.get("sections", []) or []:
+        when = entry.get("when", "always")
+        if _eval_atom(when, groups, matcher, scopes, text_l):
+            section = entry.get("name")
+            # A bare `always` is the catch-all, not a finding about the item.
+            low = (isinstance(when, str) and when.strip().lower() == "always")
+            break
+    if nb:
+        low = True          # headline-only: any section is inference
+    return nb, section, low
+
+
+def compliance_path(out_path):
+    """Sibling of the staging document, same stem, COMPLIANCE instead."""
+    stem = out_path.stem
+    stem = stem.replace("staging_candidates", "compliance_report")
+    if stem == out_path.stem:
+        stem = stem + "_compliance"
+    return out_path.with_name(stem + out_path.suffix)
+
+
+def push_compliance(manifest, out_path, today, log=print):
+    """Push the compliance report beside the staging document it belongs to."""
+    remote, name = staging_target(manifest, today)
+    if not remote:
+        return None
+    name = name.replace("STAGING", "COMPLIANCE")
+    if "COMPLIANCE" not in name:
+        root, dot, ext = name.rpartition(".")
+        name = f"{root}_COMPLIANCE{dot}{ext}" if dot else name + "_COMPLIANCE"
+    dest = f"{remote.rstrip('/')}/{name}"
+    try:
+        subprocess.run(["rclone", "copyto", str(out_path), dest], check=True)
+        log(f"compliance report pushed -> {dest}")
+        return dest
+    except Exception as e:
+        log(f"WARNING: compliance push failed ({e}). Local copy is at {out_path}")
+        return None
+
+
+def build_compliance_report(cfg, ann_cfg, stats, nobody_items, section_counts):
+    """
+    The Vox Policy §8 production gate, pre-filled with what the pipeline knows.
+
+    WHAT THIS IS AND IS NOT. The pipeline can count candidates, events, missing
+    bodies and section coverage. It cannot know how many bodies a person read,
+    what they wrote up, or why they excluded something. **Those fields are left
+    blank on purpose.** A blank the analyst must fill is the point of a gate; a
+    number the machine invented would defeat it.
+
+    Nothing here passes or fails a cycle. It makes omissions visible before the
+    edition ships, which is what §8 asks for.
+    """
+    L = []
+    prod = cfg.get("production", {}) or {}
+    # Take the product name off the front of the staging title so the report
+    # reads "WCTI — Compliance Report", not "WCTI — Staging Document — ...".
+    title = str(prod.get("report_title", cfg["domain"].upper()))
+    L.append(f"# {title.split('—')[0].strip() or cfg['domain'].upper()} — Compliance Report")
+    L.append("")
+    L.append(f"*Generated {datetime.now(timezone.utc).isoformat()} · domain {cfg['domain']}.*")
+    L.append("")
+    L.append("> **This is a required artifact, not an optional one.** It is what the "
+             "Wednesday review checks the edition against. A failed check is fixed or "
+             "carried as an explicit note — never silently passed.")
+    L.append("")
+    L.append("> Fields marked **ANALYST** are deliberately blank. The pipeline cannot "
+             "know how many bodies were read or why something was excluded, and a "
+             "number it invented would defeat the purpose of the gate.")
+    L.append("")
+    L.append("## Queue coverage")
+    L.append("")
+    L.append("| Measure | Value | Filled by |")
+    L.append("|---|---|---|")
+    for label, value in stats:
+        L.append(f"| {label} | {value} | pipeline |")
+    for label in ("Bodies read", "Entries written", "Excluded with reason"):
+        L.append(f"| {label} |  | **ANALYST** |")
+    L.append("| Drop list reviewed | ☐ | **ANALYST** |")
+    L.append("")
+    L.append("## Section coverage")
+    L.append("")
+    L.append("| Section | Suggested candidates | In edition | Note |")
+    L.append("|---|---|---|---|")
+    declared = prod.get("sections", []) or []
+    for name in declared:
+        n = section_counts.get(name)
+        if n is None:
+            L.append(f"| {name} | — *not a candidate destination* |  |  |")
+        else:
+            L.append(f"| {name} | {n} |  | {'**zero candidates — say so explicitly**' if n == 0 else ''} |")
+    L.append("")
+    L.append("> Every declared section appears in the edition. An empty one is marked "
+             "\"none this cycle\" — never omitted, because an omitted section is "
+             "indistinguishable from an oversight.")
+    L.append("")
+    L.append("## Surfaced candidates with no usable body")
+    L.append("")
+    if not nobody_items:
+        L.append("*None. Every surfaced candidate has extractable text.*")
+    else:
+        L.append("These have too little extracted text to write an entry FROM. Fetch the "
+                 "body or drop the item — Vox Policy §6.2 forbids writing one up from its "
+                 "headline.")
+        L.append("")
+        for score, title, url in nobody_items:
+            L.append(f"- [{score}] {title}")
+            L.append(f"  - {url}")
+    L.append("")
+    L.append("## Edition-level checks")
+    L.append("")
+    checklist = ann_cfg.get("compliance_checklist", []) or []
+    if not checklist:
+        L.append("*No checklist configured for this domain.*")
+    for item in checklist:
+        L.append(f"- ☐ {item}")
+    L.append("")
+    return "\n".join(L)
+
+
 def force_surface_match(art, force_rules, groups, matcher):
     """
     Name of the first force-surface rule this article matches, or None.
@@ -360,6 +511,12 @@ def main():
     def forced_by(art):
         return force_surface_match(art, force_rules, fs_groups, fs_matcher)
 
+    # Staging annotations (Vox Policy §5 and §6.2). Absent from the config =
+    # no annotations and no behaviour change, so a domain that has not defined
+    # them is unaffected.
+    annotations = production.get("staging_annotations", {}) or {}
+    ann_by_id = {}
+
     arts = load_window(cfg["corpus_dir"], window_days)
     scored = []
     stale_count = 0
@@ -382,6 +539,8 @@ def main():
         elif hit:
             reasons.append(f"force-surface: {hit}")
         scored.append((s, tier, reasons, a, is_stale, bool(hit) or qualifies))
+        nb, sec, low = annotate(a, annotations, fs_groups, fs_matcher)
+        ann_by_id[id(a)] = (nb, sec, low)
     # Surfaced items first, each block still in score order. Keeping the
     # surfaced set contiguous means the grouping and rescue logic below — which
     # compares indices against the cut — needs no change at all.
@@ -415,14 +574,31 @@ def main():
     surfaced = scored[:surfaced_n]
     dropped = scored[surfaced_n:]
 
+    # Annotation tallies over the SURFACED set only — the drop list is not
+    # reviewed item by item, so counting it here would misreport the workload.
+    surfaced_pre = [x for x in scored if x[5]]
+    nobody_count = sum(1 for x in surfaced_pre if ann_by_id.get(id(x[3]), (False,))[0])
+    section_counts = {}
+    for entry in (annotations.get("sections", []) or []):
+        section_counts[entry.get("name")] = 0
+    for x in surfaced_pre:
+        sec = ann_by_id.get(id(x[3]), (False, None, False))[1]
+        if sec is not None:
+            section_counts[sec] = section_counts.get(sec, 0) + 1
+
     lines = []
     recency_note = f" · {stale_count} flagged STALE" if recency_on else " · recency gate OFF"
+    ann_note = ""
+    if annotations:
+        secs = ", ".join(f"{k} {v}" for k, v in section_counts.items())
+        ann_note = f" · {nobody_count} with NO BODY · suggested sections: {secs}"
     lines.append(f"# {report_title}")
     lines.append(f"*Generated {datetime.now(timezone.utc).isoformat()} · domain {cfg['domain']} · "
                  f"window {window_days}d · {len(arts)} articles scored · "
                  f"{len(surfaced)} surfaced, {len(dropped)} in drop list"
                  f"{f' · {forced_count} force-surfaced below the cut' if forced_count else ''}"
                  f"{recency_note}"
+                 f"{ann_note}"
                  f"{f' · {len(child_of)} event group(s)' if child_of else ''}"
                  f"{f' · {dissolved_groups} oversized cluster(s) dissolved' if dissolved_groups else ''}.*")
     lines.append("")
@@ -438,6 +614,13 @@ def main():
     if recency_on:
         lines.append("> ⚠ STALE = published outside the cycle window. NOT dropped — "
                      "confirm a fresh this-week hook (new KEV/exploitation/victim) or cut it.")
+    if annotations:
+        lines.append("> **[NO BODY]** = no usable article text was extracted, so there is "
+                     "nothing to write an entry FROM. Vox Policy §6.2: fetch the body or "
+                     "drop the item — do not write it up from the headline.")
+        lines.append("> **Suggested section** is a SUGGESTION for you to confirm or "
+                     "override. A trailing `?` means it fell through to the default or the "
+                     "item has no body, so the guess came from a headline.")
     lines.append("")
     if child_of:
         lines.append("> ⧉ = same event, reported separately. Grouped for review only — "
@@ -453,8 +636,12 @@ def main():
         mark = "⚠ STALE " if is_stale else ""
         kids = child_of.get(idx, [])
         tag = f" ⧉ {len(kids) + 1} reports" if kids else ""
-        lines.append(f"### {mark}[{s}] {a.get('title','(no title)')}{tag}")
+        nb, sec, low = ann_by_id.get(id(a), (False, None, False))
+        nb_mark = "[NO BODY] " if nb else ""
+        lines.append(f"### {mark}{nb_mark}[{s}] {a.get('title','(no title)')}{tag}")
         lines.append(f"- **Source:** {source_name(a.get('source',''))} · {a.get('published','?')}")
+        if sec:
+            lines.append(f"- **Suggested section:** {sec}{'?' if low else ''}")
         lines.append(f"- **URL:** {a.get('url','')}")
         lines.append(f"- **Score reasoning:** {' | '.join(reasons)}")
         shown = kids[:max_group_display]
@@ -488,9 +675,33 @@ def main():
     print(f"[{cfg['domain']}] {len(arts)} scored -> {len(surfaced)} candidates, "
           f"{len(dropped)} dropped -> {out_path}")
 
+    # Vox Policy §8 production gate. Emitted with every edition, alongside the
+    # staging document it reports on.
+    if annotations:
+        nobody_items = [(x[0], x[3].get("title", "(no title)"), x[3].get("url", ""))
+                        for x in surfaced_pre
+                        if ann_by_id.get(id(x[3]), (False,))[0]]
+        stats = [
+            ("Articles scored in window", len(arts)),
+            ("Surfaced candidates", len(surfaced_pre)),
+            ("Distinct events after grouping", len(surfaced_pre) - len(grouped_idx & set(range(surfaced_n)))),
+            ("Force-surfaced below the cut", forced_count),
+            ("Flagged STALE", stale_count),
+            ("Surfaced with no usable body", nobody_count),
+            ("In drop list", len(dropped)),
+        ]
+        comp_path = compliance_path(out_path)
+        comp_path.write_text(
+            build_compliance_report(cfg, annotations, stats, nobody_items, section_counts),
+            encoding="utf-8")
+        print(f"[{cfg['domain']}] compliance report -> {comp_path}")
+
     if not args.no_push:
         push_staging(cfg["manifest"], out_path, date.today(),
                      log=lambda m: print(f"[{cfg['domain']}] {m}"))
+        if annotations:
+            push_compliance(cfg["manifest"], compliance_path(out_path), date.today(),
+                            log=lambda m: print(f"[{cfg['domain']}] {m}"))
 
 
 if __name__ == "__main__":
