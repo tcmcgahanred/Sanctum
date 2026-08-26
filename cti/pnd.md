@@ -109,14 +109,18 @@ it against the host's egress first; drop noisy sources. Do not reintroduce the d
 34 county Google-News keyword feeds.
 
 Dropped 2026-08-25 — `api.msrc.microsoft.com/update-guide/rss`. **Do not reintroduce
-without new evidence.** Three independent reasons, measured over 21 cycles:
+without new evidence.** Two reasons, both measured over 21 cycles.
 
-- **Volume, and the wrong shape of it.** 4,346 items collected — **46% of the entire
-  corpus** — against a next-largest sensor at 680. It is Microsoft's patch catalogue and
-  it emits **one item per CVE**, so a single Patch Tuesday arrives as a hundred-plus
-  articles carrying no severity, no exploitation status and no judgement about which of
-  them matter. First recorded 2026-08-11 at 52.7% of lifetime articles; the decision sat
-  pending for three months.
+**First, read this correction, because the obvious argument for dropping it is wrong.**
+The often-quoted figure — MSRC is roughly half the corpus — is a **backfill artifact and
+was already investigated and dismissed on 2026-08-17.** 3,482 articles arrived on
+2026-08-05 from the sensor's first poll and 744 on 2026-08-12, the day after Patch
+Tuesday; every other day is 0–36. Ongoing volume is about six items a day. **Volume is
+not why this feed was dropped**, and the lifetime totals in `tools/sensor_health.py`
+still carry those two bursts. Anyone re-examining this should start here rather than
+rediscover the contradiction and reopen a settled decision.
+
+The two reasons that hold:
 - **Nothing usable comes out.** Every item links to
   `msrc.microsoft.com/update-guide/vulnerability/CVE-…`, a JavaScript single-page
   application with no server-rendered text. The collector was storing the string
@@ -124,7 +128,11 @@ without new evidence.** Three independent reasons, measured over 21 cycles:
   2026-08-25 across every fetch strategy — plain, browser user agent, TLS impersonation
   — and **none recovers it**; short of running a headless browser there is nothing there.
 - **Zero unique contribution.** Sole source of **no** distinct surfaced event across 21
-  runs, and a contributor to three. When a Microsoft flaw genuinely matters,
+  runs, and a contributor to three. Measured by `tools/sensor_health.py`, which did not
+  exist when this decision was first raised — **this is the evidence that settled it**,
+  and the shape of the feed is why: one item per CVE, carrying no severity, no
+  exploitation status and no judgement about which of a hundred-plus Patch Tuesday
+  entries matter. When a Microsoft flaw genuinely matters,
   BleepingComputer, The Hacker News, Talos and Rapid7 all cover it with context and all
   four are already carried here.
 
