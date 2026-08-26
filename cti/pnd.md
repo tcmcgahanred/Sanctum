@@ -28,6 +28,13 @@ manifest:
   corpus:
     backend: rclone                 # rclone | local | (s3 future)
     rclone_remote: gdrive:ravenor-corpus
+  reference_lists:                  # facts to look up instead of inferring
+    kev:
+      url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+      json_path: vulnerabilities
+      key_field: cveID
+      match_pattern: "CVE-[0-9]{4}-[0-9]{4,7}"
+      cache_hours: 12
   staging:                          # where the analyst picks the draft up
     backend: rclone
     rclone_remote: gdrive:ravenor-staging
@@ -38,7 +45,7 @@ manifest:
     min_title_len: 15               # below this, don't title-dedup
     suffix_separators: [" - ", " | ", " — "]
     fetch:
-      user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+      user_agent: ""                # OFF. Setting one cost two sensors — see below
       timeout: 20                   # seconds per request
       sleep_time: 1.0               # polite pause between requests to one host
       max_redirects: 5
@@ -47,6 +54,19 @@ manifest:
       decode_google_news: true      # resolve news.google.com wrappers to the publisher
       gnews_interval: 1             # seconds between Google News resolutions
 ```
+
+**`reference_lists` — declared, fetched, and NOT yet used for scoring.** The
+`kev` entry points at CISA's Known Exploited Vulnerabilities catalogue: 1,675
+entries, refreshed daily, verified reachable from the collector host on
+2026-08-25. The scoring model currently earns its 1.5x exploitation multiplier
+by matching phrases in prose, which has already been measured wrong — a real
+CISA advisory said *"Active Threat"* rather than *"actively exploited"* and the
+item fell from 7.8 to 1.5. The catalogue answers that question authoritatively.
+
+Nothing in `core/rules.py` reads this list. **Whether the multiplier fires on
+catalogue membership instead of, or alongside, the `kev` word group is a
+Planning & Direction decision**, and `tools/kev_impact.py` measures what the
+change would do to the real corpus so the decision is made against a number.
 
 **`max_publish_age_days` — reports from outside the cycle window do not enter
 the corpus.** Standing direction, 2026-08-25. Enforced at collection, before
@@ -69,6 +89,14 @@ records *why* its body is missing. See `core/fetch.py` for the strategy order.
 `impersonate` and `decode_google_news` need optional packages from
 `requirements.txt`; without them those strategies are skipped and collection
 still runs.
+
+**`user_agent` is empty on purpose, and that is a measured result rather than
+an oversight.** Benchmarked against all 56 sensors on 2026-08-25, sending a
+browser string was a net loss: `news.sophos.com` went from 2902 words to
+blocked — and tarpitted, 120 seconds per attempt instead of 0.4 — and
+`cybersecuritynews.com` from 777 words to an instant refusal. Every sensor the
+string helped was recovered anyway by the TLS-impersonation retry, which is a
+browser at the handshake as well as in the header.
 
 ---
 

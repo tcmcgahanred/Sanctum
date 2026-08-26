@@ -14,8 +14,10 @@ host was failing in a different way that the pipeline recorded identically:
                          "You need to enable JavaScript to run this app."
     industrialcyber.co   a Cloudflare interlude; the stored body was
                          "Just a moment.. We're verifying your browser."
-    darkreading.com      the fetch returned nothing at all (default user
-                         agent refused), leaving only a one-sentence feed dek
+    darkreading.com      the fetch returned nothing at all, leaving only a
+                         one-sentence feed dek. NOT a user-agent problem, as
+                         first assumed - measured 2026-08-25, only a real
+                         browser TLS fingerprint recovers it.
 
 All four looked the same downstream: a short `text` field. The 40-word floor in
 the staging annotations caught them only because failure pages happen to be
@@ -37,6 +39,7 @@ no opinion on whether a body is good enough to write from — that is the
 staging annotation's job, and the analyst's after that.
 """
 
+import configparser
 import html as _html
 import re
 from urllib.parse import urlparse
@@ -74,14 +77,26 @@ except Exception:                       # pragma: no cover - absence is normal
     _Readability = None
 
 
-# A plain, honest desktop browser string. trafilatura ships with `user_agents`
-# EMPTY, which makes it announce itself as a scraping library; several
-# publishers refuse that outright. This is not evasion — the collector is a
-# single polite reader, and it still obeys the per-host sleep below.
-DEFAULT_USER_AGENT = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
-)
+# OPT-IN, AND OFF BY DEFAULT. Measured against the live sensor set 2026-08-25.
+#
+# The obvious move — trafilatura announces itself as a scraping library, so
+# send a browser string instead — is WRONG. It was measured wrong rather than
+# argued wrong. Setting this string cost two working sensors outright:
+#
+#   news.sophos.com         2902 words -> blocked, and it TARPITTED:
+#                           120s per attempt instead of 0.4s
+#   cybersecuritynews.com    777 words -> blocked, refused instantly
+#
+# Both recovered the moment the override was removed, with nothing else
+# changed. The likely reason: a Chrome user-agent arriving over Python's TLS
+# stack is a LOUDER bot signal than an honest library string — the header and
+# the handshake disagree, and that mismatch is exactly what a bot filter looks
+# for. Claiming to be a browser without being one is worse than not claiming.
+#
+# Where a publisher genuinely needs a browser, the answer is the TLS
+# impersonation strategy below, which is a browser all the way down. Set this
+# only for a host measured to need it.
+DEFAULT_USER_AGENT = ""
 
 # Substrings that mark a page as an interstitial rather than an article.
 # Checked ONLY against short extractions (see _classify) — a real article about
@@ -194,9 +209,25 @@ def _classify(text):
     return text, STATUS_OK
 
 
+def _bare_config():
+    """trafilatura's DEFAULT block, reproduced for machines that lack it."""
+    cfg = configparser.ConfigParser()
+    cfg["DEFAULT"] = {"DOWNLOAD_TIMEOUT": "30", "SLEEP_TIME": "5.0",
+                      "USER_AGENTS": "", "MAX_REDIRECTS": "2",
+                      "MIN_EXTRACTED_SIZE": "250"}
+    return cfg
+
+
 def _traf_config(opts):
-    cfg = use_config()
-    cfg.set("DEFAULT", "USER_AGENTS", opts.get("user_agent", DEFAULT_USER_AGENT))
+    # Builds a settings object; it does not need trafilatura to do that. The
+    # fallback matters because the commit gate asserts on this function, and
+    # the gate runs on the authoring machine where trafilatura is not
+    # installed. The result is only ever HANDED to trafilatura, never used by
+    # it here, so a plain ConfigParser is a faithful stand-in.
+    cfg = use_config() if use_config is not None else _bare_config()
+    ua = opts.get("user_agent", DEFAULT_USER_AGENT)
+    if ua:                          # empty = leave trafilatura's own default
+        cfg.set("DEFAULT", "USER_AGENTS", ua)
     cfg.set("DEFAULT", "DOWNLOAD_TIMEOUT", str(int(opts.get("timeout", 20))))
     cfg.set("DEFAULT", "SLEEP_TIME", str(float(opts.get("sleep_time", 1.0))))
     cfg.set("DEFAULT", "MAX_REDIRECTS", str(int(opts.get("max_redirects", 5))))
@@ -293,6 +324,44 @@ def resolve_google_news(url, opts):
     if isinstance(res, dict) and res.get("status") and res.get("decoded_url"):
         return res["decoded_url"]
     return None
+
+
+# ---------------------------------------------------------------------------
+# Public surface for callers that need one strategy at a time.
+#
+# tools/sensor_bench.py used to reach in and call the underscore-prefixed
+# functions directly, which meant the module boundary was decorative. If a
+# module is worth separating it is worth having an interface; if the only
+# caller has to open the hood, the separation was not real.
+# ---------------------------------------------------------------------------
+STRATEGIES = ("trafilatura", "impersonate")
+
+
+def available_strategies():
+    """Which strategies this installation can actually run, and why not."""
+    return {
+        "trafilatura": trafilatura is not None,
+        "impersonate": _curl is not None,
+        "google_news_decode": _gnews_decode is not None,
+        "readability_fallback": _Readability is not None,
+    }
+
+
+def try_strategy(name, url, opts=None):
+    """
+    Run ONE strategy and report what it produced: (text, status).
+
+    Returns status STATUS_ERROR when the named strategy is not installed, so a
+    caller measuring strategies can distinguish "tried and failed" from
+    "never ran".
+    """
+    opts = opts or {}
+    if name == "trafilatura":
+        return _strategy_trafilatura(url, opts)
+    if name == "impersonate":
+        return _strategy_impersonate(url, opts)
+    raise ValueError("unknown strategy %r; expected one of %s"
+                     % (name, ", ".join(STRATEGIES)))
 
 
 def fetch_body(url, opts=None, log=None):

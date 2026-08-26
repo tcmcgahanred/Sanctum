@@ -179,7 +179,14 @@ def process_feed(url, seen, seen_titles, run_dir, ctx, log):
         if not link or uid(link) in seen:
             continue
         if too_old(e, ctx["max_age_days"]):
+            # NAMED, not merely counted. A count tells you something was
+            # deleted; it does not tell you what, so it cannot be audited and
+            # the policy cannot be judged. Every rejection is greppable:
+            #     grep REJECTED-AGE /opt/ravenor/logs/collector.log
             tally["too_old"] += 1
+            log.info("REJECTED-AGE pub=%s title=%r url=%s",
+                     (published_dt(e).date().isoformat() if published_dt(e) else "?"),
+                     str(e.get("title", ""))[:120], link)
             continue
         if published_dt(e) is None:
             tally["undated"] += 1
@@ -309,6 +316,9 @@ def main():
     if breakdown:
         nb_line += f" — fetch outcomes: {breakdown}"
     print(nb_line)
+    if run["too_old"]:
+        print(f"[{cfg['domain']}]   -> each one is named in the log: "
+              f"grep REJECTED-AGE {cfg['log_path']}")
     if run["undated"]:
         print(f"[{cfg['domain']}] kept despite an unparseable publish date: "
               f"{run['undated']} — these bypass the age cutoff by design")

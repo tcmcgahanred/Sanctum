@@ -23,7 +23,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from core.acolyte import article, published_dt, too_old            # noqa: E402
 from core.fetch import (STATUS_CHALLENGE, STATUS_EMPTY, STATUS_JS_SHELL,  # noqa: E402
                         STATUS_OK, _classify, is_google_news_url,
-                        nobody_reason, strip_html)
+                        DEFAULT_USER_AGENT, _traf_config,
+                        available_strategies, nobody_reason, strip_html,
+                        try_strategy)
+from core.reflist import keys_in_article                           # noqa: E402
 
 FAILS = []
 
@@ -86,6 +89,19 @@ DEK = ("A malicious application delivers four-stage Android spyware via phony "
        "Google Play sites, exploiting civilian fear during Iranian missile strikes.")
 check("a short but genuine dek is not a failure", _classify(DEK)[1], STATUS_OK)
 
+print("\n-- the user agent stays OFF unless a host is measured to need it --")
+# MEASURED 2026-08-25 across all 56 sensors. Sending a browser user-agent is
+# the obvious fix and it was a net loss: news.sophos.com 2902 words ->
+# blocked (and tarpitting, 120s per attempt), cybersecuritynews.com 777 ->
+# blocked. A Chrome header over a Python TLS handshake is a mismatch, and the
+# mismatch is the signal. This guard exists so the obvious fix cannot be
+# quietly reinstated without someone reading why it was removed.
+check("no user agent is sent by default", DEFAULT_USER_AGENT, "")
+check("...and the config does not carry one either",
+      _traf_config({}).get("DEFAULT", "USER_AGENTS"), "")
+check("an explicitly configured host UA is still honoured",
+      _traf_config({"user_agent": "X/1.0"}).get("DEFAULT", "USER_AGENTS"), "X/1.0")
+
 print("\n-- aggregator wrappers are recognised --")
 check("Google News RSS article",
       is_google_news_url("https://news.google.com/rss/articles/CBMixgFBVV95cU?oc=5"), True)
@@ -132,6 +148,43 @@ check("a feed-summary body is disclosed",
                                        "body_source": "summary"}), True)
 check("a record collected before fetch tracking says nothing rather than guessing",
       nobody_reason({"title": "old record"}), "")
+
+print("\n-- the module has a real interface, not a decorative one --")
+# tools/sensor_bench.py used to call the underscore-prefixed functions
+# directly. If the only caller has to open the hood, the separation was not a
+# separation. These pin the public surface so it cannot rot back.
+_avail = available_strategies()
+check("availability is reported for every strategy",
+      sorted(_avail), ["google_news_decode", "impersonate",
+                       "readability_fallback", "trafilatura"])
+check("every value is a plain boolean",
+      all(isinstance(v, bool) for v in _avail.values()), True)
+try:
+    try_strategy("no_such_strategy", "https://x/y")
+    check("an unknown strategy is refused loudly", "no error raised", "ValueError")
+except ValueError:
+    check("an unknown strategy is refused loudly", "ValueError", "ValueError")
+
+print("\n-- reference lists: a fact looked up, not a phrase inferred --")
+_spec = {"json_path": "vulnerabilities", "key_field": "cveID",
+         "match_pattern": "CVE-[0-9]{4}-[0-9]{4,7}"}
+_art = {"title": "Defending Against an Active Threat to Siemens S7 PLCs",
+        "text": "CVE-2026-1234 affects controllers; see also cve-2019-0708."}
+check("identifiers are found in title and body",
+      sorted(keys_in_article(_art, _spec)), ["CVE-2019-0708", "CVE-2026-1234"])
+check("case is normalised so the catalogue can be matched",
+      "CVE-2019-0708" in keys_in_article(_art, _spec), True)
+check("no pattern declared means no keys, never a crash",
+      keys_in_article(_art, {}), set())
+check("an article naming nothing yields nothing",
+      keys_in_article({"title": "no identifiers here", "text": ""}, _spec), set())
+# THE CASE THAT MOTIVATED THIS. A real CISA advisory said "Active Threat", not
+# "actively exploited", so the word group stayed silent and the item fell from
+# 7.8 to 1.5. The identifier was in the text the whole time.
+check("...and the OBSERVED miss is catchable by identifier",
+      "CVE-2026-1234" in keys_in_article(_art, _spec), True)
+check("a malformed pattern is survived, not raised",
+      keys_in_article(_art, dict(_spec, match_pattern="CVE-[")), set())
 
 print()
 if FAILS:

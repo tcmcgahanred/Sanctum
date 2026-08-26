@@ -60,14 +60,14 @@ def strat_plain(url, opts):
 
 
 def strat_ua(url, opts):
-    text, status = F._strategy_trafilatura(url, opts)
+    text, status = F.try_strategy("trafilatura", url, opts)
     return words(text) if status == F.STATUS_OK else 0
 
 
 def strat_imp(url, opts):
-    if F._curl is None:
+    if not F.available_strategies()["impersonate"]:
         return -1
-    text, status = F._strategy_impersonate(url, opts)
+    text, status = F.try_strategy("impersonate", url, opts)
     return words(text) if status == F.STATUS_OK else 0
 
 
@@ -79,7 +79,7 @@ def bench_url(url, opts, names):
     out = {}
     resolved = url
     if F.is_google_news_url(url):
-        if F._gnews_decode is None:
+        if not F.available_strategies()["google_news_decode"]:
             out["gnews"] = -1
         else:
             r = F.resolve_google_news(url, opts)
@@ -106,9 +106,9 @@ def main():
     opts = collection.get("fetch", {}) or {}
     max_age = collection.get("max_publish_age_days")
 
-    print("optional strategies available: curl_cffi=%s  googlenewsdecoder=%s  "
-          "readability=%s" % (F._curl is not None, F._gnews_decode is not None,
-                              F._Readability is not None))
+    avail = F.available_strategies()
+    print("strategies available: " +
+          "  ".join("%s=%s" % (k, v) for k, v in avail.items()))
     print("max_publish_age_days = %s\n" % max_age)
 
     sensors = [u for u in cfg["sensors"] if not args.host or args.host in u]
