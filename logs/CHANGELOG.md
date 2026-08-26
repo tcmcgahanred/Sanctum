@@ -2,6 +2,18 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-25] MSRC dropped — 46% of the corpus for zero unique contribution
+
+The first sensor **removed** rather than added in a week of additions. Tenet 6 is quality over quantity, and the ratio had gone the wrong way: 56 sensors, none ever retired, and one of them was half the intake.
+
+- **4,346 items over 21 runs — 46% of the entire corpus** — against a next-largest sensor at 680. Flagged 2026-08-11 at 52.7% of lifetime articles; the decision then sat pending for three months because there was no instrument that made the cost legible.
+- **Sole source of zero distinct surfaced events.** Contributor to three. `tools/sensor_health.py` measured it: across four thousand items there was not one occasion when MSRC was the only place a surfaced story came from. **That is the number that settled it**, and it did not exist until today.
+- **It is a patch catalogue, not reporting.** One item per CVE, so a single Patch Tuesday arrives as a hundred-plus articles with no severity, no exploitation status and no judgement about which of them matter — the three things an analyst actually needs.
+- **And nothing usable came out of it.** Every item links to a JavaScript single-page application; the collector was storing *"You need to enable JavaScript to run this app"* as the article body. Benchmarked across every fetch strategy — none recovers it.
+- **Microsoft coverage is unaffected.** Microsoft Threat Intelligence is a separate sensor and stays, and `lowmat_tech` already carries `sharepoint` and `exchange server`. The residual gap — a critical Microsoft flaw nobody writes up that KEV has not listed — occurred **zero times in 21 runs**.
+- **The drop record carries all three reasons on purpose.** "Microsoft patches matter, SLTT estates run Windows" is a reasonable-sounding argument that will be made again by someone acting in good faith. **A removal without a written reason is a removal that gets undone.**
+- **Expect the corpus to roughly halve.** Three fixes land together — this, the publish-age cutoff, and `when:7d` on the Google News queries. The staging queue should barely move, which is the point.
+
 ## [2026-08-25] The browser user agent was the obvious fix, and it was wrong
 
 Benchmarked against all 56 sensors on the collector host — the only machine that can reach them — with `tools/sensor_bench.py`. **The user-agent override is off by default and the reasoning is recorded in three places, because it is exactly the kind of change someone will helpfully reinstate.**

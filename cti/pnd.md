@@ -108,6 +108,36 @@ feed list** — edit feeds here. Add a feed only if it is reliable AND additive;
 it against the host's egress first; drop noisy sources. Do not reintroduce the dropped
 34 county Google-News keyword feeds.
 
+Dropped 2026-08-25 — `api.msrc.microsoft.com/update-guide/rss`. **Do not reintroduce
+without new evidence.** Three independent reasons, measured over 21 cycles:
+
+- **Volume, and the wrong shape of it.** 4,346 items collected — **46% of the entire
+  corpus** — against a next-largest sensor at 680. It is Microsoft's patch catalogue and
+  it emits **one item per CVE**, so a single Patch Tuesday arrives as a hundred-plus
+  articles carrying no severity, no exploitation status and no judgement about which of
+  them matter. First recorded 2026-08-11 at 52.7% of lifetime articles; the decision sat
+  pending for three months.
+- **Nothing usable comes out.** Every item links to
+  `msrc.microsoft.com/update-guide/vulnerability/CVE-…`, a JavaScript single-page
+  application with no server-rendered text. The collector was storing the string
+  *"You need to enable JavaScript to run this app"* as the article body. Benchmarked
+  2026-08-25 across every fetch strategy — plain, browser user agent, TLS impersonation
+  — and **none recovers it**; short of running a headless browser there is nothing there.
+- **Zero unique contribution.** Sole source of **no** distinct surfaced event across 21
+  runs, and a contributor to three. When a Microsoft flaw genuinely matters,
+  BleepingComputer, The Hacker News, Talos and Rapid7 all cover it with context and all
+  four are already carried here.
+
+The reasons this feed *sounds* essential — Microsoft patches, SLTT estates run Windows —
+are exactly why it needs a written record. **Coverage of Microsoft is not lost.**
+`microsoft.com/en-us/security/blog/feed/` (Microsoft Threat Intelligence) is a separate
+sensor and stays; `lowmat_tech` already carries `sharepoint` and `exchange server`, so a
+Microsoft flaw the news covers still elevates. The residual gap — a critical Microsoft
+vulnerability nobody writes up and that KEV has not yet listed — occurred **zero times in
+21 runs**. If that gap ever needs closing, the answer is Microsoft's CVRF API
+(`api.msrc.microsoft.com/cvrf/v3.0/`, verified reachable 2026-08-25) used as a **lookup**,
+one document per month — not a feed that emits the flood more cleanly.
+
 Also dropped 2026-08-11, verified against 9 cycles of `collector.log` — do not reintroduce
 without new evidence:
 
@@ -163,7 +193,7 @@ https://www.nist.gov/blogs/cybersecurity-insights/rss.xml
 https://jvn.jp/en/rss/jvn.rdf
 
 # --- National: vendor PSIRTs ---
-https://api.msrc.microsoft.com/update-guide/rss
+# MSRC update-guide RSS was dropped 2026-08-25. See the drop list above.
 https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml
 https://security.paloaltonetworks.com/rss.xml
 https://www.fortiguard.com/rss/ir.xml
