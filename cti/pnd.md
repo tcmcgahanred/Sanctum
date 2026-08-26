@@ -163,6 +163,33 @@ without new evidence:
   the identical `no text` failure every cycle. The query matches nothing, so Google returns an
   empty feed, which falls to the page path and yields nothing extractable. Too narrow.
 
+Considered and declined 2026-08-26 — `malwarebytes.com/blog/feed/index.xml`. **Measured
+before adding rather than after.** Write this one down carefully, because the feed is sound:
+it passes every mechanical test and fails the only test that matters.
+
+- **Mechanically it is one of the better feeds available.** HTTP 200 from the collector host,
+  20 parseable entries, newest 0.1 days old, bodies extracting at 445 to 2,560 words on plain
+  trafilatura — no browser user agent, no TLS impersonation, no strategy required. Single-topic
+  posts with dated, citable per-story URLs, so it passes the shape test that refused CyberWire.
+  Roughly six items a day and no back-catalogue burst beyond the first poll. One item in twenty
+  is a weekly roundup carrying 45 words, which is the CyberWire objection in miniature.
+- **Every one of its 20 items scored between 1.00 and 1.50 against a 2.00 threshold. Zero would
+  surface.** All twenty landed in tier 4, *broad/national with SLTT relevance* — the floor. Only
+  two multipliers fired across the entire feed: one low-maturity SLTT technology and one
+  supply-chain. Measured by loading the live CTI scoring model and scoring the real feed
+  contents, before the sensor was added to anything.
+- **The reason is audience, not quality.** Malwarebytes Labs writes for individuals — phishing
+  lures, consumer scams, mobile banking trojans, personal privacy. The model floors anything
+  with no AOR hook, correctly, because this is a California SLTT brief. Items that look in scope
+  by their titles do not survive it: a healthcare breach exposing medical records and Social
+  Security numbers scored 1.00 because it is national with no California link, and 2,560 words
+  of loader threat research scored the same.
+- **The one thing that would change this answer** is the open Planning & Direction question on
+  whether AI-assistant security is in scope. Three of the twenty items are in that class. If
+  that decision comes back yes, this feed is worth **re-measuring — not re-arguing.** Do not
+  reintroduce on the grounds that the feed is good. It is good. Against this mandate it is
+  also empty.
+
 Wanted but not collectable — checked 2026-08-23, do not re-search without new evidence:
 
 - **Dragos** (`dragos.com`) publishes no RSS feed. Ten conventional paths tested from the

@@ -2,6 +2,13 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-26] First clean cycle read; a sensor measured before adding, and declined
+
+- **The first collection cycle under the publish-age cutoff, `when:7d`, the fetch strategies and the MSRC removal.** 211 new articles, 207 of them with usable bodies, 35 age rejections every one named in the log. **The standing prediction was that the corpus would roughly halve. It roughly tripled.** The eleven rewritten Google News queries produced 143 of the 211 against 14 the day before, because `when:7d` changes the result set rather than filtering it — the old queries were re-offering a back catalogue already marked seen. Collection now takes 20 minutes where it took 88 seconds, and scoring a further 16.
+- **`max_publish_age_days` is still unmeasured, and now the reason is structural rather than incidental.** Run against the lifetime corpus, `lag_check.py` reports a 7-day cutoff deleting 69% of surfacing items — but that is the polluted archive being counted as loss, with a median publication-to-collection lag of 88.9 days and a 95th percentile of 2,235. The clean day cannot answer it either: **the cutoff censors the very data needed to evaluate the cutoff**, because anything older was refused before entry. The only uncensored record is the rejection log itself. A hand review of one run's complete 35-item rejection list is in `running-log.md`, Blocker 15.
+- **Malwarebytes Labs measured against the live scoring model and declined — zero of twenty items would surface.** The feed is mechanically excellent and against this mandate it is empty. Full record in `cti/pnd.md`. **This is the first sensor decision taken by measurement before the fact rather than after**, and it cost one command.
+- **A gap that exposed.** `tools/sensor_bench.py` tells you to run it before adding a sensor, and then can only bench sensors already in the manifest. Both of today's candidate measurements were throwaway probes typed into a shell. A `--url` flag would make the check repeatable instead of reinvented.
+
 ## [2026-08-25] MSRC dropped — unusable bodies and zero unique contribution
 
 The first sensor **removed** rather than added in a week of additions. Tenet 6 is quality over quantity, and the ratio had gone the wrong way: 56 sensors, none ever retired, and one of them was half the intake.
