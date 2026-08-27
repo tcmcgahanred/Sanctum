@@ -197,57 +197,138 @@ trade, not a maintenance edit.
 
 ---
 
+## How a keyword gets attributed to a requirement
+
+*Added 2026-08-26.*
+
+**A keyword's intelligence requirement is decided by which group it lands in.**
+Nothing else attributes it. The tier rules that consume a group are the
+requirements, so putting a term in `geo` makes it PIR-1 vocabulary and putting it
+in `sector` makes it PIR-2 vocabulary, whether or not anyone intended that.
+
+That was true before this section existed and it was written down nowhere. The
+mapping could only be recovered by walking every rule tree by hand across two
+files, and on 2026-08-26 a session doing exactly that got it wrong twice in one
+sitting. **A fact that must be derived is a fact that will eventually be derived
+wrongly.** So each group now declares its attribution in the block below, and
+`tools/vocab_check.py` warns when one does not.
+
+**The question to ask of a new keyword:** does this word tell me *which*
+requirement is in play, or does it make an already-relevant item more urgent?
+
+- **First case — it belongs in a requirement-defining group,** and that group
+  names the requirement. `geo` and `incident` serve PIR-1. `sector` and
+  `incident_broad` serve PIR-2. `exploit_strong` and `lowmat_tech` serve PIR-3.
+- **Second case — it is an elevation term and has no single requirement.**
+  `ci`, `ransom`, `supplychain`, `cve` and `cisa_source` change how an item
+  ranks, never which question it answers. Attributing one of these to a
+  requirement is a category error, not a judgement call.
+
+**Three groups sit outside both.** `listicle` is an exclusion — it exists only to
+be negated. `ttp` shapes the product rather than the score, suggesting a vox
+section. `kev` and `targeting` are consumed by no rule at all, both on purpose
+and both with the reason recorded below.
+
+**Why this lives here and not in `pnd.md` or `requirements.md`.** It is reasoning
+about a group, and the standing decision of 2026-08-17 puts terms in `pnd.md` and
+reasoning about terms here — two copies of the same fact drift within a month.
+Writing it as prose in `requirements.md` would have created a second copy that
+nobody opens while editing a word list, which is how `kev` and `targeting` came
+to be invisible in the first place.
+
+**The judgement is not automatable and is not meant to be.** Deciding whether
+`outage` serves PIR-1 or PIR-2 is intelligence judgement. What the guard enforces
+is only that the judgement was made and recorded — never what it should be.
+
+---
+
 ## Group review status
 
 ```yaml
 vocab:
   review_interval_days: 180
   groups:
+    # Each group declares ONE of `serves:` or `role:`. See "How a keyword gets
+    # attributed to a requirement" above for what the values mean and why the
+    # declaration lives here rather than in pnd.md or requirements.md.
     geo:
       reviewed: 2026-08-17
       review_interval_days: 180   # county/city lists change slowly
+      serves: [PIR-1]             # tier 1 and force-surface M1
     incident:
-      reviewed: 2026-08-17
+      reviewed: 2026-08-24        # theft/hacker terms added, v2 changelog
       review_interval_days: 90    # see Open finding 1 — known incomplete
+      serves: [PIR-1]             # tier 1 and force-surface M1
     sector:
-      reviewed: 2026-08-24          # rewritten to compound terms, v2 changelog
-    ci:
-      reviewed: 2026-08-24          # rewritten to compound terms, v2 changelog
-    incident:
-      reviewed: 2026-08-24          # theft/hacker terms added, v2 changelog
-      review_interval_days: 90
-    ransom:
-      reviewed: 2026-08-17
-      review_interval_days: 90    # actor and brand names turn over fast
-    kev:
-      reviewed: 2026-08-17
-      review_interval_days: 90
-    lowmat_tech:
-      reviewed: 2026-08-17
-      review_interval_days: 90    # Vox Policy §7 calls this a maintained lexicon
-    supplychain:
-      reviewed: 2026-08-17
-    targeting:
-      reviewed: 2026-08-24
-      review_interval_days: 90    # attack-verb phrasing follows the press, not the threat
+      reviewed: 2026-08-24        # rewritten to compound terms, v2 changelog
+      serves: [PIR-2]             # tier 2 and force-surface M3
     incident_broad:
       reviewed: 2026-08-24
       review_interval_days: 90    # keep as union of incident + targeting, plus 'hacker'
+      serves: [PIR-2]             # tier 2 and M3; ALSO elevates two multipliers
     exploit_strong:
       reviewed: 2026-08-24
       review_interval_days: 90    # the line between real exploitation and trend talk moves
+      serves: [PIR-3]             # tier 3, force-surface M2, the CISA floor;
+                                  # ALSO elevates both x1.5 multipliers
+    lowmat_tech:
+      reviewed: 2026-08-17
+      review_interval_days: 90    # Vox Policy §7 calls this a maintained lexicon
+      serves: [PIR-3]             # tier 3, force-surface M2, the CISA floor;
+                                  # ALSO elevates both x1.5 multipliers
+    ci:
+      reviewed: 2026-08-24        # rewritten to compound terms, v2 changelog
+      role: elevation             # ransomware vs public-sector/CI multiplier only
+    ransom:
+      reviewed: 2026-08-17
+      review_interval_days: 90    # actor and brand names turn over fast
+      role: elevation             # ransomware vs public-sector/CI multiplier only
+    supplychain:
+      reviewed: 2026-08-17
+      role: elevation             # supply-chain / procurement multiplier only
     cve:
       reviewed: 2026-08-24
       review_interval_days: 365   # identifier format, not vocabulary
+      role: elevation             # KEV / actively exploited multiplier only
     cisa_source:
       reviewed: 2026-08-24
       review_interval_days: 365   # a hostname, not vocabulary
+      role: elevation             # the CISA-directive floor raises a score
     listicle:
       reviewed: 2026-08-24
       review_interval_days: 90    # headline fashions change; new shapes will appear
+      role: exclusion             # only ever appears under a `not`
     ttp:
       reviewed: 2026-08-25
       review_interval_days: 90    # tradecraft naming follows the research, fast
+      role: production            # suggests the "CTA TTPs" section; scores nothing
+    kev:
+      reviewed: 2026-08-17
+      review_interval_days: 90
+      role: unused
+      unused_because: >
+        Split into `exploit_strong` on 2026-08-24 because it was doing two jobs,
+        mixing exploitation evidence with generic vulnerability vocabulary.
+        Retained under the standing rule that when a group turns out to be two
+        groups you split it rather than deleting half. NOTE: `zero-day` and
+        `0-day` live here and nowhere else, so they currently fire no multiplier
+        — reconcile with work order 3 in cti/pnd_work_orders_20260825.md before
+        that decision is taken.
+    targeting:
+      reviewed: 2026-08-24
+      review_interval_days: 90    # attack-verb phrasing follows the press, not the threat
+      role: unused
+      unused_because: >
+        Availability language (outage, denial of service, taken offline, service
+        disruption) is confined here by design. `incident_broad` was built as the
+        union of `incident` and `targeting` and is what the rules read; this group
+        is the reserve the union draws from. Wiring it into `incident` is Open
+        finding 1 and a P&D decision, not a maintenance edit.
+
+    # PIR-4 — broad/national with SLTT relevance — has NO group. Tier 4 is
+    # `require: always`, the floor every item lands on when nothing else
+    # qualifies. There is no vocabulary to attribute to it and there should not
+    # be: it is the absence of the other three, not a subject of its own.
 
   accepted:
     - check: padded term

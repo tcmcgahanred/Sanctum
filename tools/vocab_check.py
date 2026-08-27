@@ -27,8 +27,13 @@ WHAT IT CHECKS
   redundant boundary term  <=4 chars, where the matcher already applies word
                            boundaries automatically                       [WARN]
   stale group              review date older than the configured interval [WARN]
+  unattributed group       no `serves:` and no `role:` — a keyword added here
+                           cannot be traced to an intelligence requirement [WARN]
+  group consumed by no     declared, holds terms, and no rule anywhere reads
+  rule                     it. NOTED instead when vocab.md says it is
+                           deliberate and says why                        [WARN]
 
-The first two need no vocab.md. The last three do.
+The first two need no vocab.md. The rest do.
 
 WHY BOUNDARY ENTRIES GO DEAD
 ----------------------------
@@ -126,6 +131,42 @@ def _as_date(v):
         return None
 
 
+ROLES = ("elevation", "exclusion", "production", "unused")
+
+
+def referenced_groups(cfg):
+    """
+    Every group named by any rule anywhere in a domain's config.
+
+    Walks the WHOLE loaded config, not just `scoring`. That is deliberate and
+    it was learned the hard way: a first pass walked `scoring` and `manifest`
+    only, and reported `ttp` as consumed by nothing. `ttp` is consumed — by the
+    section suggester, which lives under the separate top-level `production`
+    key. A checker that looks only where it expects to find things reports
+    absences that are not there, which is worse than not checking at all.
+    """
+    seen = set()
+
+    def walk(o):
+        if isinstance(o, dict):
+            if isinstance(o.get("group"), str):
+                seen.add(o["group"])
+            prox = o.get("proximity")
+            if isinstance(prox, dict):
+                for side in ("a", "b"):
+                    if isinstance(prox.get(side), str):
+                        seen.add(prox[side])
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+
+    for key in ("scoring", "manifest", "production"):
+        walk(cfg.get(key))
+    return seen
+
+
 def check_domain(domain, cfg, vocab, today):
     findings = []
     scoring = cfg["scoring"]
@@ -203,12 +244,94 @@ def check_domain(domain, cfg, vocab, today):
                 f"(group: {', '.join(sorted(set(live[term])))}). "
                 f"Remove it from pnd.md, or remove the dropped record."))
 
+    gmeta = vocab.get("groups") or {}
+
+    # --- requirement attribution ---------------------------------------
+    # WHY. A keyword lands in a group, and the rules that consume that group
+    # decide which intelligence requirement an item can answer. So the group IS
+    # the attribution — but nothing said so, and the mapping could only be
+    # recovered by walking every rule tree by hand across two files. A fact that
+    # must be derived is a fact that will eventually be derived wrongly; on
+    # 2026-08-26 it was, twice, in one session.
+    #
+    # Each group declares exactly one of:
+    #     serves: [PIR-1]     it decides WHICH requirement an item answers
+    #     role: elevation     it changes rank, never which requirement
+    #     role: exclusion     it appears only under a `not`
+    #     role: production    it shapes the product, not the score
+    #     role: unused        consumed by no rule, on purpose (needs a reason)
+    #
+    # WARN, never ERROR. An unattributed group is documentation debt, not a
+    # broken engine, and a gate that blocks a commit over documentation gets
+    # --no-verify'd — the failure that retired the scrub check on 2026-08-23.
+    #
+    # Silent until the domain has declared at least one, so a domain that has
+    # never used the convention is not buried in warnings on the first run.
+    # Same bootstrap rule as the review dates below.
+    declared_any = any(
+        (gmeta.get(g) or {}).get("serves") or (gmeta.get(g) or {}).get("role")
+        for g in groups)
+    if declared_any:
+        for gname in sorted(groups):
+            meta = gmeta.get(gname) or {}
+            serves, role = meta.get("serves"), meta.get("role")
+            if serves and role:
+                findings.append(Finding(
+                    WARN, domain, "attribution conflict", gname,
+                    f"declares both serves={serves!r} and role={role!r}. A group "
+                    f"either decides which requirement is answered or it does "
+                    f"not. Pick one."))
+            elif not serves and not role:
+                findings.append(Finding(
+                    WARN, domain, "unattributed group", gname,
+                    "no `serves:` and no `role:` in vocab.md. Someone adding a "
+                    "keyword here cannot tell which intelligence requirement "
+                    "they are feeding."))
+            elif role and role not in ROLES:
+                findings.append(Finding(
+                    WARN, domain, "unknown group role", f"{gname}: {role!r}",
+                    f"not one of {', '.join(ROLES)}."))
+
+    # --- groups no rule consumes ---------------------------------------
+    # A group nobody reads is invisible: it keeps its terms, keeps its review
+    # date, and contributes nothing. `kev` has been in exactly this state since
+    # 2026-08-24 — deliberately, recorded in vocab.md, retained because a group
+    # that turns out to be two groups gets split rather than half-deleted. That
+    # is a fine reason and the point of this check is not to argue with it. The
+    # point is that the reason must be WRITTEN, not remembered.
+    #
+    # Declared and unused prints as NOTED and keeps printing — accepted findings
+    # are downgraded, never silenced (standing decision, 2026-08-17).
+    #
+    # Skipped entirely when the domain declares no rules at all. "Consumed by
+    # nothing" is only a finding relative to something — a domain with no tiers
+    # and no multipliers is a stub or a fixture being built, not a domain with
+    # dead vocabulary, and burying it in warnings is the bootstrap failure this
+    # file already guards against for review dates.
+    has_rules = bool(scoring.get("tiers") or scoring.get("multipliers"))
+    consumed = referenced_groups(cfg) if has_rules else set(groups)
+    for gname in sorted(groups):
+        if gname in consumed:
+            continue
+        meta = gmeta.get(gname) or {}
+        because = str(meta.get("unused_because", "")).strip()
+        if meta.get("role") == "unused" and because:
+            findings.append(Finding(
+                NOTED, domain, "group consumed by no rule", gname,
+                f"declared unused on purpose: {because}"))
+        else:
+            findings.append(Finding(
+                WARN, domain, "group consumed by no rule", gname,
+                f"{len(groups[gname] or [])} term(s), referenced by no tier, "
+                f"multiplier, floor, force-surface or production rule. Either "
+                f"wire it in, or declare `role: unused` with `unused_because:` "
+                f"in vocab.md so the next reader knows it is deliberate."))
+
     # --- staleness -----------------------------------------------------
     # A WARN, never an ERROR. A date passing is not a reason to block a commit;
     # it is a reason to look. Blocking here would train people to --no-verify,
     # which switches off every other check with it.
     default_interval = vocab.get("review_interval_days")
-    gmeta = vocab.get("groups") or {}
     for gname in sorted(groups):
         meta = gmeta.get(gname) or {}
         interval = meta.get("review_interval_days", default_interval)

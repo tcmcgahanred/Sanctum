@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from tools.vocab_check import check_domain, load_vocab, ERROR, WARN  # noqa: E402
+from tools.vocab_check import check_domain, load_vocab, ERROR, WARN, NOTED  # noqa: E402
 
 FAILED = []
 
@@ -165,6 +165,73 @@ check("the tracked domain is never dropped from the gate",
 # deliberately empty — and a guard that always fails is a guard people ignore.
 check("an underscore-prefixed folder is not treated as a domain",
       [d for d in discover_domains(REPO_ROOT) if d.startswith("_")], [])
+
+print("\nRequirement attribution — which intelligence requirement a keyword feeds")
+
+# A domain with rules, so the orphan check is live.
+def ruled(groups, tier_group="alpha"):
+    return {"scoring": {"groups": groups, "word_boundary_terms": [],
+                        "tiers": [{"id": 1, "weight": 8.0,
+                                   "require": {"group": tier_group}},
+                                  {"id": 2, "weight": 1.0, "require": "always"}]}}
+
+two = ruled({"alpha": ["real term"], "beta": ["other term"]})
+
+# Bootstrap: a domain that has never used the convention says nothing about it.
+check("no group declares an attribution -> no attribution noise",
+      "unattributed group" in kinds(check_domain("t", two, {}, TODAY)), False)
+
+vocab_one = {"groups": {"alpha": {"serves": ["PIR-1"]}}}
+check("once ONE group declares, the silent ones are named",
+      subjects(check_domain("t", two, vocab_one, TODAY), "unattributed group"),
+      ["beta"])
+check("...and it is a WARN, never an ERROR",
+      kinds(check_domain("t", two, vocab_one, TODAY), ERROR), [])
+
+both = {"groups": {"alpha": {"serves": ["PIR-1"]},
+                   "beta": {"serves": ["PIR-2"], "role": "elevation"}}}
+check("declaring both serves and role is a conflict",
+      subjects(check_domain("t", two, both, TODAY), "attribution conflict"),
+      ["beta"])
+
+bogus = {"groups": {"alpha": {"serves": ["PIR-1"]}, "beta": {"role": "banana"}}}
+check("an unknown role is named rather than accepted",
+      kinds(check_domain("t", two, bogus, TODAY), WARN)
+      .count("unknown group role"), 1)
+
+print("\nGroups no rule consumes — invisible vocabulary")
+
+# beta is declared, holds terms, and no tier reads it.
+check("an unread group is a WARN",
+      subjects(check_domain("t", two, {}, TODAY), "group consumed by no rule"),
+      ["beta"])
+
+deliberate = {"groups": {"beta": {"role": "unused",
+                                  "unused_because": "split from alpha; kept on purpose"}}}
+f = check_domain("t", two, deliberate, TODAY)
+check("declared unused with a reason downgrades to NOTED",
+      [x.severity for x in f if x.check == "group consumed by no rule"], [NOTED])
+check("...and it keeps printing rather than being silenced",
+      subjects(f, "group consumed by no rule"), ["beta"])
+
+no_reason = {"groups": {"beta": {"role": "unused"}}}
+check("declaring it unused without saying why stays a WARN",
+      [x.severity for x in check_domain("t", two, no_reason, TODAY)
+       if x.check == "group consumed by no rule"], [WARN])
+
+# The production key lives OUTSIDE scoring. A checker that only walks `scoring`
+# reports a section-suggester group as dead. That mistake was made on 2026-08-26.
+prod = ruled({"alpha": ["real term"], "beta": ["other term"]})
+prod["production"] = {"staging_annotations":
+                      {"sections": [{"name": "S", "when": {"group": "beta"}}]}}
+check("a group used only by the section suggester is NOT reported dead",
+      subjects(check_domain("t", prod, {}, TODAY), "group consumed by no rule"), [])
+
+# A stub with vocabulary but no rules yet is not a domain with dead groups.
+check("a domain with no rules at all is exempt",
+      subjects(check_domain("t", cfg({"alpha": ["real term"]}), {}, TODAY),
+               "group consumed by no rule"), [])
+
 
 print("\nvocab.md parsing")
 missing = Path("/nonexistent/does/not/exist/vocab.md")
