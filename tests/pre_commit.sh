@@ -54,6 +54,21 @@ if command -v python3 >/dev/null 2>&1; then
     python3 "$REPO_ROOT/tests/fetch_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/fetch_test.py failed; run it to see which check" >&2
         STATUS=1; }
+    # Same class as fetch_test: engine behaviour, stdlib plus PyYAML, fails
+    # closed. It guards the handover from stage 3a to 3b — the requirement, the
+    # multiplier evidence, and the rule that an undeclared domain stays silent
+    # rather than printing "Requirement met: None" on every candidate.
+    python3 "$REPO_ROOT/tests/handover_test.py" >/dev/null || {
+        echo "pre-commit: BLOCKED — tests/handover_test.py failed; run it to see which check" >&2
+        STATUS=1; }
+    # The homonym gate. A shark breaching the ocean force-surfaced as a California
+    # cyber incident on 2026-08-31; force-surface is immune to the score by design,
+    # so nothing downstream could have caught it. This holds the line in both
+    # directions - the junk drops AND every genuine item an earlier attempt deleted
+    # still surfaces.
+    python3 "$REPO_ROOT/tests/homonym_test.py" >/dev/null || {
+        echo "pre-commit: BLOCKED — tests/homonym_test.py failed; run it to see which case" >&2
+        STATUS=1; }
 else
     echo "pre-commit: BLOCKED — python3 not found, cannot check domain files" >&2
     STATUS=1

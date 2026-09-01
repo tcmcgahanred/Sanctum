@@ -394,15 +394,34 @@ list. That catches what a correction factor would miss.
 below the threshold is still listed by title. *Dropped* never means *invisible* —
 the analyst eyeballs the discards in seconds and rescues anything mis-scored.
 
+**Each tier declares the intelligence requirement it answers.** The four tiers
+and the four priority requirements in `requirements.md` are the same four things
+and always were — the tier `name` paraphrased the requirement instead of naming
+it, so an item's requirement was computed at every scoring pass and never
+written down anywhere a reader could see. `serves:` is that name. It changes no
+score; it is read only when the staging document says which requirement a
+candidate answered.
+
+**`serves:` carries the identifier only, never the requirement's statement.**
+`requirements.md` is the single source of truth for what PIR-1 *says*. Copying
+the sentence here would put the same fact in two files, which is the drift the
+two-file split exists to prevent.
+
+**PIR-4 is the floor, not a subject.** Tier 4 is `require: always` — everything
+that qualified for nothing else. It has no vocabulary of its own and should not
+be given any.
+
 ```yaml
 scoring:
   tiers:
     - id: 1
       name: "AOR-direct (CA subject of an incident)"
+      serves: PIR-1                 # requirements.md — Direct impact to CA organizations
       weight: 8.0
       require:
         all:
           - {not: {group: listicle, scope: title}}
+          - {group: cyber_context, scope: blob}   # cyber-domain floor, see prose above
           - any:
               - all:
                   - {group: geo, scope: title}
@@ -413,10 +432,12 @@ scoring:
                   - {proximity: {a: geo, b: incident, window: 120}}
     - id: 2
       name: "SLTT-sector targeting (sector as subject)"
+      serves: PIR-2                 # requirements.md — SLTT sector targeting anywhere
       weight: 4.0
       require:
         all:
           - {not: {group: listicle, scope: title}}
+          - {group: cyber_context, scope: blob}   # cyber-domain floor, see prose above
           - any:
               - all:
                   - {group: sector, scope: title}
@@ -425,16 +446,19 @@ scoring:
                              scope: blob, all_occurrences: true}}
     - id: 3
       name: "Exploited flaw in SLTT-common tech"
+      serves: PIR-3                 # requirements.md — Actively-exploited vulns in SLTT-common tech
       weight: 2.0
       require:
         all:
           - {not: {group: listicle, scope: title}}
+          - {group: cyber_context, scope: blob}   # cyber-domain floor, see prose above
           - {group: exploit_strong, scope: blob}
           - {group: lowmat_tech, scope: blob}
           - {proximity: {a: lowmat_tech, b: exploit_strong, window: 200,
                          scope: blob, all_occurrences: true}}
     - id: 4
       name: "broad/national with SLTT relevance"
+      serves: PIR-4                 # requirements.md — Broad/national threats with SLTT relevance
       weight: 1.0
       require: always
 
@@ -501,6 +525,7 @@ scoring:
       when:
         all:
           - {not: {group: listicle, scope: title}}
+          - {group: cyber_context, scope: blob}   # cyber-domain floor
           - any:
               - all:
                   - {group: geo, scope: title}
@@ -511,6 +536,7 @@ scoring:
       when:
         all:
           - {not: {group: listicle, scope: title}}
+          - {group: cyber_context, scope: blob}   # cyber-domain floor
           - {group: exploit_strong, scope: blob}
           - {group: lowmat_tech, scope: blob}
           - {proximity: {a: lowmat_tech, b: exploit_strong, window: 200,
@@ -519,6 +545,7 @@ scoring:
       when:
         all:
           - {not: {group: listicle, scope: title}}
+          - {group: cyber_context, scope: blob}   # cyber-domain floor
           - any:
               - all:
                   - {group: sector, scope: title}
@@ -641,6 +668,44 @@ scoring:
           "process injection", "living-off-the-land"]
     # Matched against the `source` scope, never the article text.
     cisa_source: ["cisa.gov"]
+    # CYBER-DOMAIN FLOOR. Added 2026-08-31. An item cannot reach tier 1, 2 or 3,
+    # and cannot force-surface, unless it contains at least one of these. It is a
+    # FLOOR, not a scorer - nothing here adds weight, and a generous list is the
+    # safe direction because a miss here silently deletes a requirement while a
+    # false positive merely leaves an item eligible to be scored on its merits.
+    #
+    # WHY. On 2026-08-31 "A Baby Great White Leapt from the Ocean Near a Boogie
+    # Boarder" scored 8.0, tier 1, force-surfaced on M1: `geo:'california'` and
+    # `incident:'breach'` - a shark BREACHING the ocean near a California beach.
+    # "breach" is also a levee, a contract, a courtroom verdict and a code of
+    # conduct. Measured against 776 items: this floor removes 16 of 137 surfaced
+    # items and every one of the 16 is non-cyber - sharks, whale watching, two
+    # lottery suits, Oakley v Nike, a reinsurance dispute, Justice Thomas.
+    #
+    # NOT the word "cyber" alone. That was tried first and measured: it would have
+    # deleted the California DMV data breach, the LA Superior Court ransomware
+    # shutdown, the Northern Inyo Hospital breach and all three tier-3 vulnerability
+    # advisories - 44 items, roughly half of them the most in-scope in the set.
+    # Incident reporting does not say "cyber"; journalists and policy writers do.
+    #
+    # EVERY FORM OF "hack" IS SPELLED OUT, and that is not tidiness. The matcher
+    # gives any term of 4 characters or fewer automatic WORD-BOUNDARY matching, so
+    # a bare "hack" does not match "hacks", "hacked" or "hacking" - it matches only
+    # the standalone noun. Measured: with "hack" alone, "Attackers Targeted Over 100
+    # US Water Systems in July Hacks" was deleted, a tier-2 water-sector item lost to
+    # one plural noun. This is the same 4-character boundary rule behind Open finding
+    # 2 in vocab.md. A stem is not a stem in this engine unless it is 5+ characters.
+    cyber_context: ["cyber", "hacks", "hacked", "hacker", "hacking", "hack",
+          "ransomware", "malware", "phish",
+          "data breach", "security breach", "breach notification",
+          "personal information", "social security", "patient record",
+          "customer record", "credit card", "credential", "password",
+          "database", "unauthorized access", "exfiltrat", "encrypted the",
+          "threat actor", "security incident", "vulnerabilit", "exploit",
+          "cve-", "patch", "denial of service", "ddos", "it systems",
+          "computer system", "network", "server", "stolen data", "data theft",
+          "identity theft", "information technology"]
+
     listicle: ["top 5", "top 7", "top 10", "top 12", "top 15", "top 20", "top 25",
                "biggest", "ranked", "you should know", "ultimate guide",
                "buyer's guide", "buyers guide", "roundup", "round-up",
