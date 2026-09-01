@@ -2,6 +2,16 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-08-31] Two rules moved from one domain's files to the method every clone gets
+
+Corrective, same day. The chat-consumer principle and the thin-output standard were written into `cti/mandate.md` and `cti/vox_policy.md` — **both CTI-specific files.** Anyone who clones Sanctum and builds a different domain would never have read either one.
+
+- **`docs/EXPLOITATION.md` gains R13 — requirements are consumed, never authored**, and **R14 — the review surface is worked, not sampled.** That file is the domain-agnostic method for stage 3b and ships to every clone; it is where a rule about how a model reads a staging document belongs.
+- **`cti/mandate.md` keeps a pointer, not a copy.** One rule, one file. What stays CTI-specific is the wiring: requirements in `cti/requirements.md`, the model in `cti/pnd.md`, `serves:` and `serves_eei:` on the rules, identifier only.
+- **`cti/vox_policy.md` keeps both standards as binding domain statements** and names the method rule each one carries. The policy already declares that it wins where it and the method disagree, so the domain can tighten but not weaken them.
+- **R14 did not previously exist at any level.** The method said the review surface is "deliberately deeper than the finished thing" and R3 said marginal items are kept and flagged, but nothing said that twenty-eight suggested and one written is a failure to work the section.
+- **The standard this was measured against:** someone clones Sanctum, points any model at it, and produces what a practised analyst would. That is only true if every requirement is derivable from the repository. A rule that reaches one domain fails that test.
+
 ## [2026-08-31] Chat consumes requirements; it never authors them
 
 Standing doctrine, written into `cti/mandate.md` and `cti/vox_policy.md` rather than left in chat. **Requirements are defined in `cti/requirements.md`, the model that operationalises them in `cti/pnd.md`, and they reach the analyst through the staging document.** The vox copies what Sanctum supplies and derives nothing. Before today it re-derived the requirement label from the tier number, in conversation, every cycle — which worked only because one person remembered the mapping. **A re-derivation nobody can audit, in the one place with no version control.**
