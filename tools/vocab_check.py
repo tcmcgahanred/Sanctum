@@ -328,6 +328,31 @@ def check_domain(domain, cfg, vocab, today):
                 f"wire it in, or declare `role: unused` with `unused_because:` "
                 f"in vocab.md so the next reader knows it is deliberate."))
 
+    # --- declared elements must exist in the requirements tree ---------
+    # `serves_eei` is a join, and a join to a typo is worse than no join: the
+    # staging document would print an identifier the analyst cannot look up, and
+    # nothing would say it was wrong. Silent unless the domain declares any.
+    req_path = cfg.get("domain_dir")
+    declared = set()
+    for coll in ("tiers", "multipliers", "floors", "force_surface"):
+        for rule in (scoring.get(coll) or []):
+            declared.update(rule.get("serves_eei") or [])
+    if declared and req_path:
+        rp = Path(req_path) / "requirements.md"
+        if not rp.exists():
+            findings.append(Finding(
+                WARN, domain, "no requirements tree", "requirements.md",
+                "rules declare serves_eei but the domain has no requirements.md "
+                "to look those identifiers up in."))
+        else:
+            tree = set(re.findall(r"EEI-\d+\.\d+\.[a-z]", rp.read_text(encoding="utf-8")))
+            for eei in sorted(declared - tree):
+                findings.append(Finding(
+                    WARN, domain, "element not in the tree", eei,
+                    "declared by a scoring rule but not defined in "
+                    "requirements.md. The staging document would print an "
+                    "identifier nobody can look up."))
+
     # --- staleness -----------------------------------------------------
     # A WARN, never an ERROR. A date passing is not a reason to block a commit;
     # it is a reason to look. Blocking here would train people to --no-verify,

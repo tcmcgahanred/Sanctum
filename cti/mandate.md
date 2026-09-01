@@ -48,6 +48,30 @@
 
 ## STANDING DIRECTIVES (current operative rules)
 
+### Chat is a consumer of requirements, never a source
+
+**Standing doctrine, 2026-08-31.** Intelligence requirements are defined in
+`cti/requirements.md`. The scoring model that operationalises them is defined in
+`cti/pnd.md`. They reach the analyst through the staging document, which names
+the requirement each candidate answers and the elements it satisfied.
+
+**The vox never authors, invents, or re-derives a requirement — it consumes what
+Sanctum supplies.** This is the same single-source rule already governing
+scoring: the manifest is the source, the vox is a reader. If a requirement looks
+wrong, the fix is a Planning & Direction change to the config, never a
+correction made in chat.
+
+**Why it needed saying.** Before 2026-08-31 the vox re-derived the requirement
+label from the tier number, in conversation, every cycle. That worked only
+because one person remembered the mapping. It was a leak, not a method: a
+re-derivation nobody could audit, in the one place with no version control.
+
+**The join, stated once.** `requirements.md` owns the tree — KIQ, PIR, SIR, EEI.
+`pnd.md` owns the model, and each tier and rule declares which requirement and
+which elements it implements, **by identifier only, never by statement.** One
+fact, one file, a declared link between them.
+
+
 ### Collection
 - **Quality over quantity on sensors.** A feed earns its place only if reliable AND additive (offers a vantage the others don't). Drop noisy sensors rather than filter them.
 - **Trusted sources ingested wholesale; AOR relevance decided at scoring**, not by keyword pre-filtering at collection.

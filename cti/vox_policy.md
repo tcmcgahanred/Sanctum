@@ -60,6 +60,17 @@ Each entry has, in order:
 
 ## 7. Content standards (locked)
 
+- **The review surface is worked, not sampled.** Every candidate the staging
+  document suggests for a section is read. A section written with far fewer
+  entries than were suggested — 28 suggested, one written — is **a failure to
+  work the section, not a thin week.** A legitimately thin section is stated
+  plainly with the counts: *"28 suggested, 3 qualified, 25 off-target."* Never a
+  silent one-item section, and never padded with weak items to fill space. The
+  suggested counts are in the compliance report; the reading is the analyst's.
+- **Requirements are consumed, never authored.** The staging document names the
+  requirement each candidate answers and the elements it satisfied. The vox
+  copies them; it does not derive them from the tier, the score, or memory. See
+  the standing directive of the same name in `cti/mandate.md`.
 - **Body, not headline.** Read the source. No body, no entry.
 - **One event, one entry.** Fold same-event reports; place each event once, in the section matching its dominant value.
 - **Recency.** Filter on publication date within the collection window. Out-of-window items are flagged, not silently dropped; they stay only with a fresh this-week hook (new exploitation, new victim, new KEV).

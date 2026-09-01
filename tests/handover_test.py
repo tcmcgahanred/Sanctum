@@ -41,7 +41,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.rules import (score_article, matched_evidence,      # noqa: E402
-                        tier_requirement)
+                        tier_requirement, satisfied_elements)
 
 FAILURES = []
 
@@ -146,6 +146,27 @@ def run():
           [type(before[0]).__name__, type(before[1]).__name__,
            type(before[2]).__name__],
           ["float", "int", "list"])
+
+    print("\nElements satisfied — only what a rule actually claims")
+    ee = scoring()
+    ee["tiers"][0]["serves_eei"] = ["EEI-1.2.a"]
+    ee["multipliers"] = [{"name": "bump", "factor": 1.5,
+                          "serves_eei": ["EEI-3.2.a"],
+                          "when": {"group": "beta"}}]
+    both = art("red widget", "a blue gadget")
+    check("a fired tier and a fired multiplier both contribute",
+          satisfied_elements(both, ee), ["EEI-1.2.a", "EEI-3.2.a"])
+    # A rule that did not fire claims nothing. Naming an element that was not
+    # satisfied sends the analyst to check the wrong thing.
+    check("an unfired multiplier contributes nothing",
+          satisfied_elements(art("red widget"), ee), ["EEI-1.2.a"])
+    check("only the WINNING tier contributes, not every qualifying one",
+          satisfied_elements(art("nothing here"), ee), [])
+    # s2 declares none of this and must stay silent rather than print noise.
+    check("a domain declaring no elements returns nothing",
+          satisfied_elements(both, scoring()), [])
+    check("...and declaring elements still moves no score",
+          score_article(both, ee)[0], score_article(both, scoring())[0] * 1.5)
 
     print()
     if FAILURES:

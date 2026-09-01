@@ -35,6 +35,7 @@ from pathlib import Path
 from core.pnd import load_domain
 from core.fetch import nobody_reason
 from core.rules import (score_article, matched_evidence, tier_requirement,
+                        satisfied_elements,
                         compute_cycle_window, recency_tag,
                         make_matcher, _eval_atom, _scopes)
 
@@ -679,6 +680,12 @@ def main():
             # Identifier plus the tier's own name. The requirement's STATEMENT
             # stays in requirements.md; repeating it here would be a second copy.
             lines.append(f"- **Requirement met:** {req[0]} — {req[1]}")
+        # The elements beneath the requirement, as identifiers only. The SIR is
+        # derivable from the numbering (EEI-1.2.a -> SIR-1.2 -> PIR-1), so it is
+        # never declared and never stored twice. Silent when nothing is mapped.
+        eei = satisfied_elements(a, scoring)
+        if eei:
+            lines.append("- **Elements satisfied:** " + " · ".join(eei))
         # Absent `serves:` prints nothing at all. A domain that has not declared
         # its requirements is not broken, and s2 cannot be edited from the repo.
         lines.append(f"- **Score reasoning:** {' | '.join(reasons)}")

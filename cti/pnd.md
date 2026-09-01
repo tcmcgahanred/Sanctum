@@ -394,6 +394,24 @@ list. That catches what a correction factor would miss.
 below the threshold is still listed by title. *Dropped* never means *invisible* —
 the analyst eyeballs the discards in seconds and rescues anything mis-scored.
 
+**`serves_eei` declares only what a SCORING RULE can honestly attest.** An
+essential element whose evidence comes from a named external sensor — a breach
+registry, a leak-site aggregator, a vendor advisory feed — is **sensor-bound**,
+and no scoring rule may claim it. Measured 2026-08-31 against the 19 elements in
+`requirements.md`: **3 are scoring-derived and claimable, 9 are sensor-bound
+(three of those sensors PENDING and one ABSENT), 6 are analyst standards** the
+engine cannot attest at all. That distribution IS the coverage gap Byproduct 2
+of `requirements.md` describes in prose — the pipeline answers PIR-1 largely by
+luck — now countable instead of asserted.
+
+**A sensor cannot yet declare the elements it serves**, because the sensor block
+is a flat list of URLs with no place to hang metadata. Until it can, the
+sensor-bound elements stay unclaimed rather than falsely claimed.
+
+**The SIR and the PIR are never declared.** `EEI-1.2.a` sits under `SIR-1.2`
+under `PIR-1` by its own numbering. Deriving them costs nothing; storing them
+would put one fact in two files.
+
 **Each tier declares the intelligence requirement it answers.** The four tiers
 and the four priority requirements in `requirements.md` are the same four things
 and always were — the tier `name` paraphrased the requirement instead of naming
@@ -415,8 +433,9 @@ be given any.
 scoring:
   tiers:
     - id: 1
-      name: "AOR-direct (CA subject of an incident)"
-      serves: PIR-1                 # requirements.md — Direct impact to CA organizations
+      name: "Direct impact to California organizations"
+      serves: PIR-1
+      serves_eei: ["EEI-1.2.a"]     # the 34-county match; 1.1.a-d are SENSOR-bound                 # requirements.md — Direct impact to CA organizations
       weight: 8.0
       require:
         all:
@@ -431,8 +450,9 @@ scoring:
                   - {group: incident, scope: blob}
                   - {proximity: {a: geo, b: incident, window: 120}}
     - id: 2
-      name: "SLTT-sector targeting (sector as subject)"
-      serves: PIR-2                 # requirements.md — SLTT sector targeting anywhere
+      name: "SLTT sector targeting anywhere (leading indicator)"
+      serves: PIR-2
+      serves_eei: []                # 2.1.a/b are SENSOR-bound, not scoring-derived                 # requirements.md — SLTT sector targeting anywhere
       weight: 4.0
       require:
         all:
@@ -445,8 +465,9 @@ scoring:
               - {proximity: {a: sector, b: incident_broad, window: 80,
                              scope: blob, all_occurrences: true}}
     - id: 3
-      name: "Exploited flaw in SLTT-common tech"
-      serves: PIR-3                 # requirements.md — Actively-exploited vulns in SLTT-common tech
+      name: "Actively-exploited vulnerabilities in SLTT-common technology"
+      serves: PIR-3
+      serves_eei: []                # 3.1.a/b are SENSOR-bound (3.1.a has NO sensor)                 # requirements.md — Actively-exploited vulns in SLTT-common tech
       weight: 2.0
       require:
         all:
@@ -457,13 +478,15 @@ scoring:
           - {proximity: {a: lowmat_tech, b: exploit_strong, window: 200,
                          scope: blob, all_occurrences: true}}
     - id: 4
-      name: "broad/national with SLTT relevance"
-      serves: PIR-4                 # requirements.md — Broad/national threats with SLTT relevance
+      name: "Broad/national threats with SLTT relevance"
+      serves: PIR-4
+      serves_eei: []                # 4.1.a is SENSOR-bound                 # requirements.md — Broad/national threats with SLTT relevance
       weight: 1.0
       require: always
 
   multipliers:
     - name: "KEV / actively exploited"
+      serves_eei: []                # both SENSOR-bound; 3.1.a has no sensor at all
       factor: 1.5
       when:
         all:
@@ -475,6 +498,7 @@ scoring:
               - {proximity: {a: exploit_strong, b: lowmat_tech, window: 200,
                              scope: blob, all_occurrences: true}}
     - name: "low-maturity SLTT tech"
+      serves_eei: ["EEI-2.2.a", "EEI-3.2.a"]   # both scoring-derived
       factor: 1.5
       when:
         all:
@@ -486,6 +510,7 @@ scoring:
               - {proximity: {a: lowmat_tech, b: incident_broad, window: 120,
                              scope: blob, all_occurrences: true}}
     - name: "supply-chain / procurement"
+      serves_eei: []                # no element declares this multiplier
       factor: 1.3
       when:
         all:
@@ -495,6 +520,7 @@ scoring:
               - {proximity: {a: supplychain, b: incident_broad, window: 120,
                              scope: blob, all_occurrences: true}}
     - name: "ransomware vs public-sector/CI"
+      serves_eei: []                # 1.1.b is SENSOR-bound (leak-site aggregator, PENDING)
       factor: 1.3
       when:
         all:
@@ -522,6 +548,7 @@ scoring:
 
   force_surface:
     - name: "M1 in-AOR entity in an incident"
+      serves_eei: ["EEI-1.2.a"]
       when:
         all:
           - {not: {group: listicle, scope: title}}
@@ -533,6 +560,7 @@ scoring:
               - {proximity: {a: geo, b: incident, window: 120,
                              scope: blob, all_occurrences: true}}
     - name: "M2 exploited flaw affecting SLTT-relevant technology"
+      serves_eei: ["EEI-3.2.a"]
       when:
         all:
           - {not: {group: listicle, scope: title}}
@@ -542,6 +570,7 @@ scoring:
           - {proximity: {a: lowmat_tech, b: exploit_strong, window: 200,
                          scope: blob, all_occurrences: true}}
     - name: "M3 SLTT sector in an incident"
+      serves_eei: []                # 2.1.a is SENSOR-bound
       when:
         all:
           - {not: {group: listicle, scope: title}}
