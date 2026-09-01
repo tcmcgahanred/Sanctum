@@ -131,7 +131,7 @@ def _as_date(v):
         return None
 
 
-ROLES = ("elevation", "exclusion", "production", "unused")
+ROLES = ("elevation", "exclusion", "production", "unused", "gate")
 
 
 def referenced_groups(cfg):
@@ -260,6 +260,7 @@ def check_domain(domain, cfg, vocab, today):
     #     role: exclusion     it appears only under a `not`
     #     role: production    it shapes the product, not the score
     #     role: unused        consumed by no rule, on purpose (needs a reason)
+    #     role: gate          a precondition every item must pass; adds no weight
     #
     # WARN, never ERROR. An unattributed group is documentation debt, not a
     # broken engine, and a gate that blocks a commit over documentation gets

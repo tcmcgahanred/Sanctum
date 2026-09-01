@@ -110,6 +110,52 @@ No requirement was dropped.**
   `blackmail` did not help, because **the failure is geographic, not lexical**.
   Whether the AOR is 34 counties or wider is a P&D decision.
 
+## v3 changelog - 2026-08-31, the homonym gate
+
+A third homonym reached tier 1, and this time it force-surfaced.
+
+1. **"breach" is not a cyber word.** *"A Baby Great White Leapt from the Ocean Near a
+   Boogie Boarder"* scored **8.0, tier 1, force-surfaced on M1** — `geo:'california'`
+   matched the beach and `incident:'breach'` matched a shark breaching the surface.
+   The same word is a levee, a contract, a courtroom verdict and a code of conduct.
+   An earlier great-white item escaped only because it was stale.
+
+2. **The obvious fix was measured and rejected.** Removing bare `breach` and keeping
+   only compounds — `data breach`, `security breach` — was tested against 776 real
+   items. It removed 15 false positives and **took at least 10 genuine items with
+   them**, including two LACMA data breach stories, the Madera Community Hospital
+   class action and the FBI item on a Chinese hacking group. **Root cause:** tier 1's
+   proximity atom names `incident` as a string, so it always reads the raw group.
+   Narrow the group and any article whose only incident word near the California
+   mention was `breach` falls out — *even when "data breach" is in its own headline*.
+   **Proximity cannot be guarded from outside the group it names.**
+
+3. **The owner's instinct was right and his word was wrong.** He proposed requiring
+   the word "cyber". Measured: that would have deleted the California DMV data
+   breach, the LA Superior Court ransomware shutdown, the Northern Inyo Hospital
+   breach and all three tier-3 vulnerability advisories — 44 of 137 surfaced items,
+   roughly half of them the most in-scope in the set. **Incident reporting does not
+   say "cyber."** Journalists and policy writers do.
+
+4. **What shipped: a cyber-domain gate.** A new group `cyber_context` — 39 terms, the
+   language a computer story actually uses — is now a required conjunct on tiers 1, 2
+   and 3 and on all three force-surface rules. Measured on the same 776 items: **16 of
+   137 surfaced items removed, and all 16 are non-cyber** — sharks, whale watching,
+   two lottery suits, Oakley v Nike, a reinsurance dispute, Justice Thomas at Stanford.
+   Zero genuine losses. **`breach` was not touched.**
+
+5. **A four-character stem is not a stem.** The first version used `hack`. The matcher
+   gives any term of 4 characters or fewer automatic word-boundary matching, so `hack`
+   matched the standalone noun and nothing else — and *"Attackers Targeted Over 100 US
+   Water Systems in July Hacks"*, a tier-2 water-sector item, was deleted by one plural
+   noun. Every form is now spelled out. **Same 4-character rule as Open finding 2.**
+
+**The class, stated once:** an ordinary English word cannot carry a requirement. This is
+the third instance — `water` in `sector`, `" calif "` in `geo`, now `breach` in
+`incident`. The cure is never to delete the term. It is to require context.
+
+---
+
 ## Open finding 1 — the `incident` group covers one third of the problem
 
 **Severity: high. Unresolved. P&D decision.**
@@ -294,6 +340,10 @@ vocab:
       reviewed: 2026-08-24
       review_interval_days: 365   # a hostname, not vocabulary
       role: elevation             # the CISA-directive floor raises a score
+    cyber_context:
+      reviewed: 2026-08-31
+      review_interval_days: 90    # the words reporters use for a hack turn over
+      role: gate                  # a precondition, not a scorer - adds no weight
     listicle:
       reviewed: 2026-08-24
       review_interval_days: 90    # headline fashions change; new shapes will appear

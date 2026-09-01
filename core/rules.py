@@ -190,6 +190,52 @@ def _rule_matched_terms(atom, groups, matcher, scopes, text_l):
 # ------------------------------------------------------------------
 # Scoring
 # ------------------------------------------------------------------
+def matched_evidence(art, scoring):
+    """
+    Which declared vocabulary groups actually appear in this article, and one
+    representative term from each. Display and handover only — reads nothing
+    the scorer does not already read, changes no score.
+
+    SEPARATE FUNCTION, NOT AN EXTRA RETURN VALUE. `score_article` is called from
+    eleven places across seven files; widening its tuple would break every one
+    of them to serve a document none of them writes.
+
+    Reports every group present, INCLUDING groups that did not decide the tier.
+    That is deliberate and it is why the staging document labels this line
+    "vocabulary present" rather than "terms fired" — the reasoning behind the
+    score is the reason string, and conflating the two would claim a term
+    contributed when it did not (tenet 3: never send the reader to check the
+    wrong thing).
+    """
+    groups = scoring.get("groups") or {}
+    matcher = make_matcher(scoring.get("word_boundary_terms"))
+    _title, scopes, _text_l = _scopes(art)
+    found = {}
+    for gname, terms in groups.items():
+        hit = matcher(scopes["blob"], terms or [])
+        if hit:
+            found[gname] = hit
+    return found
+
+
+def tier_requirement(tier_id, scoring):
+    """
+    The intelligence requirement a tier answers, as (id, name), or None.
+
+    Reads the `serves:` field a tier may declare. **Absent is normal and must
+    stay silent** — a domain that has not declared its requirements is not
+    broken, and `s2` is git-ignored so it cannot be edited from the repo at all
+    (running-log.md Blocker 20). A staging document that printed
+    "Requirement met: None" on every candidate of an undeclared domain would be
+    worse than printing nothing.
+    """
+    for t in scoring.get("tiers", []) or []:
+        if t.get("id") == tier_id:
+            serves = t.get("serves")
+            return (str(serves), str(t.get("name", ""))) if serves else None
+    return None
+
+
 def score_article(art, scoring):
     """
     Assign a provisional tier + elevation signals from a domain's scoring config.
@@ -235,7 +281,14 @@ def score_article(art, scoring):
     for m in scoring.get("multipliers", []):
         if _eval_atom(m["when"], groups, matcher, scopes, text_l):
             score *= float(m["factor"])
-            reasons.append(f"x{m['factor']} {m.get('name','mult')}")
+            # Name the words that fired, exactly as the tier reason does. Until
+            # 2026-08-26 a multiplier reason said only "x1.5 low-maturity SLTT
+            # tech" and never which product word triggered it, so half the
+            # evidence behind a score was invisible — and the multiplier groups
+            # are the vocabulary most worth refining.
+            why = _rule_matched_terms(m["when"], groups, matcher, scopes, text_l)
+            reasons.append(f"x{m['factor']} {m.get('name','mult')}"
+                           + (f" ({why})" if why and why != "always" else ""))
 
     # FLOORS raise a score to a stated minimum and never lower one. A floor is
     # deliberately weaker than force-surface: the item becomes visible at the
@@ -246,7 +299,9 @@ def score_article(art, scoring):
         if _eval_atom(f["when"], groups, matcher, scopes, text_l):
             fl = float(f.get("score", 0))
             if score < fl:
-                reasons.append(f"floor {fl} {f.get('name','floor')}")
+                whyf = _rule_matched_terms(f["when"], groups, matcher, scopes, text_l)
+                reasons.append(f"floor {fl} {f.get('name','floor')}"
+                               + (f" ({whyf})" if whyf and whyf != "always" else ""))
                 score = fl
 
     return round(score, 2), tier_id, reasons

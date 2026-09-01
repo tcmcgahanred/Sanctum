@@ -34,7 +34,8 @@ from pathlib import Path
 
 from core.pnd import load_domain
 from core.fetch import nobody_reason
-from core.rules import (score_article, compute_cycle_window, recency_tag,
+from core.rules import (score_article, matched_evidence, tier_requirement,
+                        compute_cycle_window, recency_tag,
                         make_matcher, _eval_atom, _scopes)
 
 
@@ -667,7 +668,28 @@ def main():
         lines.append(f"- **URL:** {a.get('url','')}")
         if a.get("final_url"):
             lines.append(f"- **Publisher URL:** {a['final_url']}")
+        # The three evidence lines, together, at the end of the entry. This is
+        # the handover to stage 3b: everything below is something the analyst
+        # cannot re-derive from the article, because it was computed here and
+        # would otherwise be discarded. Until 2026-08-26 the tier was calculated
+        # for every item, carried through this entire function, and never
+        # printed — the one number tying an item to an intelligence requirement.
+        req = tier_requirement(tier, scoring)
+        if req:
+            # Identifier plus the tier's own name. The requirement's STATEMENT
+            # stays in requirements.md; repeating it here would be a second copy.
+            lines.append(f"- **Requirement met:** {req[0]} — {req[1]}")
+        # Absent `serves:` prints nothing at all. A domain that has not declared
+        # its requirements is not broken, and s2 cannot be edited from the repo.
         lines.append(f"- **Score reasoning:** {' | '.join(reasons)}")
+        ev = matched_evidence(a, scoring)
+        if ev:
+            # "present", not "fired" — this lists every group the article
+            # matches, including ones that decided nothing. The reason string
+            # above is what justified the score; this is the handle for
+            # vocabulary refinement.
+            lines.append("- **Vocabulary present:** "
+                         + " · ".join(f"{g}={t}" for g, t in sorted(ev.items())))
         shown = kids[:max_group_display]
         hidden = len(kids) - len(shown)
         for k in shown:
