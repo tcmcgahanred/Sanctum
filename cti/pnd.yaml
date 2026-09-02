@@ -1,0 +1,1293 @@
+# ==============================================================================
+#  CTI - SANCTUM DOMAIN FILE
+#
+#  Everything this domain needs, in the order the intelligence cycle runs it.
+#  The engines in core/ read this file. Comments are for whoever edits it.
+#  
+#  Dated history is NOT here - it is in CHANGELOG.yaml, keyed by the setting
+#  each entry concerns. What survived the history is in README.md's tenets.
+#  
+#  A comment on a value says what BREAKS if you change it. Why we chose it
+#  is in the changelog. If a sentence would read identically in another
+#  domain's file, it belongs in core/README.md, not here.
+# ==============================================================================
+
+# ==============================================================================
+#  STAGE 1 - PLANNING & DIRECTION
+#
+#  What we need to know, and where the machine keeps its things.
+#  Changing a requirement here changes what the whole cycle is for.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+#  REQUIREMENTS - KIQ / PIR / SIR / EEI
+#
+#  Each scoring tier declares the PIR it answers, by identifier only.
+#  Each scoring rule may declare the EEIs it can honestly attest.
+#  vocab_check verifies every declared identifier exists in this tree.
+# ------------------------------------------------------------------------------
+requirements:
+  kiq:
+    id: KIQ-1
+    question: What cyber threats endanger California SLTT organizations and the critical infrastructure
+      they operate or depend on?
+    collection_posture: Cast a wide net. Any credible cyber-threat reporting is in scope at
+      collection. Trusted sources are ingested wholesale and AOR relevance is decided at scoring,
+      never by keyword pre-filtering at collection.
+  pirs:
+  - id: PIR-1
+    tier: 1
+    name: Direct impact to California organizations
+    question: What incidents, breaches, or targeting have directly affected California-based
+      organizations or entities?
+    sirs:
+    - id: SIR-1.1
+      question: Which California SLTT / critical-infrastructure organizations reported a breach
+        or incident this window?
+      eeis:
+      - id: EEI-1.1.a
+        fact: Breach notifications affecting Californians (org, date, type, records).
+        sensor:
+          name: CA AG breach-registry scraper
+          status: PENDING
+        scoring: Tier-1 CA-direct
+        note: Blocked by the process_page re-collection defect - the registry is a web portal,
+          and page sources are collected once and never revisited.
+      - id: EEI-1.1.b
+        fact: Extortion/leak-site posts naming California victims.
+        sensor:
+          name: ransomware leak-site aggregator, CA-filtered
+          status: PENDING
+        scoring: Tier-1 + ransomware/CI
+      - id: EEI-1.1.c
+        fact: Regional/local press reports of incidents at CA local-gov, school, utility or
+          tribal entities.
+        sensor:
+          name: curated CA regional press
+          status: PENDING
+        scoring: Tier-1 CA-direct
+        note: StateScoop is SLTT trade press, not CA regional press. This EEI remains unserved.
+      - id: EEI-1.1.d
+        fact: Official CA advisories naming an affected CA entity.
+        sensor:
+          name: Cal OES + CDT + MS-ISAC
+          status: ACTIVE
+          also: Cal-CSIC - PENDING
+        scoring: Tier-1, primary source
+        note: 'Cal-CSIC remains unserved: publishing, but PDF/DOCX on an HTML index with no
+          RSS. Same process_page blocker as EEI-1.1.a.'
+    - id: SIR-1.2
+      question: Is the affected organization inside the 34-county CCIC AOR?
+      eeis:
+      - id: EEI-1.2.a
+        fact: Org county/location matched against the 34-county list.
+        sensor:
+          name: derived at scoring
+          status: ACTIVE
+        scoring: AOR-county match - all 34 counties present in the geo group
+        note: 'Known precision gap: several county names are not California-exclusive. kings
+          county is Brooklyn; lake county is Illinois, Florida, Indiana and Ohio; trinity
+          county is also Texas; sierra county is also New Mexico. Any of these plus an incident
+          term in proximity scores Tier-1. The reasoning line makes it auditable; the analyst
+          must catch it.'
+      - id: EEI-1.2.b
+        fact: In-AOR vs near-AOR vs out-of-AOR-but-CA classification.
+        scoring: annotation - e.g. Suisun/Solano = near-AOR
+    - id: SIR-1.3
+      question: What is the verified operational impact, versus what is merely claimed?
+      eeis:
+      - id: EEI-1.3.a
+        fact: Confirmed disruption (systems down, public-safety/911 impact, operational degradation),
+          verified against a primary source.
+        standard: Verify specific impact claims before publishing; soften or cut unverifiable
+          specifics. Anti-FUD.
+      - id: EEI-1.3.b
+        fact: 'Attribution status: confirmed / suspected / unknown.'
+        standard: Attribution discipline - never state suspected as fact.
+  - id: PIR-2
+    tier: 2
+    name: SLTT sector targeting anywhere (leading indicator)
+    question: What threat activity is targeting SLTT-relevant sectors anywhere, as a leading
+      indicator for the AOR?
+    sirs:
+    - id: SIR-2.1
+      question: Which SLTT sectors are being targeted this window (water/wastewater, K-12/higher-ed,
+        local gov, tribal/territorial)?
+      eeis:
+      - id: EEI-2.1.a
+        fact: Reported attacks/targeting of a named SLTT sector, any geography.
+        sensor:
+          name: national trusted feeds + StateScoop
+          status: ACTIVE
+          also: K-12 Dive, WaterISAC - PENDING; GovTech - REJECTED
+        scoring: Tier-2 sector
+        note: GovTech advertises no working feed - both candidate paths returned 0 entries
+          and HTTP 404. Do not retry without new evidence.
+      - id: EEI-2.1.b
+        fact: Sector ISAC/agency advisories (WaterISAC, MS-ISAC, CISA sector alerts).
+        sensor:
+          name: MS-ISAC + CISA (4 feeds)
+          status: ACTIVE
+          also: WaterISAC - PENDING
+        scoring: Tier-2, primary source
+    - id: SIR-2.2
+      question: Does the targeted sector/technology generalize to the AOR?
+      eeis:
+      - id: EEI-2.2.a
+        fact: Whether the targeted tech/config is common in AOR SLTT orgs (e.g. internet-exposed
+          PLCs in small water systems).
+        scoring: low-maturity SLTT tech multiplier
+        note: 'This is the leading-indicator logic: out-of-state targeting matters because
+          the same exposure exists here.'
+    - id: SIR-2.3
+      question: Is this an isolated incident or a widening campaign?
+      eeis:
+      - id: EEI-2.3.a
+        fact: Multiple incidents sharing TTPs/sector across geographies.
+        analytic: convergence - supports a widening-campaign framing, e.g. the multistate
+          water attacks
+  - id: PIR-3
+    tier: 3
+    name: Actively-exploited vulnerabilities in SLTT-common technology
+    question: What in-the-wild / KEV vulnerabilities affect technology common in low-maturity
+      SLTT environments?
+    sirs:
+    - id: SIR-3.1
+      question: What is actively exploited in the wild this window?
+      eeis:
+      - id: EEI-3.1.a
+        fact: CISA KEV additions (CVE, date, exploitation status, ransomware-use flag).
+        sensor:
+          name: dedicated KEV feed
+          status: ABSENT
+        scoring: KEV multiplier
+        note: No dedicated KEV sensor. KEV additions reach the corpus only when an advisory
+          or aggregator mentions them - the single-aggregator dependence the ICD 203 review
+          flagged. Cheap to close.
+      - id: EEI-3.1.b
+        fact: Vendor PSIRT advisories confirming in-the-wild exploitation.
+        sensor:
+          name: vendor PSIRTs (Cisco, Palo Alto, Fortinet)
+          status: ACTIVE
+        scoring: KEV/exploitation
+    - id: SIR-3.2
+      question: Does the affected technology exist in low-maturity SLTT environments?
+      eeis:
+      - id: EEI-3.2.a
+        fact: Whether the product is commonly deployed by SLTT orgs (edge appliances, on-prem
+          SharePoint, RMM, routers).
+        scoring: low-maturity SLTT tech multiplier
+      - id: EEI-3.2.b
+        fact: Which providers/versions are affected, and does the audience use them?
+        standard: Provider-dependent relevance - a webmail/product item is relevant only if
+          it hits providers the audience runs (Google Workspace, Microsoft 365). MSP-only
+          software is low-relevance if few orgs in the AOR use MSPs.
+    - id: SIR-3.3
+      question: What is the remediation posture?
+      eeis:
+      - id: EEI-3.3.a
+        fact: Patch availability and KEV remediation deadline.
+        standard: 'Actionability - frame as a vendor-accountability ask: ''confirm your vendor
+          or IT provider patched X''.'
+  - id: PIR-4
+    tier: 4
+    name: Broad/national threats with SLTT relevance
+    question: What national-scale threats carry material relevance to SLTT defenders?
+    sirs:
+    - id: SIR-4.1
+      question: What national-scale threats materially affect SLTT defenders?
+      eeis:
+      - id: EEI-4.1.a
+        fact: National advisories/campaigns with an SLTT nexus.
+        sensor:
+          name: national feeds
+          status: ACTIVE
+        scoring: Tier-4
+      - id: EEI-4.1.b
+        fact: 'Audience-portfolio relevance: does it reach the SLTT audience, or is it developer-only,
+          defense-industrial-only, or vendor opinion?'
+        standard: Audience filter - developer-targeted (npm poisoning) and defense-industrial-base
+          (CMMC) items are out of portfolio unless they reach SLTT through a vendor.
+  sensor_roadmap:
+  - priority: 0
+    build: Fix process_page re-collection (core/acolyte.py)
+    serves: []
+    note: Prerequisite, not a sensor. Page sources are deduped on URL hash, so a portal is
+      captured once and never revisited. Priorities 1 and 2 are portals and are useless until
+      this lands.
+  - priority: 1
+    build: CA AG breach-registry scraper
+    serves:
+    - EEI-1.1.a
+    note: 'Highest value: the only authoritative AOR-direct breach sensor. PIR-1 has almost
+      no active collection without it.'
+  - priority: 2
+    build: Cal-CSIC advisories
+    serves:
+    - EEI-1.1.d
+    note: Confirmed publishing. Extracting the index page may be enough, since titles and
+      dates are what the scorer consumes - prove that before building PDF parsing.
+  - priority: 3
+    build: Ransomware leak-site aggregator, CA-filtered
+    serves:
+    - EEI-1.1.b
+    note: 'Early-warning AOR-direct: victims appear before local press.'
+  - priority: 4
+    build: CISA KEV as a primary feed
+    serves:
+    - EEI-3.1.a
+    note: Cheapest item on this list. Reduces single-aggregator dependence.
+  - priority: 5
+    build: Curated CA regional press
+    serves:
+    - EEI-1.1.c
+    note: Still unserved; StateScoop does not cover it.
+  - priority: 6
+    build: Remaining sector trade press (K-12 Dive, WaterISAC)
+    serves:
+    - EEI-2.1.a
+    - EEI-2.1.b
+
+# ------------------------------------------------------------------------------
+#  RUNTIME & STORAGE
+#
+#  base_dir is the only host-coupled value. $SANCTUM_BASE overrides it and
+#  WINS over this file - set globally it overrides every domain at once.
+# ------------------------------------------------------------------------------
+manifest:
+  domain: cti
+  base_dir: /opt/ravenor
+  sensors_file: references/sensors.txt
+  corpus:
+    backend: rclone
+    rclone_remote: gdrive:ravenor-corpus
+  reference_lists:
+    kev:
+      url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+      json_path: vulnerabilities
+      key_field: cveID
+      match_pattern: CVE-[0-9]{4}-[0-9]{4,7}
+      cache_hours: 12
+  staging:
+    backend: rclone
+    rclone_remote: gdrive:ravenor-staging
+    filename: WCTI_{date}_STAGING.md
+
+# ------------------------------------------------------------------------------
+#  STAGE 2 - COLLECTION
+#
+#  Where to look, how hard, and how far back. Trusted sources are ingested
+#  wholesale; AOR relevance is decided later at scoring, never by filtering
+#  here. A feed earns its place only if it is reliable AND additive.
+# ------------------------------------------------------------------------------
+  collection:
+    window_days: 7
+    max_publish_age_days: 7
+    min_title_len: 15
+    suffix_separators:
+    - ' - '
+    - ' | '
+    - ' — '
+    fetch:
+      user_agent: ''
+      timeout: 20
+      sleep_time: 1.0
+      max_redirects: 5
+      min_extracted_size: 80
+      impersonate: chrome
+      decode_google_news: true
+      gnews_interval: 1
+
+# ------------------------------------------------------------------------------
+#  SENSORS - the whole feed list for this domain
+#
+#  Verify every URL against the collector host's own egress before adding;
+#  some publishers refuse datacenter addresses that work from a browser.
+# ------------------------------------------------------------------------------
+  sensors:
+  - url: https://www.cisa.gov/cybersecurity-advisories/all.xml
+    group: 'National: government / CERT / SLTT'
+  - url: https://us-cert.cisa.gov/ncas/current-activity.xml
+    group: 'National: government / CERT / SLTT'
+  - url: https://www.cisecurity.org/feed/alert
+    group: 'National: government / CERT / SLTT'
+  - url: https://www.kb.cert.org/vulfeed
+    group: 'National: government / CERT / SLTT'
+  - url: https://www.nist.gov/blogs/cybersecurity-insights/rss.xml
+    group: 'National: government / CERT / SLTT'
+  - url: https://jvn.jp/en/rss/jvn.rdf
+    group: 'National: government / CERT / SLTT'
+  - url: https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml
+    group: 'National: vendor PSIRTs'
+    note: MSRC update-guide RSS was dropped 2026-08-25. See the drop list above.
+  - url: https://security.paloaltonetworks.com/rss.xml
+    group: 'National: vendor PSIRTs'
+  - url: https://www.fortiguard.com/rss/ir.xml
+    group: 'National: vendor PSIRTs'
+  - url: https://www.greynoise.io/blog/rss.xml
+    group: 'National: exploitation evidence'
+  - url: https://www.rapid7.com/blog/rss/
+    group: 'National: exploitation evidence'
+  - url: https://www.zerodayinitiative.com/rss/published/
+    group: 'National: exploitation evidence'
+  - url: https://blog.qualys.com/feed
+    group: 'National: exploitation evidence'
+  - url: https://therecord.media/feed/
+    group: 'National: news / research'
+  - url: https://unit42.paloaltonetworks.com/feed/
+    group: 'National: news / research'
+  - url: https://feeds.feedburner.com/TheHackersNews
+    group: 'National: news / research'
+  - url: https://isc.sans.edu/rssfeed_full.xml
+    group: 'National: news / research'
+  - url: https://www.schneier.com/feed/atom/
+    group: 'National: news / research'
+  - url: https://www.darkreading.com/rss.xml
+    group: 'National: news / research'
+  - url: https://securelist.com/feed/
+    group: 'National: news / research'
+  - url: https://news.sophos.com/en-us/category/threat-research/feed/
+    group: 'National: news / research'
+  - url: https://www.crowdstrike.com/blog/feed/
+    group: 'National: news / research'
+  - url: https://www.recordedfuture.com/feed/
+    group: 'National: news / research'
+  - url: https://www.tenable.com/blog/feed
+    group: 'National: news / research'
+  - url: https://feeds.feedburner.com/hackread
+    group: 'National: news / research'
+  - url: https://feeds.feedburner.com/TroyHunt
+    group: 'National: news / research'
+  - url: https://www.infosecurity-magazine.com/rss/news/
+    group: 'National: news / research'
+  - url: https://cybersecuritynews.com/feed/
+    group: 'National: news / research'
+  - url: https://bartblaze.blogspot.com/feeds/posts/default
+    group: 'National: news / research'
+  - url: https://krebsonsecurity.com/feed/
+    group: 'National: news / research'
+  - url: https://googleprojectzero.blogspot.com/feeds/posts/default
+    group: 'National: news / research'
+  - url: https://www.bleepingcomputer.com/feed/
+    group: 'National: news / research'
+  - url: https://statescoop.com/feed/
+    group: 'National: news / research'
+  - url: https://www.securityweek.com/feed/
+    group: 'National: news / research'
+    note: 'Added 2026-08-23. Found by auditing which outlets a CyberWire daily roundup cited:
+      five of ten stories came from these two, and neither was collected here. SecurityWeek:
+      use the first-party path, not feeds.feedburner.com/securityweek (same content behind a
+      302, and no reason to add a Feedburner dependency). NOTE: its feed window holds only 10
+      items — safe while collection runs daily, not if that changes.'
+  - url: https://www.theregister.com/security/headlines.atom
+    group: 'National: news / research'
+    note: 'The Register: SECTION feed only. The whole-site feed at /headlines.atom is a general
+      tech magazine — git tooling, Microsoft trivia — and does not belong in this corpus.'
+  - url: https://industrialcyber.co/feed/
+    group: 'National: news / research'
+  - url: https://www.huntress.com/blog/rss.xml
+    group: 'National: vendor telemetry'
+    note: 'Added 2026-08-23, every path verified from the collector host first. These vendors
+      run incident response and sensor networks this effort will never have. When they publish,
+      it is primary source. Marketing overhead is the price and the scorer sorts it out.  Huntress:
+      SMB and MSP telemetry — the closest commercial visibility there is to a low-maturity SLTT
+      environment. Its output lands directly on vocabulary already declared here: n-able, n-central,
+      kaseya, connectwise, screenconnect in lowmat_tech; rmm, msp, managed service provider
+      in supplychain. NOTE: the feed window is 680 items — the whole blog archive, served every
+      fetch. That is a ONE-TIME intake, not a rate; steady state is a few a week. Roughly half
+      the archive is company news and educational content, which will score low and drop. That
+      was a decision, not an oversight.'
+  - url: https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/
+    group: 'National: vendor telemetry'
+    note: 'Google Threat Intelligence (absorbed Mandiant). Use the cloudblog host: the cloud.google.com
+      path returns HTTP 200 with ZERO entries — live URL, no content, the exact failure the
+      item count exists to catch.'
+  - url: https://blog.talosintelligence.com/rss/
+    group: 'National: vendor telemetry'
+    note: Cisco Talos research. Distinct from the Cisco PSIRT advisory feed above — that is
+      disclosures, this is investigation. First-party path, not the Feedburner mirror, which
+      serves identical content.
+  - url: https://www.microsoft.com/en-us/security/blog/feed/
+    group: 'National: vendor telemetry'
+    note: Microsoft Threat Intelligence. Distinct from the MSRC feed above, which is the patch
+      catalogue. Low volume and a real marketing fraction — the weakest of these four and the
+      first to drop at review. The old msrc-blog host is dead.
+  - url: https://haveibeenpwned.com/feed/breaches/
+    group: 'National: breach registry'
+    note: 'Named-victim breach disclosure. Low volume (~2-3 per cycle). NOTE: the item date
+      is the date the breach was LOADED, not the date it happened, so the recency gate will
+      not flag a years-old breach loaded yesterday. The first sentence of every description
+      states the actual breach month — read it.'
+  - url: https://www.news.caloes.ca.gov/feed/
+    group: 'Regional AOR: official sources (example: California)'
+  - url: https://www.cdt.ca.gov/newsroom/feed/
+    group: 'Regional AOR: official sources (example: California)'
+  - url: https://www.californiacitynews.org/taxonomy/term/1717/feed
+    group: 'Regional AOR: municipal press (example: California)'
+    note: 'California City News, cybersecurity section. EXPECTED YIELD IS ~3 ITEMS PER YEAR:
+      12 items span Sep 2022 to Mar 2026. A column of `0 new of 12 returned` in the log is NORMAL
+      for this sensor and is not a failure — it serves its whole back catalogue every fetch.
+      Kept because nothing else here emits a named California municipal victim (Long Beach,
+      El Cerrito, Contra Costa), and because it carries local-government policy items — closed-session
+      law, grant programs — that no general news query surfaces. Review yield 2026-11-23.'
+  - url: https://news.google.com/rss/search?q=%22California%22%20(ransomware%20OR%20%22data%20breach%22%20OR%20cyberattack)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20(%22community%20college%22%20OR%20university%20OR%20CSU%20OR%20UC)%20(ransomware%20OR%20%22data%20breach%22)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20%22school%20district%22%20(ransomware%20OR%20cyberattack%20OR%20%22data%20breach%22)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20(%22special%20district%22%20OR%20%22transit%20agency%22%20OR%20%22public%20works%22)%20(cyberattack%20OR%20ransomware%20OR%20breach)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20(city%20OR%20county)%20(ransomware%20OR%20cyberattack%20OR%20%22data%20breach%22)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20(court%20OR%20%22superior%20court%22%20OR%20sheriff%20OR%20%22police%20department%22)%20(ransomware%20OR%20cyberattack%20OR%20breach)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20(election%20OR%20%22registrar%20of%20voters%22)%20(cyberattack%20OR%20breach%20OR%20hack)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20government%20(ransomware%20OR%20cyberattack)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20(hospital%20OR%20health%20OR%20clinic)%20(ransomware%20OR%20%22data%20breach%22)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20tribal%20(casino%20OR%20nation%20OR%20government)%20(ransomware%20OR%20cyberattack%20OR%20breach)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+  - url: https://news.google.com/rss/search?q=California%20(water%20OR%20wastewater%20OR%20utility)%20(cyberattack%20OR%20hack%20OR%20breach)%20when%3A7d&hl=en-US&gl=US&ceid=US:en
+    group: 'Regional AOR: statewide / sector queries (example: California)'
+
+# ==============================================================================
+#  STAGE 3a - PROCESSING
+#
+#  Deterministic. No model, no judgement, no tokens. Produces the staging
+#  document. Score = highest qualifying tier weight, times the product of
+#  any elevation multipliers. Tiers do not stack; multipliers do.
+# ==============================================================================
+
+scoring:
+  tiers:
+  - id: 1
+    name: Direct impact to California organizations
+    serves: PIR-1
+    serves_eei:
+    - EEI-1.2.a
+    weight: 8.0
+    require:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - group: cyber_context
+        scope: blob
+      - any:
+        - all:
+          - group: geo
+            scope: title
+          - group: incident
+            scope: blob
+        - all:
+          - group: geo
+            scope: blob
+          - group: incident
+            scope: blob
+          - proximity:
+              a: geo
+              b: incident
+              window: 120
+  - id: 2
+    name: SLTT sector targeting anywhere (leading indicator)
+    serves: PIR-2
+    serves_eei: []
+    weight: 4.0
+    require:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - group: cyber_context
+        scope: blob
+      - any:
+        - all:
+          - group: sector
+            scope: title
+          - group: incident_broad
+            scope: blob
+        - proximity:
+            a: sector
+            b: incident_broad
+            window: 80
+            scope: blob
+            all_occurrences: true
+  - id: 3
+    name: Actively-exploited vulnerabilities in SLTT-common technology
+    serves: PIR-3
+    serves_eei: []
+    weight: 2.0
+    require:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - group: cyber_context
+        scope: blob
+      - group: exploit_strong
+        scope: blob
+      - group: lowmat_tech
+        scope: blob
+      - proximity:
+          a: lowmat_tech
+          b: exploit_strong
+          window: 200
+          scope: blob
+          all_occurrences: true
+  - id: 4
+    name: Broad/national threats with SLTT relevance
+    serves: PIR-4
+    serves_eei: []
+    weight: 1.0
+    require: always
+  multipliers:
+  - name: KEV / actively exploited
+    serves_eei: []
+    factor: 1.5
+    when:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - group: exploit_strong
+        scope: blob
+      - any:
+        - proximity:
+            a: exploit_strong
+            b: cve
+            window: 200
+            scope: blob
+            all_occurrences: true
+        - proximity:
+            a: exploit_strong
+            b: lowmat_tech
+            window: 200
+            scope: blob
+            all_occurrences: true
+  - name: low-maturity SLTT tech
+    serves_eei:
+    - EEI-2.2.a
+    - EEI-3.2.a
+    factor: 1.5
+    when:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - any:
+        - group: lowmat_tech
+          scope: title
+        - proximity:
+            a: lowmat_tech
+            b: exploit_strong
+            window: 200
+            scope: blob
+            all_occurrences: true
+        - proximity:
+            a: lowmat_tech
+            b: incident_broad
+            window: 120
+            scope: blob
+            all_occurrences: true
+  - name: supply-chain / procurement
+    serves_eei: []
+    factor: 1.3
+    when:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - any:
+        - group: supplychain
+          scope: title
+        - proximity:
+            a: supplychain
+            b: incident_broad
+            window: 120
+            scope: blob
+            all_occurrences: true
+  - name: ransomware vs public-sector/CI
+    serves_eei: []
+    factor: 1.3
+    when:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - proximity:
+          a: ransom
+          b: ci
+          window: 150
+          scope: blob
+          all_occurrences: true
+  floors:
+  - name: CISA directive on technology not on the SLTT list
+    score: 2.0
+    when:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - group: cisa_source
+        scope: source
+      - group: exploit_strong
+        scope: blob
+      - not:
+          group: lowmat_tech
+          scope: blob
+  force_surface:
+  - name: M1 in-AOR entity in an incident
+    serves_eei:
+    - EEI-1.2.a
+    when:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - group: cyber_context
+        scope: blob
+      - any:
+        - all:
+          - group: geo
+            scope: title
+          - group: incident
+            scope: blob
+        - proximity:
+            a: geo
+            b: incident
+            window: 120
+            scope: blob
+            all_occurrences: true
+  - name: M2 exploited flaw affecting SLTT-relevant technology
+    serves_eei:
+    - EEI-3.2.a
+    when:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - group: cyber_context
+        scope: blob
+      - group: exploit_strong
+        scope: blob
+      - group: lowmat_tech
+        scope: blob
+      - proximity:
+          a: lowmat_tech
+          b: exploit_strong
+          window: 200
+          scope: blob
+          all_occurrences: true
+  - name: M3 SLTT sector in an incident
+    serves_eei: []
+    when:
+      all:
+      - not:
+          group: listicle
+          scope: title
+      - group: cyber_context
+        scope: blob
+      - any:
+        - all:
+          - group: sector
+            scope: title
+          - group: incident_broad
+            scope: blob
+        - proximity:
+            a: sector
+            b: incident_broad
+            window: 80
+            scope: blob
+            all_occurrences: true
+  settings:
+    surface_min_score: 2.0
+    empty_title:
+      score: 0.5
+      tier: 4
+      flag: 'FLAG: empty title (feed artifact - verify source)'
+    recency:
+      enabled: true
+      window_days: 7
+      cutoff_weekday: wednesday
+      cutoff_time: 04:00
+      timezone: America/Los_Angeles
+    grouping:
+      enabled: true
+      similarity: 0.15
+      min_shared_tokens: 3
+      min_evidence: 8.0
+      max_group_size: 25
+      max_group_display: 12
+  word_boundary_terms:
+  - scada
+  - ransom
+  - cisco
+  - how to
+  - what is
+  - hacker
+  groups:
+    geo:
+    - california
+    - californian
+    - ' calif '
+    - sacramento
+    - fresno
+    - modesto
+    - stockton
+    - bakersfield
+    - cal oes
+    - cal-csic
+    - ccic
+    - caltrans
+    - 'csu '
+    - 'uc '
+    - calmatters
+    - alpine county
+    - amador county
+    - butte county
+    - calaveras county
+    - colusa county
+    - el dorado county
+    - fresno county
+    - glenn county
+    - inyo county
+    - kern county
+    - kings county
+    - lake county
+    - lassen county
+    - madera county
+    - mariposa county
+    - mendocino county
+    - merced county
+    - modoc county
+    - mono county
+    - nevada county
+    - placer county
+    - plumas county
+    - sacramento county
+    - san joaquin county
+    - shasta county
+    - sierra county
+    - stanislaus county
+    - sutter county
+    - tehama county
+    - trinity county
+    - tulare county
+    - tuolumne county
+    - yolo county
+    - yuba county
+    incident:
+    - breach
+    - ransomware
+    - cyberattack
+    - cyber attack
+    - hacked
+    - hackers
+    - stolen data
+    - data theft
+    - blackmail
+    - defaced
+    - defacement
+    - data breach
+    - compromise
+    - exfiltrat
+    - extortion
+    - data leak
+    - data stolen
+    - records stolen
+    - security incident
+    targeting:
+    - active threat
+    - outage
+    - denial of service
+    - ddos
+    - exploited against
+    - attacks against
+    - attack against
+    - campaign against
+    - targeted
+    - target of
+    - attack on
+    - attacks on
+    - hit by
+    - struck by
+    - victim of
+    - taken offline
+    - forced offline
+    - systems offline
+    - service disruption
+    - state of emergency
+    - disrupted operations
+    - shut down its
+    - knocked offline
+    incident_broad:
+    - breach
+    - ransomware
+    - cyberattack
+    - cyber attack
+    - hacked
+    - hackers
+    - hacker
+    - stolen data
+    - data theft
+    - blackmail
+    - defaced
+    - defacement
+    - data breach
+    - compromise
+    - exfiltrat
+    - extortion
+    - data leak
+    - data stolen
+    - records stolen
+    - security incident
+    - active threat
+    - outage
+    - denial of service
+    - ddos
+    - exploited against
+    - attacks against
+    - attack against
+    - campaign against
+    - targeted
+    - target of
+    - attack on
+    - attacks on
+    - hit by
+    - struck by
+    - victim of
+    - taken offline
+    - forced offline
+    - systems offline
+    - service disruption
+    - state of emergency
+    - disrupted operations
+    - shut down its
+    - knocked offline
+    sector:
+    - water utility
+    - water utilities
+    - water district
+    - water authority
+    - water sector
+    - utility sector
+    - public works
+    - transit authority
+    - school system
+    - public schools
+    - water treatment
+    - water system
+    - drinking water
+    - wastewater
+    - utility district
+    - public utility
+    - electric utility
+    - school district
+    - k-12
+    - k12
+    - higher ed
+    - community college
+    - university
+    - municipal
+    - city government
+    - county government
+    - local government
+    - tribal government
+    - tribal nation
+    - public sector
+    - election office
+    - election systems
+    - registrar of voters
+    - transit agency
+    - special district
+    - sheriff's office
+    - sheriff's department
+    - police department
+    - superior court
+    - county court
+    lowmat_tech:
+    - fortinet
+    - fortigate
+    - sonicwall
+    - mikrotik
+    - routeros
+    - openwrt
+    - sharepoint
+    - exchange server
+    - vpn
+    - rdp
+    - n-able
+    - n-central
+    - kaseya
+    - connectwise
+    - screenconnect
+    - wordpress
+    - plc
+    - programmable logic controller
+    - scada
+    - ics
+    - operational technology
+    - cisco
+    - netgear
+    - tp-link
+    - router
+    - firewall
+    exploit_strong:
+    - actively exploited
+    - exploited in the wild
+    - in-the-wild
+    - under active exploitation
+    - added to its known exploited
+    - added to the known exploited
+    - kev catalog
+    - cisa kev
+    - exploitation in the wild
+    - weaponized exploit
+    - public proof-of-concept
+    - proof-of-concept exploit
+    - exploit code is available
+    - being exploited
+    - active threat
+    - active exploitation
+    - ongoing exploitation
+    - observed exploitation
+    - actively targeting
+    kev:
+    - cisa kev
+    - known exploited
+    - actively exploited
+    - exploited in the wild
+    - in-the-wild
+    - added to its known exploited
+    - kev catalog
+    - zero-day
+    - 0-day
+    - under active exploitation
+    cve:
+    - cve-
+    ttp:
+    - lateral movement
+    - living off the land
+    - lolbin
+    - initial access
+    - privilege escalation
+    - persistence mechanism
+    - command and control
+    - credential harvesting
+    - credential theft
+    - web shell
+    - webshell
+    - infostealer
+    - info-stealer
+    - loader
+    - dropper
+    - beacon
+    - att&ck
+    - mitre att
+    - tradecraft
+    - tactics, techniques
+    - spearphishing
+    - spear-phishing
+    - social engineering
+    - defense evasion
+    - obfuscation
+    - dll sideloading
+    - dll side-loading
+    - process injection
+    - living-off-the-land
+    cisa_source:
+    - cisa.gov
+    cyber_context:
+    - cyber
+    - hacks
+    - hacked
+    - hacker
+    - hacking
+    - hack
+    - ransomware
+    - malware
+    - phish
+    - data breach
+    - security breach
+    - breach notification
+    - personal information
+    - social security
+    - patient record
+    - customer record
+    - credit card
+    - credential
+    - password
+    - database
+    - unauthorized access
+    - exfiltrat
+    - encrypted the
+    - threat actor
+    - security incident
+    - vulnerabilit
+    - exploit
+    - cve-
+    - patch
+    - denial of service
+    - ddos
+    - it systems
+    - computer system
+    - network
+    - server
+    - stolen data
+    - data theft
+    - identity theft
+    - information technology
+    listicle:
+    - top 5
+    - top 7
+    - top 10
+    - top 12
+    - top 15
+    - top 20
+    - top 25
+    - biggest
+    - ranked
+    - you should know
+    - ultimate guide
+    - buyer's guide
+    - buyers guide
+    - roundup
+    - round-up
+    - best solutions
+    - best software
+    - best tools
+    - best vpn
+    - best antivirus
+    - best firewall
+    - best wireless
+    - best wi-fi
+    - best security
+    - cheat sheet
+    - what is
+    - how to
+    - 'explained:'
+    - a beginner's guide
+    - everything you need to know
+    supplychain:
+    - supply chain
+    - supply-chain
+    - npm
+    - pypi
+    - package
+    - dependency
+    - third-party
+    - vendor compromise
+    - msp
+    - managed service provider
+    - rmm
+    - procurement
+    - software supply
+    ransom:
+    - ransomware
+    - ransom
+    - extortion
+    - encrypt
+    - leak site
+    - double extortion
+    ci:
+    - critical infrastructure
+    - water utility
+    - water district
+    - water treatment
+    - wastewater
+    - drinking water
+    - power grid
+    - electric grid
+    - hospital
+    - healthcare
+    - public sector
+    - local government
+    - municipal
+    - school district
+    - public utility
+
+# ------------------------------------------------------------------------------
+#  VOCABULARY - what each word group is FOR
+#
+#  Every group declares serves: [PIR-n] or a role. A group that decides
+#  nothing must say why, or vocab_check reports it.
+# ------------------------------------------------------------------------------
+vocab:
+  review_interval_days: 180
+  groups:
+    geo:
+      reviewed: 2026-08-17
+      review_interval_days: 180
+      serves:
+      - PIR-1
+    incident:
+      reviewed: 2026-08-24
+      review_interval_days: 90
+      serves:
+      - PIR-1
+    sector:
+      reviewed: 2026-08-24
+      serves:
+      - PIR-2
+    incident_broad:
+      reviewed: 2026-08-24
+      review_interval_days: 90
+      serves:
+      - PIR-2
+    exploit_strong:
+      reviewed: 2026-08-24
+      review_interval_days: 90
+      serves:
+      - PIR-3
+    lowmat_tech:
+      reviewed: 2026-08-17
+      review_interval_days: 90
+      serves:
+      - PIR-3
+    ci:
+      reviewed: 2026-08-24
+      role: elevation
+    ransom:
+      reviewed: 2026-08-17
+      review_interval_days: 90
+      role: elevation
+    supplychain:
+      reviewed: 2026-08-17
+      role: elevation
+    cve:
+      reviewed: 2026-08-24
+      review_interval_days: 365
+      role: elevation
+    cisa_source:
+      reviewed: 2026-08-24
+      review_interval_days: 365
+      role: elevation
+    cyber_context:
+      reviewed: 2026-08-31
+      review_interval_days: 90
+      role: gate
+    listicle:
+      reviewed: 2026-08-24
+      review_interval_days: 90
+      role: exclusion
+    ttp:
+      reviewed: 2026-08-25
+      review_interval_days: 90
+      role: production
+    kev:
+      reviewed: 2026-08-17
+      review_interval_days: 90
+      role: unused
+      unused_because: 'Split into `exploit_strong` on 2026-08-24 because it was doing two
+        jobs, mixing exploitation evidence with generic vulnerability vocabulary. Retained
+        under the standing rule that when a group turns out to be two groups you split it
+        rather than deleting half. NOTE: `zero-day` and `0-day` live here and nowhere else,
+        so they currently fire no multiplier — reconcile with work order 3 in cti/pnd_work_orders_20260825.md
+        before that decision is taken.
+
+        '
+    targeting:
+      reviewed: 2026-08-24
+      review_interval_days: 90
+      role: unused
+      unused_because: 'Availability language (outage, denial of service, taken offline, service
+        disruption) is confined here by design. `incident_broad` was built as the union of
+        `incident` and `targeting` and is what the rules read; this group is the reserve the
+        union draws from. Wiring it into `incident` is Open finding 1 and a P&D decision,
+        not a maintenance edit.
+
+        '
+  accepted:
+  - check: padded term
+    subject: ''' calif '' in geo'
+    reason: 'Known and understood — see Open finding 2. Both fixes change matching, so the
+      decision belongs to P&D rather than to a maintenance pass. The marginal exposure is
+      small: california/californian already match, and the residual false positives are place
+      names containing "calif".
+
+      '
+    date: 2026-08-17
+
+# ==============================================================================
+#  STAGE 3b - EXPLOITATION
+#
+#  A person and a model working the staging document into the vox.
+#  Only production.report_title is read by any engine; the rest is the
+#  standard the analyst and the model are held to.
+# ==============================================================================
+
+production:
+  audience: 'Low-maturity State/Local/Tribal/Territorial (SLTT) organisations in the AOR —
+    counties, cities, school and special districts. They consume vendor software; they do
+    not write code. Recommendations must be plain-language and minimal-tooling (IG1 CIS controls
+    preferred), and lean on vendor accountability and procurement governance rather than engineering
+    effort.
+
+    '
+  relevance_clause: 'Why an SLTT organization should care:'
+  show_scores: true
+  report_title: WCTI — Staging Document (candidate queue)
+  vox_title: WCTI — Weekly Cyber Threat Intelligence
+  distributed_item_target:
+  - 5
+  - 8
+  sections:
+  - NEWS
+  - CTA TTPs
+  - LATEST ATTACKS OR RISKS
+  - KEYWORDS
+  staging_annotations:
+    min_body_words: 40
+    sections:
+    - name: LATEST ATTACKS OR RISKS
+      when:
+        any:
+        - group: exploit_strong
+          scope: blob
+        - group: cve
+          scope: blob
+    - name: CTA TTPs
+      when:
+        group: ttp
+        scope: blob
+    - name: NEWS
+      when:
+        group: incident_broad
+        scope: blob
+    - name: NEWS
+      when: always
+    compliance_checklist:
+    - Every entry written from the article BODY, never the headline (§6.2).
+    - One event, one entry - same-event reports folded, each event placed once (§7).
+    - Every entry carries a 'why an SLTT organization should care' clause, framed as vendor
+      accountability, procurement or IG1 controls (§6.3).
+    - Citations nested per entry, as live links the reader can actually open (§6.5).
+    - Serious-impact claims verified against a primary or authoritative source; wording does
+      not inflate the source (§7).
+    - 'Attribution discipline: suspected is not confirmed; the state of evidence is represented
+      as it stands (§7).'
+    - Out-of-window items either carry a fresh this-week hook or are cut - not silently kept
+      (§7).
+    - 'Audience-portfolio filter applied: developer-only and defence-industrial-only items
+      excluded unless they reach SLTT through a vendor (§7).'
+    - Product-specific items are relevant only if this audience uses the product (§7).
+    - Acronyms spelled out on first use; mechanisms named but translated (§7).
+    - All four sections present; an empty one says 'none this cycle' rather than being omitted
+      (§5).
+    - 'Three dates correct: title = distribution Thursday, ICOD in the header, LTIOV absent
+      (§2).'
+    - Staging draft carries no handling markings (§1).
+    - Reader-facing heading is 'WCTI - Weekly Cyber Threat Intelligence'; the word 'vox' appears
+      nowhere (§3).
+  deliverable_name: WCTI_v[YYYYMMDD]
+  notes: 'Staging document and vox are content only, no handling markings, and are UNCAPPED
+    - the item count is an output of the scoring and force-surface rules, never a target (Vox
+    Policy section 7). The distributed product narrows to 5-8 and adds handling markings,
+    and is outside Sanctum''s scope. KEYWORDS is wave-tops, not items. Three dates on the
+    distribution product: title = distribution (Thursday); ICOD line = collection cutoff (Wednesday
+    0400 PT); LTIOV planning-only, never printed.
+
+    '

@@ -54,7 +54,7 @@ That includes the schedule. Sanctum has no built-in cadence — weekly, monthly 
 | Build or maintain its word lists | [`docs/VOCABULARY.md`](docs/VOCABULARY.md) |
 | Turn the scored output into a vox | [`docs/EXPLOITATION.md`](docs/EXPLOITATION.md) |
 
-A worked example lives in `cti/` — a weekly cyber threat brief for local government. Copy `_template/` to start your own.
+A worked example lives in `cti/` — a weekly cyber threat brief for local government. It is the pattern to copy; there is no separate starter template, because one that lags the working domain teaches the wrong shape.
 
 ## License / use
 

@@ -112,10 +112,17 @@ def load_vocab(vocab_path):
     broken for lacking one; it is only unguarded.
     """
     if not vocab_path.exists():
-        vocab_path = vocab_path.parent / "pnd.md"
+        for name in ("pnd.yaml", "pnd.md"):
+            if (vocab_path.parent / name).exists():
+                vocab_path = vocab_path.parent / name
+                break
     if not vocab_path.exists():
         return {}
     text = vocab_path.read_text(encoding="utf-8")
+    # A .yaml domain file IS one document; a .md one carries fenced blocks.
+    if vocab_path.suffix in (".yaml", ".yml"):
+        data = yaml.safe_load(text)
+        return (data or {}).get("vocab", {}) or {}
     merged = {}
     for i, block in enumerate(_YAML_BLOCK.findall(text)):
         try:
@@ -346,24 +353,44 @@ def check_domain(domain, cfg, vocab, today):
         for rule in (scoring.get(coll) or []):
             declared.update(rule.get("serves_eei") or [])
     if declared and req_path:
-        # requirements.md when the domain splits its files, pnd.md when it
-        # keeps one. The tree is found by matching EEI identifiers, so it does
-        # not matter which file holds it — only that SOME file does.
-        rp = Path(req_path) / "requirements.md"
-        if not rp.exists():
-            rp = Path(req_path) / "pnd.md"
-        if not rp.exists():
-            findings.append(Finding(
-                WARN, domain, "no requirements tree", "requirements.md",
-                "rules declare serves_eei but the domain has neither a "
-                "requirements.md nor a pnd.md to look those identifiers up in."))
-        else:
-            tree = set(re.findall(r"EEI-\d+\.\d+\.[a-z]", rp.read_text(encoding="utf-8")))
+        # Three shapes, in order of how much they can be trusted:
+        #   1. a declared `requirements:` tree — the identifiers ARE the data,
+        #      so a typo in the tree is caught rather than silently matched.
+        #   2. requirements.md — a split domain. Scraped by regex.
+        #   3. pnd.md — a merged-but-still-markdown domain. Also scraped.
+        # Scraping matches an identifier anywhere in the file, including inside
+        # a sentence that merely mentions it, so shape 1 is strictly better.
+        tree, source = None, None
+        declared_tree = cfg.get("requirements") or {}
+        if declared_tree:
+            tree = set()
+            for pir in declared_tree.get("pirs", []) or []:
+                for sir in pir.get("sirs", []) or []:
+                    for eei in sir.get("eeis", []) or []:
+                        if eei.get("id"):
+                            tree.add(eei["id"])
+            source = "the declared requirements tree"
+        rp = None
+        if tree is None:
+            for name in ("requirements.md", "pnd.md"):
+                if (Path(req_path) / name).exists():
+                    rp = Path(req_path) / name
+                    break
+            if rp is None:
+                findings.append(Finding(
+                    WARN, domain, "no requirements tree", "requirements",
+                    "rules declare serves_eei but the domain declares no "
+                    "requirements tree and has no markdown file to scrape."))
+            else:
+                tree = set(re.findall(r"EEI-\d+\.\d+\.[a-z]",
+                                      rp.read_text(encoding="utf-8")))
+                source = rp.name
+        if tree is not None:
             for eei in sorted(declared - tree):
                 findings.append(Finding(
                     WARN, domain, "element not in the tree", eei,
                     f"declared by a scoring rule but not defined in "
-                    f"{rp.name}. The staging document would print an "
+                    f"{source}. The staging document would print an "
                     f"identifier nobody can look up."))
 
     # --- staleness -----------------------------------------------------
@@ -428,7 +455,11 @@ def git_tracked(repo_root, rel_path):
 
 def discover_domains(repo_root, tracked_only=False):
     """
-    Every <domain>/pnd.md in the repo, by folder name.
+    Every <domain>/pnd.yaml or <domain>/pnd.md in the repo, by folder name.
+
+    BOTH shapes are discovered. Looking for only one is how this check silently
+    stopped covering cti on 2026-09-01 the moment it converted to yaml: no
+    error, no warning, just a domain quietly dropping out of the guard.
 
     `tracked_only` skips domains git does not track. The commit gate uses it:
     a gitignored domain cannot reach the public repo, so it cannot be the gate's
@@ -439,10 +470,14 @@ def discover_domains(repo_root, tracked_only=False):
     are real and the operator should be able to see them.
     """
     out = []
-    for p in sorted(repo_root.glob("*/pnd.md")):
-        # A leading underscore means "not a domain" (docs/DOMAINS.md). Without this,
-        # _template/ is swept up and reported as a permanently broken domain,
-        # since its groups are deliberately empty.
+    seen = set()
+    for p in sorted(list(repo_root.glob("*/pnd.yaml")) + list(repo_root.glob("*/pnd.md"))):
+        if p.parent.name in seen:
+            continue
+        seen.add(p.parent.name)
+        # A leading underscore means "not a domain" (docs/DOMAINS.md). It exists
+        # so a folder holding domain-shaped files without being a domain — scratch,
+        # a backup, a work in progress — is not reported as broken forever.
         if p.parent.name.startswith("_"):
             continue
         if tracked_only and not git_tracked(repo_root, p.relative_to(repo_root)):
@@ -473,14 +508,18 @@ def main(argv=None):
     if args.pnd:
         targets = [(Path(args.pnd).resolve().parent.name, Path(args.pnd).resolve())]
     elif args.domain:
-        targets = [(args.domain, REPO_ROOT / args.domain / "pnd.md")]
+        d = REPO_ROOT / args.domain
+        targets = [(args.domain, d / "pnd.yaml" if (d / "pnd.yaml").exists()
+                    else d / "pnd.md")]
     else:
         names = discover_domains(REPO_ROOT, tracked_only=args.tracked_only)
         if not names:
             scope = "tracked " if args.tracked_only else ""
-            print(f"vocab_check: no {scope}<domain>/pnd.md found")
+            print(f"vocab_check: no {scope}<domain>/pnd.yaml or pnd.md found")
             return 0
-        targets = [(n, REPO_ROOT / n / "pnd.md") for n in names]
+        targets = [(n, (REPO_ROOT / n / "pnd.yaml")
+                    if (REPO_ROOT / n / "pnd.yaml").exists()
+                    else (REPO_ROOT / n / "pnd.md")) for n in names]
 
     findings, failed = [], False
     for name, pnd_path in targets:

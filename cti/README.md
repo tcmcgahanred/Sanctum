@@ -2,33 +2,41 @@
 
 *The operational weekly OSINT cyber-threat-intelligence cycle — an example Sanctum domain, tuned for a State/Local/Tribal/Territorial (SLTT) audience across a regional Area of Responsibility (AOR).*
 
-**BLUF:** This folder is a **domain instance** — configuration and outputs, no engine code. The generic engines live in `../core/` and are pointed at this domain with `../run.sh cti`. Everything CTI-specific — requirements, feeds, scoring, vocabulary and the product spec — is in the single `pnd.md`.
+**BLUF:** This folder is a **domain instance** — configuration and outputs, no engine code. The generic engines live in `../core/` and are pointed at this domain with `../run.sh cti`. Everything CTI-specific — requirements, feeds, scoring, vocabulary and the product spec — is in the single `pnd.yaml`.
 
 ## What's here
 
 | File | Role |
 |------|------|
-| `pnd.md` | **Everything.** The requirements, the sensors, the scoring model, the vocabulary reasoning and the product spec — laid out in the order the intelligence cycle runs them. The engines read only the fenced `yaml` and `sensors` blocks; every other line is for the person reading it. |
-| `CHANGELOG.md` | Dated history. Nothing here is operative — it exists so a decision can be traced, not so it has to be re-read before acting. |
+| `pnd.yaml` | **Everything the cycle needs.** Requirements, sensors, scoring model, vocabulary and the product standard, in the order the intelligence cycle runs them. Configuration and comments only — a comment says what BREAKS if you change the value it sits on. |
+| `CHANGELOG.md` | Dated history, and the reasoning behind every value. Nothing here is operative — it exists so a decision can be traced, not so it has to be re-read before acting. |
 | `editions/WCTI_v*.md` | The voxes actually put out, keyed to the distribution date. |
 
-**Merged 2026-09-01.** This folder used to hold five markdown files —
-`requirements.md`, `mandate.md`, `vocab.md`, `vox_policy.md` and `pnd.md`. They
-are now one, because a fact you have to go and find in another file is a fact
-that gets decided wrongly. The parsed config was verified identical across the
-merge: same 55 sensors, same scoring model, same vocabulary. **A domain may still
-split its files** — `s2` does, and `tools/vocab_check.py` reads either shape.
+**Converted 2026-09-01.** This folder used to hold five markdown files. They
+are now one yaml file, because a fact you have to go and find in another file is
+a fact that gets decided wrongly — and because a structure you fill in is a
+template, while prose you imitate is a writing assignment. The parsed config was
+verified identical across the conversion: same 55 sensors, same scoring model,
+same 16 vocabulary groups, and 486 articles scored with zero differences.
+
+Prose lives in two places and neither is here: **`README.md`** for anything a
+person reads start to finish, and **`CHANGELOG.md`** for why a value is what it
+is. A comment in `pnd.yaml` says only what breaks if you change the line it sits
+on.
+
+**A domain may still ship `pnd.md`** — `s2` does. The loader prefers `pnd.yaml`
+and falls back, so a domain converts when it is ready and not before.
 
 ## How P&D drives the cycle
 
 `pnd.md` is laid out by stage, and each stage owns its config block:
 
-| Stage | Section | What the engine reads |
+| Stage | Banner in `pnd.yaml` | The block it owns |
 |---|---|---|
-| 1 · Planning & Direction | Stage 1 | `manifest:` — where the corpus lives, where staging goes |
-| 2 · Collection | Stage 2 | `manifest.collection:` and the `sensors` feed list |
-| 3a · Processing | Stage 3a | `scoring:` — tiers (8/4/2/1), keyword groups, multipliers, the cyber-domain gate — and `vocab:`, the per-group requirement attribution |
-| 3b · Exploitation | Stage 3b | `production.report_title` only; the rest of the section is the human standard |
+| 1 · Planning & Direction | `STAGE 1` | `requirements:` — KIQ / PIR / SIR / EEI, and the sensor roadmap. Then `manifest:` runtime and storage |
+| 2 · Collection | `STAGE 2` | `manifest.collection:` and `manifest.sensors:` — 55 feed records |
+| 3a · Processing | `STAGE 3a` | `scoring:` — tiers (8/4/2/1), keyword groups, multipliers, the cyber-domain gate — and `vocab:`, the per-group requirement attribution |
+| 3b · Exploitation | `STAGE 3b` | `production:` — only `report_title` is read by an engine; the rest is the standard the analyst and the model are held to |
 
 Change what lands first by editing `scoring` — the rationale lives beside the
 values, so there is nothing to keep in sync. Change what's collected by editing

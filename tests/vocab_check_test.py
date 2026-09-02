@@ -160,9 +160,9 @@ check("tracked-only is a subset of the full sweep",
       <= set(discover_domains(REPO_ROOT)), True)
 check("the tracked domain is never dropped from the gate",
       "cti" in discover_domains(REPO_ROOT, tracked_only=True), True)
-# A leading underscore means "not a domain" (docs/DOMAINS.md). Without this,
-# _template/ is reported as a permanently broken domain — its groups are
-# deliberately empty — and a guard that always fails is a guard people ignore.
+# A leading underscore means "not a domain" (docs/DOMAINS.md). It exists so a
+# folder holding domain-shaped files without being a domain is not reported as
+# broken forever, and a guard that always fails is a guard people ignore.
 check("an underscore-prefixed folder is not treated as a domain",
       [d for d in discover_domains(REPO_ROOT) if d.startswith("_")], [])
 

@@ -47,8 +47,10 @@ EXIT CODES
      0  clean
      1  a domain file contains behavior, or a named file could not be read
 
-Markdown domain files are reported as skipped: YAML cannot express logic, so
-there is nothing for this check to find in them.
+Non-Python domain files (pnd.yaml, pnd.md) are reported as skipped: neither
+yaml nor markdown can express logic, so there is nothing for this check to find
+in them. Only a pnd.py can smuggle behaviour into a domain, and that is what
+this check reads.
 """
 
 import ast
@@ -202,13 +204,14 @@ def check_source(src, filename="<domain file>"):
 
 def is_domain_file(path):
     """
-    A domain file is a domain's P&D file: <domain>/pnd.md or <domain>/pnd.py.
+    A domain file is a domain's P&D file: <domain>/pnd.yaml, <domain>/pnd.md
+    or <domain>/pnd.py.
 
     `core/pnd.py` is NOT one — it is the engine that *loads* domain files, and
     it is full of legitimate logic. Name collision, opposite meaning.
     """
     p = Path(path)
-    if p.name not in ("pnd.py", "pnd.md"):
+    if p.name not in ("pnd.py", "pnd.md", "pnd.yaml"):
         return False
     return "core" not in p.parts
 
@@ -293,7 +296,8 @@ def main(argv):
             file=sys.stderr)
         return 1
 
-    note = f", {len(skipped)} markdown domain file(s) skipped" if skipped else ""
+    note = (f", {len(skipped)} declarative domain file(s) skipped — yaml and "
+            f"markdown cannot express logic" if skipped else "")
     print(f"domain-check: clean ({checked} file(s) scanned{note})")
     return 0
 

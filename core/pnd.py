@@ -107,6 +107,22 @@ def _deep_merge(a, b, path=()):
     return a
 
 
+def parse_pnd(text, is_yaml):
+    """Parse a domain file. A .yaml file IS the config; a .md file carries it
+    in fenced blocks.
+
+    Both go through _UniqueKeyLoader, so a key declared twice is refused either
+    way. The .md path also refuses a leaf redefined ACROSS blocks; a single yaml
+    document cannot express that, which is one fewer way to be wrong.
+    """
+    if is_yaml:
+        data = yaml.load(text, Loader=_UniqueKeyLoader)
+        if not isinstance(data, dict):
+            raise ValueError("pnd.yaml is not a mapping")
+        return data
+    return extract_config(text)
+
+
 def extract_config(md_text):
     """Extract + merge every fenced yaml block from a pnd.md into one dict.
 
@@ -187,12 +203,17 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
         if not domain:
             raise ValueError("load_domain requires a domain name or pnd_path")
         domain_dir = root / domain
-        pnd = domain_dir / "pnd.md"
+        # A domain ships EITHER pnd.yaml (config only) or pnd.md (config in
+        # fenced blocks). yaml wins if both are present, and that is the only
+        # ordering that lets a domain convert without a flag day.
+        pnd = domain_dir / "pnd.yaml"
+        if not pnd.exists():
+            pnd = domain_dir / "pnd.md"
     if not pnd.exists():
         raise FileNotFoundError(f"P&D file not found: {pnd}")
 
     text = pnd.read_text(encoding="utf-8")
-    cfg = extract_config(text)
+    cfg = parse_pnd(text, is_yaml=(pnd.suffix in (".yaml", ".yml")))
     _validate(cfg, domain)
 
     manifest = cfg["manifest"]
@@ -208,10 +229,29 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
     if not sensors_path.is_absolute():
         sensors_path = domain_dir / sensors_path
 
-    # Sensors: prefer an inline ```sensors block in pnd.md (single-file P&D);
-    # fall back to the external sensors_file only if no inline block exists.
-    sensors = extract_sensors(text)
-    sensors_source = "pnd.md (inline)"
+    # Sensors, in order of preference:
+    #   1. manifest.sensors  - a list of records (pnd.yaml). A record carries its
+    #      url plus whatever else the domain wants to say about that feed; only
+    #      `url` is required, and everything else is ignored by the collector.
+    #   2. a fenced ```sensors block - one URL per line (pnd.md).
+    #   3. the external sensors_file named by the manifest.
+    # The collector consumes a flat list of URLs in every case, so a domain can
+    # move between shapes without the engine noticing. s2 still uses shape 2.
+    sensors, sensors_source = None, None
+    declared = manifest.get("sensors")
+    if isinstance(declared, list) and declared:
+        missing = [i for i, s in enumerate(declared)
+                   if not (s.get("url") if isinstance(s, dict) else s)]
+        if missing:
+            raise ValueError(
+                f"[{domain}] manifest.sensors entries at position(s) {missing} "
+                f"have no `url`. A record without one is a feed that will never "
+                f"be collected and nothing downstream would say so.")
+        sensors = [s["url"] if isinstance(s, dict) else s for s in declared]
+        sensors_source = f"{pnd.name} (manifest.sensors)"
+    if sensors is None:
+        sensors = extract_sensors(text)
+        sensors_source = f"{pnd.name} (inline block)"
     if sensors is None:
         sensors = load_sensors(sensors_path) if sensors_path.exists() else []
         sensors_source = str(sensors_path) if sensors else "(none found)"
@@ -221,6 +261,7 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
         "manifest": manifest,
         "scoring": cfg["scoring"],
         "production": cfg.get("production", {}),
+        "requirements": cfg.get("requirements", {}),
         "domain": domain,
         "domain_dir": domain_dir,
         "base_dir": base_dir,

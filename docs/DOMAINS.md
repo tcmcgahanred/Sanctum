@@ -145,8 +145,11 @@ pointed at the split being wrong rather than the content.
 
 ## Creating a new domain
 
-1. **Copy `_template/` to `<domain>/`.** Folders whose name begins with `_` are
-   not domains and are skipped by tooling.
+1. **Copy `cti/` to `<domain>/` and empty it out.** There is no starter
+   template: one was kept until 2026-09-01 and removed because it lagged the
+   working domain and would have taught a stranger the wrong shape. Copy the
+   domain that actually runs. Folders whose name begins with `_` are not
+   domains and are skipped by tooling.
 2. **Run the Planning & Direction survey** (`PND_SURVEY.md`) to fill `pnd.md`.
    Do not write word lists first — see `VOCABULARY.md` §3, and note that the
    method there is marked unvalidated.
@@ -192,9 +195,10 @@ ones when run from the commit gate, and includes them on a manual run.
 
 ## The `_` prefix
 
-A folder under the repo root containing a `pnd.md` is treated as a domain by
-tooling that discovers domains. `_template/` would otherwise be swept up and
-reported as a broken domain forever, since its groups are deliberately empty.
+A folder under the repo root containing a `pnd.yaml` or a `pnd.md` is treated
+as a domain by tooling that discovers domains. The prefix exists so a folder
+that holds domain-shaped files without being a domain — scratch, a backup, a
+work in progress — is not swept up and reported as broken forever.
 
 **Convention: a leading underscore means "not a domain."** Applied in
 `../tools/vocab_check.py`; apply it to any future tool that discovers domains.

@@ -27,8 +27,11 @@ WHAT IS CHECKED
   duplicate across     a leaf redefined by a later block is refused
   identical across     the same leaf twice with the SAME value is allowed, so a
                        harmless restatement never blocks a commit
-  the real domain      cti loads, carries its vocabulary, and still has 55
-                       sensors — the merge moved text, never values
+  pnd.yaml             a domain may ship one yaml document instead, and the
+                       same duplicate-key guard applies to it
+  the real domain      cti loads from pnd.yaml, carries its vocabulary and its
+                       requirements tree, and still has 55 sensors — the
+                       conversion moved text, never values
 
     tests/merge_test.py        # exit 0 = one file per domain is safe
 """
@@ -145,14 +148,35 @@ manifest:
     check("...and the block's other keys still land",
           same["manifest"]["base_dir"], "/tmp")
 
+    print("\nA domain may ship pnd.yaml instead, and it is ONE document")
+    # A single yaml document cannot declare manifest twice, so the split-block
+    # trick above does not exist here — which is one fewer way to be wrong. The
+    # duplicate-key loader still applies, and that is what this checks.
+    from core.pnd import parse_pnd                              # noqa: E402
+    one = parse_pnd("manifest:\n  domain: t\n  collection:\n    window_days: 7\n",
+                    is_yaml=True)
+    check("a pnd.yaml parses whole", one["manifest"]["collection"], {"window_days": 7})
+    try:
+        parse_pnd("manifest:\n  domain: a\n  domain: b\n", is_yaml=True)
+        check("a repeated key in pnd.yaml is refused", "loaded", "refused")
+    except ValueError as e:
+        check("a repeated key in pnd.yaml is refused, naming the key",
+              "domain" in str(e), True)
+
     print("\nThe real domain, after the merge")
-    text = (Path(__file__).resolve().parent.parent / "cti" / "pnd.md").read_text()
-    real = extract_config(text)
-    check("cti/pnd.md carries all four top-level blocks",
-          sorted(real), ["manifest", "production", "scoring", "vocab"])
-    check("...the vocabulary came with it", len(real["vocab"]["groups"]), 16)
-    check("...and every sensor survived", len(extract_sensors(text)), 55)
+    import yaml                                                 # noqa: E402
+    root = Path(__file__).resolve().parent.parent
+    raw = yaml.safe_load((root / "cti" / "pnd.yaml").read_text())
     cfg = load_domain(domain="cti")
+    check("cti/pnd.yaml carries all five top-level blocks", sorted(raw),
+          ["manifest", "production", "requirements", "scoring", "vocab"])
+    check("...the vocabulary came with it", len(raw["vocab"]["groups"]), 16)
+    check("...and every sensor survived", len(cfg["sensors"]), 55)
+    check("...read from the sensor records, not a fenced block",
+          "manifest.sensors" in cfg["sensors_source"], True)
+    check("...every requirement identifier is declared, not scraped",
+          sum(len(s.get("eeis", [])) for p in cfg["requirements"]["pirs"]
+              for s in p["sirs"]), 19)
     check("the domain still loads through the normal path",
           cfg["scoring"]["settings"]["recency"]["cutoff_weekday"], "wednesday")
 

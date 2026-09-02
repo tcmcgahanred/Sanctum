@@ -10,7 +10,7 @@ real headlines used words the fixtures did not. RUN IT BEFORE EVERY SCORING
 COMMIT, on the collector host, where the corpus is.
 
     python3 tools/rescore_check.py --domain cti --old <old-pnd.md> [--limit 40]
-    git show HEAD:cti/pnd.md > /tmp/pnd_old.md
+    git show HEAD:cti/pnd.yaml > /tmp/pnd_old.yaml   # or pnd.md on a split domain
 
 Reports: surfaced counts before and after; what STOPPED surfacing; what STARTED
 (a long list means something was loosened by accident); and per-feed removal
@@ -49,8 +49,8 @@ def evaluate(art, scoring):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--domain", default="cti")
-    ap.add_argument("--old", required=True, help="path to the PREVIOUS pnd.md")
-    ap.add_argument("--new", help="path to the new pnd.md (default: the domain's)")
+    ap.add_argument("--old", required=True, help="path to the PREVIOUS domain file (pnd.yaml or pnd.md)")
+    ap.add_argument("--new", help="path to the new domain file (default: the domain's)")
     ap.add_argument("--limit", type=int, default=40, help="rows to print per list")
     ap.add_argument("--grep", help="only show rows whose feed or title contains this")
     a = ap.parse_args()
