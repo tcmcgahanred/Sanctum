@@ -101,10 +101,18 @@ class Finding:
 
 def load_vocab(vocab_path):
     """
-    Parse the `vocab:` block from a domain's vocab.md. Returns {} when the file
-    is absent — the file is optional, and the checks that need it simply do not
-    run. A domain is not broken for lacking one; it is only unguarded.
+    Parse the `vocab:` block from a domain's vocab.md, OR from its pnd.md when
+    the domain keeps everything in one file.
+
+    Two shapes are supported on purpose. `cti` merged its five markdown files
+    into one on 2026-09-01; `s2` is git-ignored, cannot be edited from the repo,
+    and still keeps a separate vocab.md. A fallback serves both without a flag
+    day. Returns {} when neither carries a `vocab:` block — the block is
+    optional, and the checks that need it simply do not run. A domain is not
+    broken for lacking one; it is only unguarded.
     """
+    if not vocab_path.exists():
+        vocab_path = vocab_path.parent / "pnd.md"
     if not vocab_path.exists():
         return {}
     text = vocab_path.read_text(encoding="utf-8")
@@ -338,20 +346,25 @@ def check_domain(domain, cfg, vocab, today):
         for rule in (scoring.get(coll) or []):
             declared.update(rule.get("serves_eei") or [])
     if declared and req_path:
+        # requirements.md when the domain splits its files, pnd.md when it
+        # keeps one. The tree is found by matching EEI identifiers, so it does
+        # not matter which file holds it — only that SOME file does.
         rp = Path(req_path) / "requirements.md"
+        if not rp.exists():
+            rp = Path(req_path) / "pnd.md"
         if not rp.exists():
             findings.append(Finding(
                 WARN, domain, "no requirements tree", "requirements.md",
-                "rules declare serves_eei but the domain has no requirements.md "
-                "to look those identifiers up in."))
+                "rules declare serves_eei but the domain has neither a "
+                "requirements.md nor a pnd.md to look those identifiers up in."))
         else:
             tree = set(re.findall(r"EEI-\d+\.\d+\.[a-z]", rp.read_text(encoding="utf-8")))
             for eei in sorted(declared - tree):
                 findings.append(Finding(
                     WARN, domain, "element not in the tree", eei,
-                    "declared by a scoring rule but not defined in "
-                    "requirements.md. The staging document would print an "
-                    "identifier nobody can look up."))
+                    f"declared by a scoring rule but not defined in "
+                    f"{rp.name}. The staging document would print an "
+                    f"identifier nobody can look up."))
 
     # --- staleness -----------------------------------------------------
     # A WARN, never an ERROR. A date passing is not a reason to block a commit;

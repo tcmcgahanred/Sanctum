@@ -45,6 +45,15 @@ satisfies the machine is one nobody can maintain.
 | File | Status | What it is |
 |---|---|---|
 | `pnd.md` | **REQUIRED** | Planning & Direction. Manifest, sensors, scoring model, production block. The only file the engine reads. |
+> **One file or several — the engine does not care.** Added 2026-09-01, when
+> `cti` merged its five markdown files into one `pnd.md` laid out by
+> intelligence-cycle stage. The loader reads every fenced `yaml` block in
+> `pnd.md` and deep-merges them, so `manifest:` may legitimately appear twice;
+> `tools/vocab_check.py` looks for the `vocab:` block and the requirements tree
+> in the split files first and falls back to `pnd.md`. The table below describes
+> the SPLIT shape, which `s2` still uses and which remains a valid choice. What
+> is not a valid choice is the same fact written in two places.
+
 | `vocab.md` | **EXPECTED** | The reasoning behind the word lists — collisions, dropped terms, per-group review dates, known gaps. Never the terms themselves. See `VOCABULARY.md`. |
 | `README.md` | **EXPECTED** | What this domain is, who it serves, how to run it, how to adapt it. |
 | `requirements.md` | **EXPECTED** | The whole requirements tree — KIQ → PIR → SIR → EEI — each collectable fact mapped to the sensor that serves it. **This is the file that makes a coverage gap visible** — see below. Owns no numbers. |

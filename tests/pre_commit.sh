@@ -7,6 +7,7 @@
 #
 #   domain_check.py      a domain file declares settings, never behaviour
 #   vocab_check.py       no silent decay in a domain's word lists
+#   merge_test.py        one file per domain assembles, and nothing is declared twice
 #   fetch_test.py        failure pages never become article bodies, and old
 #                        reports never enter the corpus
 #   changelog_check.sh   you changed something — did you write it down? (warns)
@@ -66,6 +67,11 @@ if command -v python3 >/dev/null 2>&1; then
     # so nothing downstream could have caught it. This holds the line in both
     # directions - the junk drops AND every genuine item an earlier attempt deleted
     # still surfaces.
+    python3 "$REPO_ROOT/tests/merge_test.py" >/dev/null || {
+        echo "pre-commit: BLOCKED — tests/merge_test.py failed; a domain file declares something twice, or the one-file layout broke" >&2
+        STATUS=1
+    }
+
     python3 "$REPO_ROOT/tests/homonym_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/homonym_test.py failed; run it to see which case" >&2
         STATUS=1; }

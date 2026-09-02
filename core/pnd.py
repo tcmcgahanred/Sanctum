@@ -57,25 +57,71 @@ def extract_sensors(md_text):
     return urls
 
 
-def _deep_merge(a, b):
+class _UniqueKeyLoader(yaml.SafeLoader):
+    """SafeLoader that REFUSES a mapping with a repeated key.
+
+    PyYAML's default is to take the last one silently. That is how `incident:`
+    came to appear twice in cti/vocab.md: sixteen entries were written, fifteen
+    parsed, and nothing anywhere said so. A config file whose contents disagree
+    with what it looks like is worse than a config file that fails to load.
+    """
+
+
+def _no_duplicate_keys(loader, node, deep=False):
+    seen = set()
+    for key_node, _ in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in seen:
+            raise ValueError(
+                f"duplicate key {key!r} at line {key_node.start_mark.line + 1} "
+                f"of this yaml block. PyYAML would silently keep the last one. "
+                f"Merge the two entries, or rename one.")
+        seen.add(key)
+    return yaml.SafeLoader.construct_mapping(loader, node, deep=deep)
+
+
+_UniqueKeyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _no_duplicate_keys)
+
+
+def _deep_merge(a, b, path=()):
+    """Merge b into a. Dicts merge; anything else must not be redefined.
+
+    Two yaml blocks declaring `manifest:` is deliberate — that is how the file
+    splits by intelligence-cycle stage while still assembling one config. Two
+    blocks declaring the same LEAF (a list, a number, a string) is not: one of
+    them is dead text that reads as if it were in force. Refuse it.
+    """
     for k, v in b.items():
+        here = path + (k,)
         if k in a and isinstance(a[k], dict) and isinstance(v, dict):
-            _deep_merge(a[k], v)
+            _deep_merge(a[k], v, here)
+        elif k in a and a[k] != v:
+            raise ValueError(
+                f"'{'.'.join(here)}' is declared twice with different values "
+                f"across yaml blocks. Only mappings may be assembled from more "
+                f"than one block; a list or a scalar declared twice means one "
+                f"of them is silently dead. Delete the one that is not in force.")
         else:
             a[k] = v
     return a
 
 
 def extract_config(md_text):
-    """Extract + merge every fenced yaml block from a pnd.md into one dict."""
+    """Extract + merge every fenced yaml block from a pnd.md into one dict.
+
+    Duplicate keys are refused in both places they can hide: inside one block
+    (_UniqueKeyLoader) and across blocks (_deep_merge). Both were silent before
+    2026-09-01 and both had already cost a wrong count.
+    """
     merged = {}
     blocks = _YAML_BLOCK.findall(md_text)
     if not blocks:
         raise ValueError("no ```yaml config blocks found in P&D markdown")
     for i, block in enumerate(blocks):
         try:
-            data = yaml.safe_load(block)
-        except yaml.YAMLError as e:
+            data = yaml.load(block, Loader=_UniqueKeyLoader)
+        except (yaml.YAMLError, ValueError) as e:
             raise ValueError(f"yaml block #{i+1} failed to parse: {e}") from e
         if data is None:
             continue
