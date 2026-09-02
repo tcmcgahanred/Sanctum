@@ -12,8 +12,8 @@
 
 ## 2. Cadence & dates
 
-- Collection cutoff / **ICOD** (information current as of): Monday 0500 Pacific.
-- Produced: Monday. Team review: Wednesday. Distribution: Thursday.
+- Collection cutoff / **ICOD** (information current as of): Wednesday 0400 Pacific. The staging document is complete by 0500.
+- Produced: Wednesday 0600. Team review: Thursday morning. Distribution: Thursday afternoon.
 - **Title date = distribution date (Thursday).** ICOD appears in the header. LTIOV is planning doctrine only — never on the product.
 
 ## 3. Naming

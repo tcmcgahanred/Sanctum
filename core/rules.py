@@ -368,7 +368,10 @@ def compute_cycle_window(now_utc, settings):
     Return (window_start_utc, cutoff_utc) for the current cycle.
 
     cutoff = the most recent <cutoff_weekday> at <cutoff_time> in <timezone>
-    that is <= now (the ICOD, e.g. Monday 0900 America/Los_Angeles).
+    that is <= now (the ICOD, e.g. Wednesday 0400 America/Los_Angeles).
+    NOTE: cutoff_time must be at or before the hour the run STARTS. If the
+    declared time has not yet passed when scoring runs, this walks back a
+    whole week and the cycle windows on the previous week silently.
     window_start = cutoff - window_days.
     """
     rec = settings.get("recency", {}) or {}

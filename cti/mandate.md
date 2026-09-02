@@ -21,16 +21,16 @@
 
 | When | Step |
 |------|------|
-| **Monday 0500 PT** | **Collector runs. Collection cutoff = ICOD** ("information current as of"). Corpus windowed on the 7 days ending here. |
-| **Monday 0500** (same run) | **Staging document written** by `arbites.py` — 3a, machine, deterministic. Pushed to the staging store. |
-| **Monday ~0600** | **Vox created** from the staging document — 3b, operator plus a model, per `../docs/EXPLOITATION.md`. |
-| **Monday–Tuesday** | **Individual review / amend** — analyst verification and edits. |
-| **Wednesday** | **Team review.** |
+| **Wednesday 0400 PT** | **Collector runs. Collection cutoff = ICOD** ("information current as of"). Corpus windowed on the 7 days ending here. |
+| **Wednesday, complete by 0500** (same run) | **Staging document written** by `arbites.py` — 3a, machine, deterministic. Pushed to the staging store. |
+| **Wednesday 0600** | **Vox created** from the staging document — 3b, operator plus a model, per `../docs/EXPLOITATION.md`. |
+| **Wednesday, rest of day** | **Individual review / amend** — analyst verification and edits. |
+| **Thursday morning** | **Team review.** |
 | **Thursday afternoon** | **Distribution** — finished report sent. This is the product's **title date**. |
 
 **Three dates — keep them distinct:**
 - **Title date = distribution (Thursday).** What the product is dated.
-- **ICOD line = collection cutoff (that week's Monday 0500 PT).** Carried in the product body: "information current as of …".
+- **ICOD line = collection cutoff (that week's Wednesday 0400 PT).** Carried in the product body: "information current as of …".
 - **LTIOV** (latest time information is of value) — **planning doctrine only. Never printed on the product.**
 
 **Two documents, two names — never interchangeable** (Vox Policy §3):
@@ -64,7 +64,7 @@ copies them.
 - **Quality over quantity on sensors.** A feed earns its place only if reliable AND additive (offers a vantage the others don't). Drop noisy sensors rather than filter them.
 - **Trusted sources ingested wholesale; AOR relevance decided at scoring**, not by keyword pre-filtering at collection.
 - **Verify every feed URL against the current host's actual egress** before loading (some sources 403 datacenter/server IPs even when they work from a browser).
-- **Collection window: the 7 days ending Monday 0500 PT (ICOD).** The window closes at the 0500 cutoff and the staging document is built from that closed corpus in the same run. The 0500 time exists so a 0600 pull sees a finished run, leaving the analyst until 0900 to review.
+- **Collection window: the 7 days ending Wednesday 0400 PT (ICOD).** The window closes at the 0400 cutoff and the staging document is built from that closed corpus in the same run. **The cutoff is 0400 and not 0500 because a run takes 36 minutes** (collection 20m01s, scoring 16m04s, measured 2026-08-26) and `compute_cycle_window` walks back a **whole week** if the declared cutoff time has not yet passed when scoring runs. Starting at 0400 puts the finished staging document in the staging store before 0500, which is when it is wanted.
 - **Dropped and why:** 34 county Google News keyword feeds — keyword search on a general news index returns the county's whole news firehose, not its cyber incidents. Wrong instrument for precision local detection. Do not reintroduce keyword-query feeds.
 
 ### Analysis / Scoring
@@ -97,13 +97,13 @@ Mandate is not their home.*
 - **Plain language, minimal-tooling recommendations** (IG1 CIS controls preferred). Audience consumes vendor software; they don't write code. Emphasis on vendor accountability and procurement governance.
 - **The vox is content, not a finished product.** No handling markings, no distribution furniture. The distributed product is a separate template with TLP:CLEAR, deeper analysis and presentation polish, built downstream by the team. Never conflate the two.
 - **No internal machinery in the reader-facing document** (Vox Policy §4). The header carries the heading, the filename and dates, a paragraph on what the document is, and a note on the scores. It does **not** carry staging-document filenames, stage labels, sensor names, feed URLs or pipeline paths. *"Local reporting was thin this week"* is the collection note; *"the Cal OES feed returned nothing"* is not.
-- **Three dates on the distribution product:** title = distribution (Thursday); ICOD line in body = collection cutoff (Monday 0500 PT); LTIOV never printed.
+- **Three dates on the distribution product:** title = distribution (Thursday); ICOD line in body = collection cutoff (Wednesday 0400 PT); LTIOV never printed.
 - **Citations nested per entry** (not consolidated endnotes).
 - **Source-access check before publishing:** confirm every cited URL is publicly reachable. On 403/paywall/login wall, find an alternative citation for the same reporting. A citation the audience can't open is not usable.
 - **Synthesis stays manual** (no API/tokens) — deliberate choice, not a limitation to fix by default.
 
 ### Dissemination
-- **Distribution target: Thursday afternoon** (after Monday staging, Mon–Tue individual review, Wednesday team review).
+- **Distribution target: Thursday afternoon** (after Wednesday staging, Wednesday individual review, Thursday-morning team review).
 - **Product is TLP:CLEAR** — freely shareable, no distribution restriction.
 
 ---

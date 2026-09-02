@@ -18,8 +18,9 @@ DOCTRINE lives in the domain config; the engine only executes it:
 
 RECENCY GATE (Codex Layer 4 — implemented): in_window() still gathers the corpus
 by COLLECTED date, but each item is additionally checked by PUBLISH date against
-the cycle window (config: scoring.settings.recency, default 7 days ending Monday
-0900 America/Los_Angeles). Out-of-window items are flagged 'STALE — confirm
+the cycle window (config: scoring.settings.recency, default 7 days ending the
+declared cutoff_weekday at cutoff_time in the declared timezone; CTI runs
+Wednesday 0400 America/Los_Angeles). Out-of-window items are flagged 'STALE — confirm
 current hook' in their reasoning and marked in the output — never dropped, never
 re-scored. Origin: a June FortiBleed advisory surfaced in the August edition.
 """

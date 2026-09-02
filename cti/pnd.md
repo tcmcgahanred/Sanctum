@@ -588,8 +588,8 @@ scoring:
     recency:
       enabled: true
       window_days: 7
-      cutoff_weekday: monday
-      cutoff_time: "05:00"
+      cutoff_weekday: wednesday
+      cutoff_time: "04:00"
       timezone: America/Los_Angeles
     grouping:
       enabled: true
@@ -768,8 +768,8 @@ policy forbids caps, and it is gone:
 
 | Artifact | When | Size |
 |---|---|---|
-| **Staging document** (3a) | Monday 0500 | **Uncapped.** Everything clearing `surface_min_score` or matching a `force_surface` rule |
-| **Vox** (3b) | Monday | **Uncapped.** The operator cuts on judgement, not to a number |
+| **Staging document** (3a) | Wednesday, complete by 0500 | **Uncapped.** Everything clearing `surface_min_score` or matching a `force_surface` rule |
+| **Vox** (3b) | Wednesday 0600 | **Uncapped.** The operator cuts on judgement, not to a number |
 | **Distributed report** | Thursday | 5–8 items — "restraint is the product" applies here, and this is **outside Sanctum's scope** |
 
 If the surface is too large, tune the weights, the vocabulary, or the exclusion
@@ -880,5 +880,5 @@ production:
     narrows to 5-8 and adds handling markings, and is outside Sanctum's scope.
     KEYWORDS is wave-tops, not items. Three dates on the distribution product:
     title = distribution (Thursday); ICOD line = collection cutoff
-    (Monday 0500 PT); LTIOV planning-only, never printed.
+    (Wednesday 0400 PT); LTIOV planning-only, never printed.
 ```
