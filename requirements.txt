@@ -22,3 +22,4 @@ pyyaml          # P&D config parsing (core/pnd.py). rclone stays a system binary
 curl_cffi
 googlenewsdecoder
 readability-lxml
+tzdata  # Windows has no system timezone database; zoneinfo needs this

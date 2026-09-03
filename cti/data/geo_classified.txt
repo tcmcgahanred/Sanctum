@@ -1,0 +1,1672 @@
+# Sanctum · derived geography confidence table — DO NOT EDIT BY HAND
+# regenerate with: tools/geo_classify.py --state CA
+# generated 2026-09-02 · state CA · 1653 names
+# source: US Census Bureau Gazetteer (public domain)
+#   2025_Gaz_counties_national.txt
+#   2025_Gaz_place_national.txt
+# frequency signal: wordfreq
+#
+#   A  unique to this state      match on the name alone
+#   B  shared with 2-3 states    require corroboration nearby
+#   C  shared with 4+ states, or a common English word — never alone
+#
+#   A 1085   B 280   C 288
+#
+# LIMIT: the places file has no county column, so this covers the whole
+# state. Narrowing to a sub-state AOR needs the Census place-to-county
+# relationship file.
+#
+# name|kind|bucket|states|reason
+acalanes ridge|place|A|1|
+acampo|place|A|1|
+acton|place|B|2|shares its name with 2 states
+adelanto|place|A|1|
+adin|place|A|1|
+agoura hills|place|A|1|
+agua dulce|place|B|2|shares its name with 2 states
+aguanga|place|A|1|
+ahwahnee|place|A|1|
+airport|place|C|1|common English word, zipf 4.84
+alameda|county|A|1|
+alameda|place|A|1|
+alamo|place|C|8|shares its name with 8 states
+albany|place|C|16|shares its name with 16 states
+albion|place|C|11|shares its name with 11 states
+alderpoint|place|A|1|
+alhambra|place|B|2|shares its name with 2 states
+alhambra valley|place|A|1|
+aliso viejo|place|A|1|
+alleghany|place|B|3|shares its name with 3 states
+allendale|place|C|6|shares its name with 6 states
+allensworth|place|A|1|
+almanor|place|A|1|
+alondra park|place|A|1|
+alpaugh|place|A|1|
+alpine|county|A|1|
+alpine|place|C|9|shares its name with 9 states
+alpine village|place|A|1|
+alta|place|C|4|shares its name with 4 states
+alta sierra|place|A|1|
+altadena|place|A|1|
+alto|place|C|4|shares its name with 4 states
+alturas|place|B|2|shares its name with 2 states
+alum rock|place|A|1|
+amador|county|A|1|
+amador city|place|A|1|
+amador pines|place|A|1|
+american canyon|place|A|1|
+amesti|place|A|1|
+anaheim|place|A|1|
+anchor bay|place|A|1|
+anderson|place|C|13|common English word, zipf 4.36
+angels|place|C|1|common English word, zipf 4.26
+angwin|place|A|1|
+antelope|place|C|5|shares its name with 5 states
+antioch|place|C|5|shares its name with 5 states
+anza|place|A|1|
+apple valley|place|C|5|shares its name with 5 states
+aptos|place|A|1|
+aptos hills-larkin valley|place|A|1|
+arbuckle|place|A|1|
+arcadia|place|C|13|shares its name with 13 states
+arcata|place|A|1|
+arden-arcade|place|A|1|
+armona|place|A|1|
+arnold|place|C|5|common English word, zipf 4.00
+aromas|place|A|1|
+arroyo grande|place|A|1|
+artesia|place|B|3|shares its name with 3 states
+artois|place|A|1|
+arvin|place|A|1|
+ashland|place|C|19|shares its name with 19 states
+aspen springs|place|A|1|
+atascadero|place|A|1|
+atherton|place|A|1|
+atwater|place|B|3|shares its name with 3 states
+auberry|place|A|1|
+auburn|place|C|18|shares its name with 18 states
+auburn lake trails|place|A|1|
+august|place|C|1|common English word, zipf 5.10
+avalon|place|C|6|shares its name with 6 states
+avenal|place|A|1|
+avery|place|B|3|shares its name with 3 states
+avila beach|place|A|1|
+avocado heights|place|A|1|
+azusa|place|A|1|
+baker|place|C|10|common English word, zipf 4.23
+bakersfield|place|B|3|shares its name with 3 states
+bakersfield country club|place|A|1|
+baldwin park|place|B|2|shares its name with 2 states
+ballard|place|B|3|shares its name with 3 states
+ballico|place|A|1|
+bangor|place|C|5|shares its name with 5 states
+banning|place|A|1|
+barstow|place|C|4|shares its name with 4 states
+bass lake|place|B|3|shares its name with 3 states
+bay point|place|A|1|
+bayview|place|B|3|shares its name with 3 states
+baywood park|place|A|1|
+beale afb|place|A|1|
+bear creek|place|C|6|shares its name with 6 states
+bear valley|place|A|1|
+bear valley springs|place|A|1|
+beaumont|place|C|4|shares its name with 4 states
+beckwourth|place|A|1|
+belden|place|B|2|shares its name with 2 states
+bell|place|C|5|common English word, zipf 4.59
+bell canyon|place|A|1|
+bell gardens|place|A|1|
+bella vista|place|B|2|shares its name with 2 states
+bellflower|place|B|3|shares its name with 3 states
+belmont|place|C|12|shares its name with 12 states
+belvedere|place|B|2|shares its name with 2 states
+ben lomond|place|B|2|shares its name with 2 states
+benbow|place|A|1|
+bend|place|C|2|common English word, zipf 4.13
+benicia|place|A|1|
+benton|place|C|17|shares its name with 17 states
+benton park|place|A|1|
+berkeley|place|C|5|shares its name with 5 states
+bermuda dunes|place|A|1|
+berry creek|place|A|1|
+bertsch-oceanview|place|A|1|
+bethel island|place|A|1|
+beverly hills|place|C|5|shares its name with 5 states
+bieber|place|A|1|
+big bear city|place|A|1|
+big bear lake|place|A|1|
+big bend|place|B|2|shares its name with 2 states
+big creek|place|B|3|shares its name with 3 states
+big lagoon|place|A|1|
+big pine|place|A|1|
+big river|place|A|1|
+biggs|place|A|1|
+biola|place|A|1|
+bishop|place|C|3|common English word, zipf 4.38
+black point-green point|place|A|1|
+blackhawk|place|B|2|shares its name with 2 states
+blacklake|place|A|1|
+blairsden|place|A|1|
+bloomfield|place|C|12|shares its name with 12 states
+bloomington|place|C|9|shares its name with 9 states
+blue lake|place|A|1|
+bluewater|place|B|3|shares its name with 3 states
+blythe|place|B|2|shares its name with 2 states
+bodega|place|A|1|
+bodega bay|place|A|1|
+bodfish|place|A|1|
+bolinas|place|A|1|
+bombay beach|place|A|1|
+bonadelle ranchos|place|A|1|
+bonita|place|B|2|shares its name with 2 states
+bonny doon|place|A|1|
+bonsall|place|A|1|
+boonville|place|C|5|shares its name with 5 states
+bootjack|place|A|1|
+boron|place|A|1|
+boronda|place|A|1|
+borrego springs|place|A|1|
+bostonia|place|A|1|
+boulder creek|place|A|1|
+boulevard|place|A|1|
+bowles|place|A|1|
+boyes hot springs|place|A|1|
+bradbury|place|A|1|
+bradley|place|C|9|common English word, zipf 4.01
+brawley|place|A|1|
+brea|place|A|1|
+brentwood|place|C|6|shares its name with 6 states
+bret harte|place|A|1|
+bridgeport|place|C|15|shares its name with 15 states
+brisbane|place|A|1|
+broadmoor|place|A|1|
+brookdale|place|B|3|shares its name with 3 states
+brooks|place|C|7|common English word, zipf 4.04
+brooktrails|place|A|1|
+buck meadows|place|A|1|
+buckhorn|place|C|4|shares its name with 4 states
+bucks lake|place|A|1|
+buellton|place|A|1|
+buena park|place|A|1|
+buena vista|place|C|9|shares its name with 9 states
+burbank|place|C|6|shares its name with 6 states
+burlingame|place|B|2|shares its name with 2 states
+burney|place|B|2|shares its name with 2 states
+burnt ranch|place|A|1|
+butte|county|B|3|shares its name with 3 counties
+butte creek canyon|place|A|1|
+butte meadows|place|A|1|
+butte valley|place|A|1|
+buttonwillow|place|A|1|
+byron|place|C|8|shares its name with 8 states
+bystrom|place|A|1|
+c-road|place|C|1|common English word, zipf 4.98
+cabazon|place|A|1|
+calabasas|place|A|1|
+calaveras|county|A|1|
+calexico|place|A|1|
+california city|place|A|1|
+california hot springs|place|A|1|
+california pines|place|A|1|
+california polytechnic state university|place|A|1|
+calimesa|place|A|1|
+calipatria|place|A|1|
+calistoga|place|A|1|
+callender|place|B|2|shares its name with 2 states
+calpella|place|A|1|
+calpine|place|A|1|
+calwa|place|A|1|
+camanche north shore|place|A|1|
+camanche village|place|A|1|
+camarillo|place|A|1|
+cambria|place|C|5|shares its name with 5 states
+cambrian park|place|A|1|
+cameron park|place|B|2|shares its name with 2 states
+camino|place|A|1|
+camino tassajara|place|A|1|
+camp nelson|place|A|1|
+camp pendleton mainside|place|A|1|
+camp pendleton south|place|A|1|
+campbell|place|C|13|common English word, zipf 4.23
+campo|place|B|2|shares its name with 2 states
+campo seco|place|A|1|
+camptonville|place|A|1|
+canby|place|B|3|shares its name with 3 states
+cantua creek|place|A|1|
+canyon lake|place|B|2|shares its name with 2 states
+canyondam|place|A|1|
+capitola|place|B|2|shares its name with 2 states
+caribou|place|B|3|shares its name with 3 states
+carlsbad|place|B|3|shares its name with 3 states
+carmel valley village|place|A|1|
+carmel-by-the-sea|place|A|1|
+carmet|place|A|1|
+carmichael|place|A|1|
+carnelian bay|place|A|1|
+carpinteria|place|A|1|
+carrick|place|A|1|
+carson|place|C|6|shares its name with 6 states
+cartago|place|A|1|
+caruthers|place|A|1|
+casa conejo|place|A|1|
+casa loma|place|A|1|
+casa de oro-mount helix|place|A|1|
+casmalia|place|A|1|
+caspar|place|A|1|
+cassel|place|A|1|
+castaic|place|A|1|
+castella|place|A|1|
+castle hill|place|A|1|
+castro valley|place|A|1|
+castroville|place|B|2|shares its name with 2 states
+cathedral city|place|A|1|
+catheys valley|place|A|1|
+cayucos|place|A|1|
+cazadero|place|A|1|
+cedar flat|place|A|1|
+cedar ridge|place|A|1|
+cedar slope|place|A|1|
+cedarville|place|C|6|shares its name with 6 states
+centerville|place|C|19|shares its name with 19 states
+ceres|place|A|1|
+cerritos|place|A|1|
+chalfant|place|B|2|shares its name with 2 states
+challenge-brownsville|place|A|1|
+channel islands beach|place|A|1|
+charleston view|place|A|1|
+charter oak|place|B|2|shares its name with 2 states
+cherokee|place|C|9|shares its name with 9 states
+cherokee strip|place|A|1|
+cherry valley|place|C|5|shares its name with 5 states
+cherryland|place|A|1|
+chester|place|C|20|shares its name with 20 states
+chico|place|B|3|shares its name with 3 states
+chilcoot-vinton|place|A|1|
+china lake acres|place|A|1|
+chinese camp|place|A|1|
+chino|place|A|1|
+chino hills|place|A|1|
+choctaw valley|place|A|1|
+chowchilla|place|A|1|
+chualar|place|A|1|
+chula vista|place|B|2|shares its name with 2 states
+citrus|place|B|2|shares its name with 2 states
+citrus heights|place|A|1|
+claremont|place|C|7|shares its name with 7 states
+clarksburg|place|C|7|shares its name with 7 states
+clay|place|C|20|common English word, zipf 4.29
+clayton|place|C|20|shares its name with 20 states
+clear creek|place|B|3|shares its name with 3 states
+clearlake|place|A|1|
+clearlake oaks|place|A|1|
+clearlake riviera|place|A|1|
+cleone|place|A|1|
+clio|place|C|5|shares its name with 5 states
+clipper mills|place|A|1|
+cloverdale|place|C|6|shares its name with 6 states
+clovis|place|B|2|shares its name with 2 states
+clyde|place|C|8|shares its name with 8 states
+coachella|place|A|1|
+coalinga|place|A|1|
+coarsegold|place|A|1|
+cobb|place|B|3|shares its name with 3 states
+coffee creek|place|B|2|shares its name with 2 states
+cohasset|place|B|2|shares its name with 2 states
+cold springs|place|B|2|shares its name with 2 states
+coleville|place|A|1|
+colfax|place|C|10|shares its name with 10 states
+college city|place|A|1|
+collierville|place|B|2|shares its name with 2 states
+colma|place|A|1|
+coloma|place|B|3|shares its name with 3 states
+colton|place|C|4|shares its name with 4 states
+columbia|place|C|22|common English word, zipf 4.40
+colusa|county|A|1|
+colusa|place|A|1|
+commerce|place|C|5|common English word, zipf 4.37
+comptche|place|A|1|
+compton|place|B|2|shares its name with 2 states
+concord|place|C|13|shares its name with 13 states
+concow|place|A|1|
+contra costa|county|A|1|
+contra costa centre|place|A|1|
+copperopolis|place|A|1|
+corcoran|place|B|2|shares its name with 2 states
+corning|place|C|7|shares its name with 7 states
+corona|place|B|3|shares its name with 3 states
+coronado|place|A|1|
+coronita|place|A|1|
+corralitos|place|A|1|
+corte madera|place|A|1|
+costa mesa|place|A|1|
+cotati|place|A|1|
+coto de caza|place|A|1|
+cottonwood|place|C|8|shares its name with 8 states
+coulterville|place|B|2|shares its name with 2 states
+country club|place|B|3|shares its name with 3 states
+courtland|place|C|6|shares its name with 6 states
+covelo|place|A|1|
+covina|place|A|1|
+cowan|place|B|3|shares its name with 3 states
+crescent city|place|B|3|shares its name with 3 states
+crescent mills|place|A|1|
+cressey|place|A|1|
+crest|place|A|1|
+crestline|place|B|3|shares its name with 3 states
+creston|place|C|6|shares its name with 6 states
+crockett|place|B|3|shares its name with 3 states
+cromberg|place|A|1|
+crowley lake|place|A|1|
+crows landing|place|A|1|
+cudahy|place|B|2|shares its name with 2 states
+culver city|place|A|1|
+cupertino|place|A|1|
+cutler|place|B|3|shares its name with 3 states
+cutten|place|A|1|
+cuyama|place|A|1|
+cypress|place|B|2|shares its name with 2 states
+dales|place|A|1|
+daly city|place|A|1|
+dana point|place|A|1|
+danville|place|C|16|shares its name with 16 states
+daphnedale park|place|A|1|
+darwin|place|B|2|shares its name with 2 states
+davenport|place|C|7|shares its name with 7 states
+davis|place|C|8|common English word, zipf 4.49
+day valley|place|A|1|
+deer park|place|C|9|shares its name with 9 states
+del aire|place|A|1|
+del dios|place|A|1|
+del mar|place|A|1|
+del monte forest|place|A|1|
+del norte|county|A|1|
+del rey|place|A|1|
+del rey oaks|place|A|1|
+del rio|place|B|2|shares its name with 2 states
+delano|place|C|4|shares its name with 4 states
+delft colony|place|A|1|
+delhi|place|C|5|common English word, zipf 4.29
+delleker|place|A|1|
+denair|place|A|1|
+derby acres|place|A|1|
+descanso|place|A|1|
+desert center|place|A|1|
+desert edge|place|A|1|
+desert hot springs|place|A|1|
+desert palms|place|A|1|
+desert shores|place|A|1|
+desert view highlands|place|A|1|
+di giorgio|place|A|1|
+diablo|place|A|1|
+diablo grande|place|A|1|
+diamond bar|place|A|1|
+diamond springs|place|A|1|
+dillon beach|place|A|1|
+dinuba|place|A|1|
+discovery bay|place|A|1|
+dixon|place|C|9|shares its name with 9 states
+dixon lane-meadowcreek|place|A|1|
+dobbins|place|A|1|
+dogtown|place|A|1|
+dollar point|place|A|1|
+dorrington|place|A|1|
+dorris|place|A|1|
+dos palos|place|A|1|
+dos palos y|place|A|1|
+douglas city|place|A|1|
+douglas flat|place|A|1|
+downey|place|B|3|shares its name with 3 states
+downieville|place|A|1|
+doyle|place|B|2|shares its name with 2 states
+drytown|place|A|1|
+duarte|place|A|1|
+dublin|place|C|9|common English word, zipf 4.08
+ducor|place|A|1|
+dunnigan|place|A|1|
+dunsmuir|place|A|1|
+durham|place|C|7|shares its name with 7 states
+dustin acres|place|A|1|
+dutch flat|place|A|1|
+eagleville|place|C|4|shares its name with 4 states
+earlimart|place|A|1|
+east bakersfield|place|A|1|
+east foothills|place|A|1|
+east hemet|place|A|1|
+east los angeles|place|A|1|
+east nicolaus|place|A|1|
+east niles|place|A|1|
+east oakdale|place|A|1|
+east orosi|place|A|1|
+east palo alto|place|A|1|
+east pasadena|place|A|1|
+east porterville|place|A|1|
+east quincy|place|A|1|
+east rancho dominguez|place|A|1|
+east richmond heights|place|A|1|
+east san gabriel|place|A|1|
+east shore|place|A|1|
+east sonora|place|A|1|
+east tulare villa|place|A|1|
+east whittier|place|A|1|
+eastern goleta valley|place|A|1|
+easton|place|C|10|shares its name with 10 states
+eastvale|place|B|2|shares its name with 2 states
+edgewood|place|C|12|shares its name with 12 states
+edison|place|C|5|shares its name with 5 states
+edmundson acres|place|A|1|
+edna|place|B|3|shares its name with 3 states
+edwards afb|place|A|1|
+el adobe|place|A|1|
+el cajon|place|A|1|
+el centro|place|A|1|
+el centro naval air facility|place|A|1|
+el cerrito|place|A|1|
+el dorado|county|A|1|
+el dorado hills|place|A|1|
+el granada|place|A|1|
+el macero|place|A|1|
+el modena|place|A|1|
+el monte|place|A|1|
+el monte mobile village|place|A|1|
+el nido|place|A|1|
+el paso de robles (paso robles)|place|A|1|
+el portal|place|B|2|shares its name with 2 states
+el rancho|place|B|3|shares its name with 3 states
+el rio|place|A|1|
+el segundo|place|A|1|
+el sobrante|place|A|1|
+el verano|place|A|1|
+eldridge|place|B|3|shares its name with 3 states
+elfin forest|place|A|1|
+elizabeth lake|place|A|1|
+elk creek|place|B|3|shares its name with 3 states
+elk grove|place|B|2|shares its name with 2 states
+elkhorn|place|B|3|shares its name with 3 states
+elmira|place|C|4|shares its name with 4 states
+elverta|place|A|1|
+emerald lake hills|place|A|1|
+emeryville|place|A|1|
+empire|place|C|8|common English word, zipf 4.54
+encinitas|place|A|1|
+escalon|place|A|1|
+escondido|place|A|1|
+esparto|place|A|1|
+etna|place|C|4|shares its name with 4 states
+eucalyptus hills|place|A|1|
+eureka|place|C|12|shares its name with 12 states
+exeter|place|C|6|shares its name with 6 states
+fair oaks|place|C|7|shares its name with 7 states
+fairbanks ranch|place|A|1|
+fairfax|place|C|10|shares its name with 10 states
+fairfield|place|C|19|shares its name with 19 states
+fairhaven|place|B|2|shares its name with 2 states
+fairmead|place|A|1|
+fairview|place|C|24|shares its name with 24 states
+fall river mills|place|A|1|
+fallbrook|place|A|1|
+farmersville|place|C|5|shares its name with 5 states
+farmington|place|C|18|shares its name with 18 states
+fellows|place|A|1|
+felton|place|C|4|shares its name with 4 states
+ferndale|place|C|6|shares its name with 6 states
+fetters hot springs-agua caliente|place|A|1|
+fiddletown|place|A|1|
+fieldbrook|place|A|1|
+fields landing|place|A|1|
+fillmore|place|C|8|shares its name with 8 states
+firebaugh|place|A|1|
+fish camp|place|A|1|
+florence-graham|place|A|1|
+florin|place|A|1|
+floriston|place|A|1|
+flournoy|place|A|1|
+folsom|place|C|5|shares its name with 5 states
+fontana|place|B|2|shares its name with 2 states
+foothill farms|place|A|1|
+forbestown|place|A|1|
+ford city|place|B|2|shares its name with 2 states
+forest meadows|place|A|1|
+forest ranch|place|A|1|
+foresta|place|A|1|
+foresthill|place|A|1|
+forestville|place|C|8|shares its name with 8 states
+fort bidwell|place|A|1|
+fort bragg|place|A|1|
+fort dick|place|A|1|
+fort hunter liggett|place|A|1|
+fort irwin|place|A|1|
+fort jones|place|A|1|
+fort washington|place|B|3|shares its name with 3 states
+fortuna|place|B|3|shares its name with 3 states
+foster city|place|A|1|
+fountain valley|place|A|1|
+fowler|place|C|6|shares its name with 6 states
+franklin|place|C|34|common English word, zipf 4.21
+frazier park|place|A|1|
+freedom|place|C|4|common English word, zipf 4.86
+freeport|place|C|10|shares its name with 10 states
+fremont|place|C|13|shares its name with 13 states
+french camp|place|B|2|shares its name with 2 states
+french gulch|place|A|1|
+french valley|place|A|1|
+fresno|county|A|1|
+fresno|place|B|3|shares its name with 3 states
+friant|place|A|1|
+fruitdale|place|B|3|shares its name with 3 states
+fruitridge pocket|place|A|1|
+fuller acres|place|A|1|
+fullerton|place|C|4|shares its name with 4 states
+fulton|place|C|18|shares its name with 18 states
+furnace creek|place|A|1|
+galt|place|C|4|shares its name with 4 states
+garberville|place|A|1|
+garden acres|place|A|1|
+garden farms|place|A|1|
+garden grove|place|B|3|shares its name with 3 states
+gardena|place|B|2|shares its name with 2 states
+garey|place|A|1|
+garnet|place|A|1|
+gasquet|place|A|1|
+gazelle|place|A|1|
+georgetown|place|C|18|shares its name with 18 states
+gerber|place|A|1|
+geyserville|place|A|1|
+gilroy|place|A|1|
+glen ellen|place|A|1|
+glencoe|place|C|9|shares its name with 9 states
+glendale|place|C|11|shares its name with 11 states
+glendora|place|B|3|shares its name with 3 states
+glenn|county|A|1|
+glennville|place|B|2|shares its name with 2 states
+gold mountain|place|A|1|
+gold river|place|A|1|
+golden hills|place|A|1|
+goleta|place|A|1|
+gonzales|place|B|3|shares its name with 3 states
+good hope|place|C|5|shares its name with 5 states
+goodmanville|place|A|1|
+goodyears bar|place|A|1|
+goshen|place|C|11|shares its name with 11 states
+graeagle|place|A|1|
+grand terrace|place|A|1|
+grangeville|place|B|2|shares its name with 2 states
+granite bay|place|A|1|
+granite hills|place|A|1|
+graniteville|place|B|3|shares its name with 3 states
+grass valley|place|B|3|shares its name with 3 states
+graton|place|A|1|
+grayson|place|C|8|shares its name with 8 states
+greeley hill|place|A|1|
+green acres|place|B|2|shares its name with 2 states
+green valley|place|C|6|shares its name with 6 states
+greenacres|place|B|2|shares its name with 2 states
+greenfield|place|C|11|shares its name with 11 states
+greenhorn|place|B|2|shares its name with 2 states
+greenview|place|B|3|shares its name with 3 states
+greenville|place|C|25|shares its name with 25 states
+grenada|place|B|2|shares its name with 2 states
+gridley|place|B|3|shares its name with 3 states
+grimes|place|C|4|shares its name with 4 states
+grizzly flats|place|A|1|
+groveland|place|C|4|shares its name with 4 states
+grover beach|place|A|1|
+guadalupe|place|C|4|shares its name with 4 states
+guerneville|place|A|1|
+guinda|place|A|1|
+gustine|place|B|2|shares its name with 2 states
+hacienda heights|place|A|1|
+half moon bay|place|A|1|
+hamilton branch|place|A|1|
+hamilton city|place|A|1|
+hanford|place|A|1|
+happy camp|place|A|1|
+happy valley|place|C|4|shares its name with 4 states
+harbison canyon|place|A|1|
+hardwick|place|C|4|shares its name with 4 states
+harmony grove|place|A|1|
+hartland|place|C|7|shares its name with 7 states
+hartley|place|B|3|shares its name with 3 states
+hasley canyon|place|A|1|
+hat creek|place|A|1|
+hathaway pines|place|A|1|
+hawaiian gardens|place|A|1|
+hawthorne|place|C|5|shares its name with 5 states
+hayfork|place|A|1|
+hayward|place|C|4|shares its name with 4 states
+healdsburg|place|A|1|
+heber|place|B|2|shares its name with 2 states
+hemet|place|A|1|
+herald|place|A|1|
+hercules|place|A|1|
+herlong|place|A|1|
+hermosa beach|place|A|1|
+hesperia|place|B|2|shares its name with 2 states
+hickman|place|C|4|shares its name with 4 states
+hidden hills|place|A|1|
+hidden meadows|place|A|1|
+hidden valley lake|place|A|1|
+highgrove|place|A|1|
+highland|place|C|11|shares its name with 11 states
+highlands|place|C|5|shares its name with 5 states
+hillcrest|place|B|3|shares its name with 3 states
+hillsborough|place|C|5|shares its name with 5 states
+hilmar-irwin|place|A|1|
+hiouchi|place|A|1|
+hollister|place|C|5|shares its name with 5 states
+holtville|place|B|2|shares its name with 2 states
+home garden|place|A|1|
+home gardens|place|A|1|
+homeland|place|B|3|shares its name with 3 states
+homestead valley|place|A|1|
+homewood canyon|place|A|1|
+honcut|place|A|1|
+hood|place|C|2|common English word, zipf 4.21
+hoopa|place|A|1|
+hopland|place|A|1|
+hornbrook|place|A|1|
+hornitos|place|A|1|
+hughson|place|A|1|
+humboldt|county|B|3|shares its name with 3 counties
+humboldt hill|place|A|1|
+huntington beach|place|A|1|
+huntington park|place|A|1|
+huron|place|C|7|shares its name with 7 states
+hyampom|place|A|1|
+hydesville|place|A|1|
+hypericum|place|A|1|
+idlewild|place|A|1|
+idyllwild-pine cove|place|A|1|
+igo|place|A|1|
+imperial|county|A|1|
+imperial|place|C|5|common English word, zipf 4.21
+imperial beach|place|A|1|
+independence|place|C|15|common English word, zipf 4.58
+indian falls|place|A|1|
+indian wells|place|B|2|shares its name with 2 states
+indianola|place|C|7|shares its name with 7 states
+indio|place|B|2|shares its name with 2 states
+indio hills|place|A|1|
+industry|place|C|4|common English word, zipf 5.19
+inglewood|place|B|2|shares its name with 2 states
+interlaken|place|C|4|shares its name with 4 states
+inverness|place|C|6|shares its name with 6 states
+inyo|county|A|1|
+inyokern|place|A|1|
+ione|place|B|3|shares its name with 3 states
+iron horse|place|A|1|
+irvine|place|B|2|shares its name with 2 states
+irwindale|place|A|1|
+isla vista|place|A|1|
+isleton|place|A|1|
+ivanhoe|place|C|5|shares its name with 5 states
+jackson|place|C|29|common English word, zipf 4.58
+jacumba|place|A|1|
+jamestown|place|C|16|shares its name with 16 states
+jamul|place|A|1|
+janesville|place|C|5|shares its name with 5 states
+jenner|place|A|1|
+johannesburg|place|A|1|
+johnson park|place|A|1|
+johnstonville|place|A|1|
+johnsville|place|A|1|
+jones valley|place|A|1|
+joshua tree|place|A|1|
+jovista|place|A|1|
+julian|place|B|3|shares its name with 3 states
+junction city|place|C|11|shares its name with 11 states
+june lake|place|A|1|
+jurupa valley|place|A|1|
+keddie|place|A|1|
+keeler|place|A|1|
+keene|place|C|4|shares its name with 4 states
+kelly ridge|place|A|1|
+kelseyville|place|A|1|
+kennedy|place|C|4|common English word, zipf 4.28
+kennedy meadows|place|A|1|
+kensington|place|C|6|shares its name with 6 states
+kentfield|place|A|1|
+kenwood|place|B|3|shares its name with 3 states
+kep'el|place|A|1|
+kerman|place|A|1|
+kern|county|A|1|
+kernville|place|A|1|
+keswick|place|B|3|shares its name with 3 states
+kettleman city|place|A|1|
+keyes|place|B|2|shares its name with 2 states
+king city|place|B|3|shares its name with 3 states
+kings|county|B|2|shares its name with 2 counties
+kings beach|place|A|1|
+kingsburg|place|A|1|
+kingvale|place|A|1|
+kirkwood|place|C|4|shares its name with 4 states
+klamath|place|B|2|shares its name with 2 states
+knights ferry|place|A|1|
+knights landing|place|A|1|
+knightsen|place|A|1|
+la cañada flintridge|place|A|1|
+la crescenta-montrose|place|A|1|
+la cresta|place|A|1|
+la grange|place|C|7|shares its name with 7 states
+la habra|place|A|1|
+la habra heights|place|A|1|
+la honda|place|A|1|
+la mesa|place|B|2|shares its name with 2 states
+la mirada|place|A|1|
+la palma|place|A|1|
+la porte|place|B|3|shares its name with 3 states
+la presa|place|B|2|shares its name with 2 states
+la puente|place|A|1|
+la quinta|place|A|1|
+la riviera|place|A|1|
+la selva beach|place|A|1|
+la verne|place|A|1|
+la vina|place|A|1|
+ladera|place|A|1|
+ladera heights|place|A|1|
+ladera ranch|place|A|1|
+lafayette|place|C|16|shares its name with 16 states
+laguna beach|place|B|2|shares its name with 2 states
+laguna hills|place|A|1|
+laguna niguel|place|A|1|
+laguna woods|place|A|1|
+lagunitas-forest knolls|place|A|1|
+lake|county|C|12|shares its name with 12 counties
+lake almanor country club|place|A|1|
+lake almanor peninsula|place|A|1|
+lake almanor west|place|A|1|
+lake arrowhead|place|C|5|shares its name with 5 states
+lake california|place|A|1|
+lake city|place|C|14|shares its name with 14 states
+lake davis|place|A|1|
+lake don pedro|place|A|1|
+lake elsinore|place|A|1|
+lake forest|place|B|2|shares its name with 2 states
+lake hughes|place|A|1|
+lake isabella|place|B|2|shares its name with 2 states
+lake los angeles|place|A|1|
+lake mathews|place|A|1|
+lake nacimiento|place|A|1|
+lake riverside|place|A|1|
+lake san marcos|place|A|1|
+lake shastina|place|A|1|
+lake sherwood|place|B|2|shares its name with 2 states
+lake wildwood|place|A|1|
+lake of the pines|place|A|1|
+lake of the woods|place|C|6|shares its name with 6 states
+lakehead|place|A|1|
+lakeland village|place|A|1|
+lakeport|place|B|3|shares its name with 3 states
+lakeside|place|C|11|shares its name with 11 states
+lakeview|place|C|14|shares its name with 14 states
+lakewood|place|C|10|shares its name with 10 states
+lamont|place|C|6|shares its name with 6 states
+lanare|place|A|1|
+lancaster|place|C|14|shares its name with 14 states
+larkfield-wikiup|place|A|1|
+larkspur|place|B|2|shares its name with 2 states
+las flores|place|A|1|
+las lomas|place|B|2|shares its name with 2 states
+lassen|county|A|1|
+lathrop|place|B|2|shares its name with 2 states
+laton|place|A|1|
+lawndale|place|B|2|shares its name with 2 states
+laytonville|place|A|1|
+le grand|place|B|2|shares its name with 2 states
+lebec|place|A|1|
+lee vining|place|A|1|
+leggett|place|B|2|shares its name with 2 states
+lemon cove|place|A|1|
+lemon grove|place|B|2|shares its name with 2 states
+lemon hill|place|A|1|
+lemoore|place|A|1|
+lemoore station|place|A|1|
+lennox|place|B|2|shares its name with 2 states
+lenwood|place|A|1|
+leona valley|place|A|1|
+lewiston|place|C|8|shares its name with 8 states
+lexington hills|place|A|1|
+likely|place|C|1|common English word, zipf 5.20
+lincoln|place|C|35|common English word, zipf 4.31
+lincoln village|place|B|2|shares its name with 2 states
+linda|place|C|1|common English word, zipf 4.06
+lindcove|place|A|1|
+linden|place|C|11|shares its name with 11 states
+lindsay|place|C|5|shares its name with 5 states
+linnell camp|place|A|1|
+litchfield|place|C|6|shares its name with 6 states
+little grass valley|place|A|1|
+little river|place|C|4|shares its name with 4 states
+little valley|place|B|2|shares its name with 2 states
+littlerock|place|A|1|
+live oak|place|C|4|shares its name with 4 states
+livermore|place|B|3|shares its name with 3 states
+livingston|place|C|13|shares its name with 13 states
+lockeford|place|A|1|
+lockwood|place|B|3|shares its name with 3 states
+lodi|place|C|5|shares its name with 5 states
+lodoga|place|A|1|
+loleta|place|A|1|
+loma linda|place|B|3|shares its name with 3 states
+loma mar|place|A|1|
+loma rica|place|A|1|
+lomita|place|A|1|
+lompico|place|A|1|
+lompoc|place|A|1|
+london|place|C|5|common English word, zipf 5.27
+lone pine|place|A|1|
+long barn|place|A|1|
+long beach|place|C|7|shares its name with 7 states
+lookout|place|A|1|
+loomis|place|C|5|shares its name with 5 states
+los alamitos|place|A|1|
+los alamos|place|B|2|shares its name with 2 states
+los altos|place|B|2|shares its name with 2 states
+los altos hills|place|A|1|
+los angeles|county|A|1|
+los angeles|place|B|2|shares its name with 2 states
+los banos|place|A|1|
+los berros|place|A|1|
+los gatos|place|A|1|
+los molinos|place|A|1|
+los olivos|place|A|1|
+los osos|place|A|1|
+los ranchos|place|A|1|
+lost hills|place|A|1|
+lower lake|place|A|1|
+loyalton|place|A|1|
+loyola|place|A|1|
+lucas valley-marinwood|place|A|1|
+lucerne|place|C|4|shares its name with 4 states
+lucerne valley|place|A|1|
+lynwood|place|B|2|shares its name with 2 states
+lytle creek|place|A|1|
+mabie|place|A|1|
+macdoel|place|A|1|
+mad river|place|A|1|
+madeline|place|A|1|
+madera|county|A|1|
+madera|place|B|2|shares its name with 2 states
+madera acres|place|A|1|
+madera ranchos|place|A|1|
+madison|place|C|30|common English word, zipf 4.17
+magalia|place|A|1|
+malaga|place|B|3|shares its name with 3 states
+malibu|place|A|1|
+mammoth lakes|place|A|1|
+manchester|place|C|21|common English word, zipf 4.53
+manhattan beach|place|B|2|shares its name with 2 states
+manila|place|B|3|shares its name with 3 states
+manteca|place|A|1|
+manton|place|B|2|shares its name with 2 states
+march arb|place|A|1|
+maricopa|place|B|2|shares its name with 2 states
+marin|county|A|1|
+marin city|place|A|1|
+marina|place|A|1|
+marina del rey|place|A|1|
+mariposa|county|A|1|
+mariposa|place|A|1|
+markleeville|place|A|1|
+martell|place|B|2|shares its name with 2 states
+martinez|place|B|3|shares its name with 3 states
+marysville|place|C|8|shares its name with 8 states
+matheny|place|B|2|shares its name with 2 states
+mather|place|B|2|shares its name with 2 states
+maxwell|place|C|5|shares its name with 5 states
+mayfair|place|A|1|
+mayflower village|place|A|1|
+maywood|place|C|4|shares its name with 4 states
+mcarthur|place|B|2|shares its name with 2 states
+mcclellan park|place|A|1|
+mcclenney tract|place|A|1|
+mccloud|place|A|1|
+mcfarland|place|B|3|shares its name with 3 states
+mcgee creek|place|A|1|
+mckinleyville|place|A|1|
+mckittrick|place|B|2|shares its name with 2 states
+mcswain|place|A|1|
+mead valley|place|A|1|
+meadow valley|place|A|1|
+meadow vista|place|A|1|
+meadowbrook|place|B|3|shares its name with 3 states
+mecca|place|B|2|shares its name with 2 states
+meiners oaks|place|A|1|
+mendocino|county|A|1|
+mendocino|place|A|1|
+mendota|place|C|4|shares its name with 4 states
+menifee|place|B|3|shares its name with 3 states
+menlo park|place|A|1|
+mentone|place|C|4|shares its name with 4 states
+merced|county|A|1|
+merced|place|A|1|
+meridian|place|C|8|shares its name with 8 states
+mesa|place|C|4|shares its name with 4 states
+mesa verde|place|A|1|
+mesa vista|place|A|1|
+mettler|place|A|1|
+mexican colony|place|A|1|
+meyers|place|A|1|
+mi-wuk village|place|A|1|
+middletown|place|C|14|shares its name with 14 states
+midpines|place|A|1|
+midway city|place|A|1|
+milford|place|C|18|shares its name with 18 states
+mill valley|place|A|1|
+millbrae|place|A|1|
+millerton|place|C|5|shares its name with 5 states
+millville|place|C|8|shares its name with 8 states
+milpitas|place|A|1|
+mineral|place|C|8|common English word, zipf 4.03
+minkler|place|A|1|
+mira monte|place|A|1|
+miranda|place|B|2|shares its name with 2 states
+mission canyon|place|A|1|
+mission hills|place|B|2|shares its name with 2 states
+mission viejo|place|A|1|
+modesto|place|B|2|shares its name with 2 states
+modjeska|place|A|1|
+modoc|county|A|1|
+mohawk vista|place|A|1|
+mojave|place|A|1|
+mokelumne hill|place|A|1|
+monmouth|place|C|5|shares its name with 5 states
+mono|county|A|1|
+mono city|place|A|1|
+mono vista|place|A|1|
+monrovia|place|B|3|shares its name with 3 states
+monson|place|A|1|
+montague|place|B|3|shares its name with 3 states
+montalvin manor|place|A|1|
+montara|place|A|1|
+montclair|place|B|2|shares its name with 2 states
+monte rio|place|A|1|
+monte sereno|place|A|1|
+montebello|place|B|2|shares its name with 2 states
+montecito|place|A|1|
+monterey|county|A|1|
+monterey|place|C|6|shares its name with 6 states
+monterey park|place|B|2|shares its name with 2 states
+monterey park tract|place|A|1|
+montgomery creek|place|A|1|
+monument hills|place|A|1|
+moorpark|place|A|1|
+morada|place|A|1|
+moraga|place|A|1|
+moreno valley|place|A|1|
+morgan hill|place|B|2|shares its name with 2 states
+morongo valley|place|A|1|
+morro bay|place|A|1|
+moskowite corner|place|A|1|
+moss beach|place|A|1|
+moss landing|place|A|1|
+mount hebron|place|A|1|
+mount hermon|place|B|3|shares its name with 3 states
+mount laguna|place|A|1|
+mount shasta|place|A|1|
+mountain center|place|A|1|
+mountain gate|place|A|1|
+mountain house|place|A|1|
+mountain meadows|place|B|2|shares its name with 2 states
+mountain mesa|place|A|1|
+mountain ranch|place|A|1|
+mountain view|place|C|9|shares its name with 9 states
+mountain view acres|place|A|1|
+mt. bullion|place|A|1|
+muir beach|place|A|1|
+murphys|place|A|1|
+murrieta|place|A|1|
+muscoy|place|A|1|
+myers flat|place|A|1|
+myrtletown|place|A|1|
+napa|county|A|1|
+napa|place|A|1|
+national city|place|A|1|
+needles|place|A|1|
+nevada|county|B|2|shares its name with 2 counties
+nevada city|place|A|1|
+new cuyama|place|A|1|
+new pine creek|place|B|2|shares its name with 2 states
+newark|place|C|11|shares its name with 11 states
+newcastle|place|C|8|common English word, zipf 4.07
+newell|place|C|5|shares its name with 5 states
+newman|place|B|2|shares its name with 2 states
+newport beach|place|A|1|
+nicasio|place|A|1|
+nice|place|C|1|common English word, zipf 5.37
+nicolaus|place|A|1|
+niland|place|A|1|
+nipinnawasee|place|A|1|
+nipomo|place|A|1|
+norco|place|B|2|shares its name with 2 states
+nord|place|A|1|
+norris canyon|place|A|1|
+north auburn|place|A|1|
+north edwards|place|A|1|
+north el monte|place|A|1|
+north fair oaks|place|A|1|
+north fork|place|B|2|shares its name with 2 states
+north gate|place|A|1|
+north highlands|place|A|1|
+north lakeport|place|A|1|
+north richmond|place|A|1|
+north san juan|place|A|1|
+north shore|place|B|2|shares its name with 2 states
+north tustin|place|A|1|
+norwalk|place|C|5|shares its name with 5 states
+novato|place|A|1|
+nubieber|place|A|1|
+nuevo|place|A|1|
+oak glen|place|A|1|
+oak hills|place|C|4|shares its name with 4 states
+oak park|place|C|4|shares its name with 4 states
+oak run|place|B|2|shares its name with 2 states
+oak shores|place|A|1|
+oak view|place|A|1|
+oakdale|place|C|9|shares its name with 9 states
+oakhurst|place|C|4|shares its name with 4 states
+oakland|place|C|18|shares its name with 18 states
+oakley|place|C|6|shares its name with 6 states
+oakville|place|C|6|shares its name with 6 states
+oasis|place|B|3|shares its name with 3 states
+occidental|place|A|1|
+oceano|place|A|1|
+oceanside|place|B|3|shares its name with 3 states
+ocotillo|place|A|1|
+oildale|place|A|1|
+ojai|place|A|1|
+olancha|place|A|1|
+old fig garden|place|A|1|
+old river|place|A|1|
+old station|place|A|1|
+old stine|place|A|1|
+olde stockdale|place|A|1|
+olivehurst|place|A|1|
+ono|place|A|1|
+ontario|place|C|6|common English word, zipf 4.21
+onyx|place|A|1|
+orange|county|C|8|shares its name with 8 counties
+orange|place|C|11|common English word, zipf 4.62
+orange blossom|place|A|1|
+orange cove|place|A|1|
+orange park acres|place|A|1|
+orangevale|place|A|1|
+orcutt|place|A|1|
+orick|place|A|1|
+orinda|place|A|1|
+orland|place|B|2|shares its name with 2 states
+orosi|place|A|1|
+oroville|place|B|2|shares its name with 2 states
+oroville east|place|A|1|
+oxnard|place|A|1|
+pacheco|place|A|1|
+pacific grove|place|A|1|
+pacifica|place|A|1|
+pajaro|place|A|1|
+pajaro dunes|place|A|1|
+pala|place|A|1|
+palermo|place|B|3|shares its name with 3 states
+palm desert|place|A|1|
+palm springs|place|B|2|shares its name with 2 states
+palmdale|place|B|2|shares its name with 2 states
+palo alto|place|B|3|shares its name with 3 states
+palo cedro|place|A|1|
+palo verde|place|A|1|
+paloma|place|B|2|shares its name with 2 states
+palos verdes estates|place|A|1|
+panorama heights|place|A|1|
+paradise|place|C|8|common English word, zipf 4.16
+paradise park|place|A|1|
+paramount|place|A|1|
+parklawn|place|A|1|
+parksdale|place|A|1|
+parkway|place|B|2|shares its name with 2 states
+parkwood|place|B|2|shares its name with 2 states
+parlier|place|A|1|
+pasadena|place|B|3|shares its name with 3 states
+pasatiempo|place|A|1|
+paskenta|place|A|1|
+patterson|place|C|6|shares its name with 6 states
+patterson tract|place|A|1|
+patton village|place|B|2|shares its name with 2 states
+paxton|place|C|5|shares its name with 5 states
+paynes creek|place|A|1|
+pearsonville|place|A|1|
+penn valley|place|A|1|
+penngrove|place|A|1|
+penryn|place|B|2|shares its name with 2 states
+pepperdine university|place|A|1|
+perris|place|A|1|
+pescadero|place|A|1|
+petaluma|place|A|1|
+petaluma center|place|A|1|
+peters|place|A|1|
+phelan|place|A|1|
+phillipsville|place|A|1|
+philo|place|B|3|shares its name with 3 states
+phoenix lake|place|A|1|
+pico rivera|place|A|1|
+piedmont|place|C|8|shares its name with 8 states
+pierpoint|place|A|1|
+pike|place|C|12|shares its name with 12 states
+pine canyon|place|A|1|
+pine flat|place|A|1|
+pine grove|place|C|5|shares its name with 5 states
+pine hills|place|B|2|shares its name with 2 states
+pine mountain club|place|A|1|
+pine mountain lake|place|A|1|
+pine valley|place|C|4|shares its name with 4 states
+pinole|place|A|1|
+pioneer|place|C|4|shares its name with 4 states
+piru|place|A|1|
+pismo beach|place|A|1|
+pittsburg|place|C|6|shares its name with 6 states
+pixley|place|A|1|
+piñon hills|place|A|1|
+placentia|place|A|1|
+placer|county|A|1|
+placerville|place|B|3|shares its name with 3 states
+plainview|place|C|8|shares its name with 8 states
+planada|place|A|1|
+platina|place|A|1|
+pleasant hill|place|C|10|shares its name with 10 states
+pleasanton|place|C|6|shares its name with 6 states
+pleasure point|place|A|1|
+plumas|county|A|1|
+plumas eureka|place|A|1|
+plumas lake|place|A|1|
+plymouth|place|C|14|shares its name with 14 states
+point arena|place|A|1|
+point reyes station|place|A|1|
+pollock pines|place|A|1|
+pomona|place|C|5|shares its name with 5 states
+ponderosa|place|B|2|shares its name with 2 states
+poplar-cotton center|place|A|1|
+port costa|place|A|1|
+port hueneme|place|A|1|
+porterville|place|B|2|shares its name with 2 states
+portola|place|A|1|
+portola valley|place|A|1|
+posey|place|B|2|shares its name with 2 states
+poso park|place|A|1|
+post mountain|place|A|1|
+potomac park|place|B|2|shares its name with 2 states
+potrero|place|A|1|
+potter valley|place|A|1|
+poway|place|A|1|
+prattville|place|B|2|shares its name with 2 states
+princeton|place|C|18|shares its name with 18 states
+proberta|place|A|1|
+prunedale|place|A|1|
+pumpkin center|place|B|2|shares its name with 2 states
+quartz hill|place|A|1|
+quincy|place|C|7|shares its name with 7 states
+rackerby|place|A|1|
+rail road flat|place|A|1|
+rainbow|place|C|1|common English word, zipf 4.07
+raisin city|place|A|1|
+ramona|place|C|4|shares its name with 4 states
+rancho calaveras|place|A|1|
+rancho cordova|place|A|1|
+rancho cucamonga|place|A|1|
+rancho mirage|place|A|1|
+rancho mission viejo|place|A|1|
+rancho murieta|place|A|1|
+rancho palos verdes|place|A|1|
+rancho san diego|place|A|1|
+rancho santa fe|place|A|1|
+rancho santa margarita|place|A|1|
+rancho tehama reserve|place|A|1|
+randsburg|place|A|1|
+red bluff|place|A|1|
+red corral|place|A|1|
+redcrest|place|A|1|
+redding|place|B|2|shares its name with 2 states
+redlands|place|B|2|shares its name with 2 states
+redondo beach|place|A|1|
+redway|place|A|1|
+redwood city|place|A|1|
+redwood valley|place|A|1|
+reedley|place|A|1|
+reliez valley|place|A|1|
+rexland acres|place|A|1|
+rialto|place|A|1|
+richfield|place|C|11|shares its name with 11 states
+richgrove|place|A|1|
+richmond|place|C|18|common English word, zipf 4.12
+richvale|place|A|1|
+ridgecrest|place|B|3|shares its name with 3 states
+ridgecrest heights|place|A|1|
+ridgemark|place|A|1|
+rio dell|place|A|1|
+rio linda|place|A|1|
+rio oso|place|A|1|
+rio vista|place|B|2|shares its name with 2 states
+rio del mar|place|A|1|
+ripley|place|C|10|shares its name with 10 states
+ripon|place|B|2|shares its name with 2 states
+river pines|place|A|1|
+riverbank|place|A|1|
+riverdale|place|C|10|shares its name with 10 states
+riverdale park|place|B|2|shares its name with 2 states
+rivergrove|place|B|2|shares its name with 2 states
+riverside|county|A|1|
+riverside|place|C|16|shares its name with 16 states
+robbins|place|C|4|shares its name with 4 states
+robinson mill|place|A|1|
+rocklin|place|A|1|
+rodeo|place|B|2|shares its name with 2 states
+rodriguez camp|place|A|1|
+rohnert park|place|A|1|
+rolling hills|place|B|3|shares its name with 3 states
+rolling hills estates|place|A|1|
+rollingwood|place|B|2|shares its name with 2 states
+romoland|place|A|1|
+rosamond|place|A|1|
+rose hills|place|A|1|
+rosedale|place|C|8|shares its name with 8 states
+rosemead|place|A|1|
+rosemont|place|C|4|shares its name with 4 states
+roseville|place|C|7|shares its name with 7 states
+ross|place|C|5|common English word, zipf 4.39
+rossmoor|place|B|2|shares its name with 2 states
+rough and ready|place|A|1|
+round mountain|place|B|2|shares its name with 2 states
+round valley|place|B|2|shares its name with 2 states
+rouse|place|A|1|
+rowland heights|place|A|1|
+rumsey|place|A|1|
+running springs|place|A|1|
+ruth|place|C|3|common English word, zipf 4.05
+rutherford|place|C|5|shares its name with 5 states
+sacramento|county|A|1|
+sacramento|place|B|3|shares its name with 3 states
+sage|place|A|1|
+salida|place|B|2|shares its name with 2 states
+salinas|place|B|2|shares its name with 2 states
+salmon creek|place|B|2|shares its name with 2 states
+salton city|place|A|1|
+salton sea beach|place|A|1|
+salyer|place|A|1|
+samoa|place|A|1|
+san andreas|place|A|1|
+san anselmo|place|A|1|
+san antonio heights|place|A|1|
+san ardo|place|A|1|
+san benito|county|A|1|
+san bernardino|county|A|1|
+san bernardino|place|A|1|
+san bruno|place|A|1|
+san buenaventura (ventura)|place|A|1|
+san carlos|place|B|3|shares its name with 3 states
+san clemente|place|A|1|
+san diego|county|A|1|
+san diego|place|B|2|shares its name with 2 states
+san diego country estates|place|A|1|
+san dimas|place|A|1|
+san fernando|place|B|2|shares its name with 2 states
+san francisco|county|A|1|
+san francisco|place|A|1|
+san gabriel|place|A|1|
+san geronimo|place|A|1|
+san jacinto|place|B|2|shares its name with 2 states
+san joaquin|county|A|1|
+san joaquin|place|A|1|
+san jose|place|C|4|shares its name with 4 states
+san juan bautista|place|A|1|
+san juan capistrano|place|A|1|
+san leandro|place|A|1|
+san lorenzo|place|B|3|shares its name with 3 states
+san lucas|place|A|1|
+san luis obispo|county|A|1|
+san luis obispo|place|A|1|
+san marcos|place|B|2|shares its name with 2 states
+san marino|place|A|1|
+san martin|place|A|1|
+san mateo|county|A|1|
+san mateo|place|B|2|shares its name with 2 states
+san miguel|place|C|4|shares its name with 4 states
+san pablo|place|B|2|shares its name with 2 states
+san pasqual|place|A|1|
+san rafael|place|B|2|shares its name with 2 states
+san ramon|place|A|1|
+san simeon|place|A|1|
+sand city|place|A|1|
+sanger|place|B|2|shares its name with 2 states
+santa ana|place|A|1|
+santa barbara|county|A|1|
+santa barbara|place|A|1|
+santa clara|county|A|1|
+santa clara|place|C|6|shares its name with 6 states
+santa clarita|place|A|1|
+santa cruz|county|B|2|shares its name with 2 counties
+santa cruz|place|C|4|shares its name with 4 states
+santa fe springs|place|A|1|
+santa margarita|place|A|1|
+santa maria|place|B|2|shares its name with 2 states
+santa monica|place|B|2|shares its name with 2 states
+santa nella|place|A|1|
+santa paula|place|A|1|
+santa rosa|place|C|5|shares its name with 5 states
+santa rosa valley|place|A|1|
+santa susana|place|A|1|
+santa venetia|place|A|1|
+santa ynez|place|A|1|
+santee|place|B|3|shares its name with 3 states
+saranap|place|A|1|
+saratoga|place|C|6|shares its name with 6 states
+saticoy|place|A|1|
+sattley|place|A|1|
+sausalito|place|A|1|
+scotia|place|C|4|shares its name with 4 states
+scotts valley|place|A|1|
+sea ranch|place|A|1|
+seacliff|place|A|1|
+seal beach|place|A|1|
+searles valley|place|A|1|
+seaside|place|B|2|shares its name with 2 states
+sebastopol|place|B|2|shares its name with 2 states
+seeley|place|B|2|shares its name with 2 states
+selma|place|C|7|shares its name with 7 states
+sequoia crest|place|A|1|
+sereno del mar|place|A|1|
+seville|place|C|4|shares its name with 4 states
+shafter|place|A|1|
+shandon|place|A|1|
+shasta|county|A|1|
+shasta|place|A|1|
+shasta lake|place|A|1|
+shaver lake|place|A|1|
+sheep ranch|place|A|1|
+shell ridge|place|A|1|
+shelter cove|place|A|1|
+sheridan|place|C|14|shares its name with 14 states
+shingle springs|place|A|1|
+shingletown|place|A|1|
+shoshone|place|B|2|shares its name with 2 states
+sierra|county|B|2|shares its name with 2 counties
+sierra brooks|place|A|1|
+sierra city|place|A|1|
+sierra madre|place|A|1|
+sierra village|place|A|1|
+sierraville|place|A|1|
+signal hill|place|A|1|
+silver city|place|C|6|shares its name with 6 states
+silver lakes|place|A|1|
+silverado|place|A|1|
+silverado resort|place|A|1|
+simi valley|place|A|1|
+siskiyou|county|A|1|
+sisquoc|place|A|1|
+sky valley|place|B|2|shares its name with 2 states
+sleepy hollow|place|C|4|shares its name with 4 states
+smartsville|place|A|1|
+smith corner|place|B|2|shares its name with 2 states
+smith river|place|A|1|
+snelling|place|B|2|shares its name with 2 states
+soda bay|place|A|1|
+soda springs|place|B|2|shares its name with 2 states
+solana beach|place|A|1|
+solano|county|A|1|
+soledad|place|A|1|
+solvang|place|A|1|
+somis|place|A|1|
+sonoma|county|A|1|
+sonoma|place|A|1|
+sonoma state university|place|A|1|
+sonora|place|B|3|shares its name with 3 states
+soquel|place|A|1|
+soulsbyville|place|A|1|
+south dos palos|place|A|1|
+south el monte|place|A|1|
+south gate|place|A|1|
+south lake tahoe|place|A|1|
+south monrovia island|place|A|1|
+south oroville|place|A|1|
+south pasadena|place|B|2|shares its name with 2 states
+south san francisco|place|A|1|
+south san gabriel|place|A|1|
+south san jose hills|place|A|1|
+south taft|place|A|1|
+south whittier|place|A|1|
+spaulding|place|B|3|shares its name with 3 states
+spreckels|place|A|1|
+spring garden|place|B|2|shares its name with 2 states
+spring valley|place|C|9|shares its name with 9 states
+spring valley lake|place|A|1|
+springville|place|C|7|shares its name with 7 states
+squaw valley|place|A|1|
+squirrel mountain valley|place|A|1|
+st. helena|place|C|4|shares its name with 4 states
+stallion springs|place|A|1|
+stanford|place|C|5|shares its name with 5 states
+stanislaus|county|A|1|
+stanton|place|C|10|shares its name with 10 states
+stebbins|place|B|2|shares its name with 2 states
+stevenson ranch|place|A|1|
+stevinson|place|A|1|
+stinson beach|place|A|1|
+stirling city|place|A|1|
+stockton|place|C|11|shares its name with 11 states
+stones landing|place|A|1|
+stonyford|place|A|1|
+stratford|place|C|7|shares its name with 7 states
+strathmore|place|B|2|shares its name with 2 states
+strawberry|place|B|3|shares its name with 3 states
+sugarloaf saw mill|place|A|1|
+sugarloaf village|place|A|1|
+suisun city|place|A|1|
+sultana|place|A|1|
+summerland|place|A|1|
+sun village|place|A|1|
+sunny slopes|place|A|1|
+sunnyside|place|B|3|shares its name with 3 states
+sunnyside-tahoe city|place|A|1|
+sunnyvale|place|B|2|shares its name with 2 states
+sunol|place|B|2|shares its name with 2 states
+susanville|place|A|1|
+sutter|county|A|1|
+sutter|place|A|1|
+sutter creek|place|A|1|
+swall meadows|place|A|1|
+taft|place|C|6|shares its name with 6 states
+taft heights|place|A|1|
+taft mosswood|place|A|1|
+tahoe vista|place|A|1|
+tahoma|place|A|1|
+talmage|place|B|3|shares its name with 3 states
+tamalpais-homestead valley|place|A|1|
+tancred|place|A|1|
+tara hills|place|A|1|
+tarina|place|A|1|
+tarpey village|place|A|1|
+taylorsville|place|C|7|shares its name with 7 states
+tecopa|place|A|1|
+tehachapi|place|A|1|
+tehama|county|A|1|
+tehama|place|A|1|
+temecula|place|A|1|
+temelec|place|A|1|
+temescal valley|place|A|1|
+temple city|place|A|1|
+templeton|place|C|5|shares its name with 5 states
+tennant|place|B|2|shares its name with 2 states
+terminous|place|A|1|
+terra bella|place|A|1|
+teviston|place|A|1|
+thermal|place|C|1|common English word, zipf 4.04
+thermalito|place|A|1|
+thornton|place|C|7|shares its name with 7 states
+thousand oaks|place|A|1|
+thousand palms|place|A|1|
+three rivers|place|C|4|shares its name with 4 states
+three rocks|place|A|1|
+tiburon|place|A|1|
+timber cove|place|A|1|
+tipton|place|C|8|shares its name with 8 states
+tobin|place|A|1|
+tomales|place|A|1|
+tonyville|place|A|1|
+tooleville|place|A|1|
+topanga|place|A|1|
+topaz|place|A|1|
+toro canyon|place|A|1|
+torrance|place|B|2|shares its name with 2 states
+trabuco canyon|place|A|1|
+tracy|place|C|4|shares its name with 4 states
+tranquillity|place|A|1|
+traver|place|A|1|
+tres pinos|place|A|1|
+trinidad|place|B|3|shares its name with 3 states
+trinity|county|B|2|shares its name with 2 counties
+trinity center|place|A|1|
+trinity village|place|A|1|
+trona|place|A|1|
+trowbridge|place|A|1|
+truckee|place|A|1|
+tulare|county|A|1|
+tulare|place|B|2|shares its name with 2 states
+tulelake|place|A|1|
+tuolumne|county|A|1|
+tuolumne city|place|A|1|
+tupman|place|A|1|
+turlock|place|A|1|
+tustin|place|B|3|shares its name with 3 states
+tuttle|place|B|3|shares its name with 3 states
+tuttletown|place|A|1|
+twain|place|A|1|
+twain harte|place|A|1|
+twentynine palms|place|A|1|
+twin lakes|place|C|9|shares its name with 9 states
+ukiah|place|B|2|shares its name with 2 states
+union city|place|C|9|shares its name with 9 states
+university of california-davis|place|A|1|
+university of california-santa barbara|place|A|1|
+upland|place|C|4|shares its name with 4 states
+upper lake|place|A|1|
+vacaville|place|A|1|
+val verde|place|B|2|shares its name with 2 states
+valinda|place|A|1|
+valle vista|place|C|4|shares its name with 4 states
+vallecito|place|A|1|
+vallejo|place|A|1|
+valley acres|place|A|1|
+valley center|place|B|2|shares its name with 2 states
+valley ford|place|A|1|
+valley home|place|A|1|
+valley ranch|place|A|1|
+valley springs|place|B|3|shares its name with 3 states
+valley wells|place|A|1|
+vandenberg afb|place|A|1|
+vandenberg village|place|A|1|
+ventura|county|A|1|
+verdi|place|B|2|shares its name with 2 states
+vernon|place|C|15|shares its name with 15 states
+victor|place|C|6|common English word, zipf 4.18
+victorville|place|A|1|
+view park-windsor hills|place|A|1|
+villa park|place|B|2|shares its name with 2 states
+vina|place|B|2|shares its name with 2 states
+vincent|place|C|4|common English word, zipf 4.14
+vine hill|place|A|1|
+vineyard|place|B|2|shares its name with 2 states
+virginia lakes|place|A|1|
+visalia|place|A|1|
+vista|place|B|2|shares its name with 2 states
+vista santa rosa|place|A|1|
+volcano|place|B|2|shares its name with 2 states
+volta|place|A|1|
+walker|place|C|9|common English word, zipf 4.42
+wallace|place|C|11|common English word, zipf 4.05
+walnut|place|C|5|shares its name with 5 states
+walnut creek|place|C|4|shares its name with 4 states
+walnut grove|place|C|7|shares its name with 7 states
+walnut park|place|A|1|
+warm springs|place|C|5|shares its name with 5 states
+warner valley|place|A|1|
+wasco|place|B|2|shares its name with 2 states
+washington|place|C|35|common English word, zipf 5.08
+waterford|place|C|8|shares its name with 8 states
+waterloo|place|C|10|shares its name with 10 states
+watsonville|place|A|1|
+waukena|place|A|1|
+wautec|place|A|1|
+wawona|place|A|1|
+weaverville|place|B|2|shares its name with 2 states
+weed|place|C|2|common English word, zipf 4.27
+weedpatch|place|A|1|
+weitchpec|place|A|1|
+weldon|place|C|5|shares its name with 5 states
+weott|place|A|1|
+west athens|place|A|1|
+west bishop|place|A|1|
+west carson|place|A|1|
+west covina|place|A|1|
+west goshen|place|A|1|
+west hollywood|place|A|1|
+west menlo park|place|A|1|
+west modesto|place|A|1|
+west park|place|B|3|shares its name with 3 states
+west point|place|C|13|shares its name with 13 states
+west puente valley|place|A|1|
+west rancho dominguez|place|A|1|
+west sacramento|place|A|1|
+west whittier-los nietos|place|A|1|
+westhaven-moonstone|place|A|1|
+westlake village|place|B|2|shares its name with 2 states
+westley|place|A|1|
+westminster|place|C|7|common English word, zipf 4.00
+westmont|place|C|4|shares its name with 4 states
+westmorland|place|A|1|
+westside|place|B|2|shares its name with 2 states
+westwood|place|C|9|shares its name with 9 states
+wheatland|place|C|7|shares its name with 7 states
+whitehawk|place|A|1|
+whitewater|place|C|6|shares its name with 6 states
+whitley gardens|place|A|1|
+whitmore|place|A|1|
+whittier|place|B|3|shares its name with 3 states
+wildomar|place|A|1|
+wilkerson|place|A|1|
+williams|place|C|9|common English word, zipf 4.67
+williams canyon|place|A|1|
+willits|place|A|1|
+willow creek|place|B|3|shares its name with 3 states
+willowbrook|place|B|3|shares its name with 3 states
+willows|place|A|1|
+wilseyville|place|A|1|
+wilsonia|place|A|1|
+wilton|place|C|9|shares its name with 9 states
+winchester|place|C|16|shares its name with 16 states
+windsor|place|C|14|shares its name with 14 states
+winter gardens|place|A|1|
+winterhaven|place|A|1|
+winters|place|B|2|shares its name with 2 states
+winton|place|B|3|shares its name with 3 states
+wofford heights|place|A|1|
+woodacre|place|A|1|
+woodbridge|place|B|3|shares its name with 3 states
+woodcrest|place|A|1|
+woodlake|place|B|2|shares its name with 2 states
+woodland|place|C|13|shares its name with 13 states
+woodlands|place|A|1|
+woodside|place|B|3|shares its name with 3 states
+woodville|place|C|8|shares its name with 8 states
+woodville farm labor camp|place|A|1|
+woody|place|A|1|
+wrightwood|place|A|1|
+yankee hill|place|B|2|shares its name with 2 states
+yermo|place|A|1|
+yettem|place|A|1|
+yolo|county|A|1|
+yolo|place|A|1|
+yorba linda|place|A|1|
+yosemite lakes|place|A|1|
+yosemite valley|place|A|1|
+yosemite west|place|A|1|
+yountville|place|A|1|
+yreka|place|A|1|
+yuba|county|A|1|
+yuba city|place|A|1|
+yucaipa|place|A|1|
+yucca valley|place|A|1|
+zayante|place|A|1|

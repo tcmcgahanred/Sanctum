@@ -45,16 +45,7 @@ Thumbs.db
 .idea/
 .vscode/
 
-# --- Reference material: kept LOCAL, never published ---
-# Working notes, feed candidate lists, and the effort briefing stay on your
-# machine but are not committed (they carry internal/host detail).
-*/references/
-references/
 
-# --- Legacy. The scrub check was removed 2026-08-23, but anyone who created a
-# .scrub-denylist while it existed still has one on disk. The rule stays so that
-# file can never be committed by accident. Do not delete this line to tidy up.
-.scrub-denylist
 
 # --- Second domain: kept out of the public repo entirely.
 .githooks/

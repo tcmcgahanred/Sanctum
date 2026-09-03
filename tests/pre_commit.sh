@@ -7,6 +7,8 @@
 #
 #   domain_check.py      a domain file declares settings, never behaviour
 #   vocab_check.py       no silent decay in a domain's word lists
+#   geo_classify_test.py the geography confidence table is sound
+#   cycle_dates_test.py  the staging document states its own ICOD and coverage
 #   merge_test.py        one file per domain assembles, and nothing is declared twice
 #   fetch_test.py        failure pages never become article bodies, and old
 #                        reports never enter the corpus
@@ -67,6 +69,16 @@ if command -v python3 >/dev/null 2>&1; then
     # so nothing downstream could have caught it. This holds the line in both
     # directions - the junk drops AND every genuine item an earlier attempt deleted
     # still surfaces.
+    python3 "$REPO_ROOT/tests/geo_classify_test.py" >/dev/null || {
+        echo "pre-commit: BLOCKED — tests/geo_classify_test.py failed; the geography table was hand-edited or a regeneration moved a known collision" >&2
+        STATUS=1
+    }
+
+    python3 "$REPO_ROOT/tests/cycle_dates_test.py" >/dev/null || {
+        echo "pre-commit: BLOCKED — tests/cycle_dates_test.py failed; the staging document no longer states its own ICOD, so the vox cannot be dated" >&2
+        STATUS=1
+    }
+
     python3 "$REPO_ROOT/tests/merge_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/merge_test.py failed; a domain file declares something twice, or the one-file layout broke" >&2
         STATUS=1

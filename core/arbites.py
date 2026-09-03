@@ -37,8 +37,13 @@ from core.pnd import load_domain
 from core.fetch import nobody_reason
 from core.rules import (score_article, matched_evidence, tier_requirement,
                         satisfied_elements,
-                        compute_cycle_window, recency_tag,
+                        compute_cycle_window, recency_tag, _parse_pub,
                         make_matcher, _eval_atom, _scopes)
+
+try:                                    # 3.9+; absent only on very old builds
+    from zoneinfo import ZoneInfo
+except ImportError:                     # pragma: no cover
+    ZoneInfo = None                     # dates fall back to UTC, still printed
 
 
 def in_window(art, cutoff):
@@ -622,6 +627,64 @@ def main():
                  f"{ann_note}"
                  f"{f' · {len(child_of)} event group(s)' if child_of else ''}"
                  f"{f' · {dissolved_groups} oversized cluster(s) dissolved' if dissolved_groups else ''}.*")
+    # ------------------------------------------------------------------
+    # CYCLE DATES — the ICOD and the coverage span, stated once, at the top.
+    #
+    # 3a computes the cycle window and used to discard it. The vox header is
+    # required to carry an ICOD (Vox Policy §2 and §4) and the analyst cannot
+    # re-derive it from the document: the header said "window 7d" and never
+    # which 7 days. On 2026-09-02 that produced a vox with no date range,
+    # because the model correctly refused to invent one.
+    #
+    # Coverage is the OBSERVED publish span of the surfaced items, which is not
+    # the same as the declared window — the freshest report is usually some
+    # hours old, and a STALE item can sit outside the window entirely. Both are
+    # printed because they answer different questions: the window is what the
+    # cycle CLAIMS, coverage is what it actually GOT.
+    #
+    # Silent when the domain declares no recency block. s2 does not, and
+    # printing "ICOD: None" would be worse than printing nothing.
+    # ------------------------------------------------------------------
+    if recency_on and window_start is not None:
+        rec_tz = str(rec_cfg.get("timezone", "UTC"))
+        try:
+            tz = ZoneInfo(rec_tz) if ZoneInfo else timezone.utc
+        except Exception:
+            tz, rec_tz = timezone.utc, "UTC"
+        icod_local = cutoff.astimezone(tz)
+        start_local = window_start.astimezone(tz)
+        # %Z gives the abbreviation a reader knows — PDT, PST — rather than the
+        # IANA name. This line is copied into a reader-facing product.
+        abbr = icod_local.strftime("%Z") or rec_tz
+        fmt = "%a %d %b %Y %H%M"
+        lines.append("")
+        lines.append(f"**ICOD (information current as of): {icod_local.strftime(fmt)} {abbr}** "
+                     f"· cycle window opens {start_local.strftime(fmt)} {abbr}")
+
+        # Coverage is measured on the IN-WINDOW candidates only. A stale item
+        # dragged the span back to 19 July on the first build of this block,
+        # which is honest about the corpus and wrong as a date range for the
+        # product: stale items either earn a fresh hook or get cut, so they do
+        # not define the period the vox covers. They are counted, not folded in.
+        fresh = [_parse_pub(x[3].get("published", "")) for x in surfaced if not x[4]]
+        fresh = [d for d in fresh if d]
+        stale_surfaced = sum(1 for x in surfaced if x[4])
+        undated = len(surfaced) - stale_surfaced - len(fresh)
+        if fresh:
+            lo, hi = min(fresh).astimezone(tz), max(fresh).astimezone(tz)
+            extra = []
+            if stale_surfaced:
+                extra.append(f"{stale_surfaced} STALE outside it")
+            if undated:
+                extra.append(f"{undated} undated")
+            note = f" · {' · '.join(extra)}" if extra else ""
+            lines.append(f"**Reporting covered: {lo.strftime('%d %b %H%M')} – "
+                         f"{hi.strftime('%d %b %H%M')} {abbr}** "
+                         f"({len(fresh)} in-window candidates{note})")
+        lines.append("")
+        lines.append(f"> Copy into the vox header: *Information current as of "
+                     f"{icod_local.strftime('%d %B %Y, %H%M')} {abbr}.*")
+
     lines.append("")
     cut_note = (f"Surfacing threshold: score ≥ {min_score}."
                 if min_score is not None else "No score threshold — everything surfaced.")
