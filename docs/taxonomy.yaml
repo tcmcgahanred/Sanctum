@@ -1,0 +1,579 @@
+# ==============================================================================
+#  SANCTUM - TAXONOMY
+#
+#  One name per thing, and one thing per name. Scraped from the repository as it
+#  stands, so every entry describes something that exists rather than something
+#  intended.
+#
+#  status:
+#    settled    in use, agreed, and consistent with the code
+#    proposed   agreed in discussion, NOT yet reflected in code or config
+#    contested  the word currently means more than one thing - see `collisions`
+#    misused    the label is wrong for what it names; a rename is available
+#
+#  Each entry says what the term MEANS and WHERE it lives. Why a thing is the way
+#  it is belongs in logs/CHANGELOG.md, not here.
+# ==============================================================================
+
+meta:
+  version: 1
+  created: 2026-09-03
+  scope: Sanctum itself - the apparatus, its configuration, and the intelligence
+    vocabulary it implements. Not a domain's subject-matter vocabulary; that lives
+    in each domain's scoring.groups.
+  note: This is the first file in docs/ written against the current layout. The
+    other four describe a five-file markdown shape that no longer exists.
+
+# ==============================================================================
+#  SOURCES - where a definition came from
+#
+#  A borrowed definition is not ours to edit. If one reads wrong, the honest move
+#  is to add a Sanctum term beside it, not to reword somebody else's standard.
+# ==============================================================================
+sources:
+
+  sanctum:
+    what: Defined by this apparatus because no standard has a word for it.
+    editable: true
+
+  nist_sp_800_150:
+    what: NIST Special Publication 800-150, Guide to Cyber Threat Information Sharing.
+    published: 2016-10
+    doi: http://dx.doi.org/10.6028/NIST.SP.800-150
+    url: https://csrc.nist.gov/pubs/sp/800/150/final
+    pdf: https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-150.pdf
+    editable: false
+    covers: 'The four threat-information terms below, and nothing else we use.
+      Its scope is sharing relationships and distribution rules - it starts AFTER
+      collection has happened. It defines no collection-management vocabulary at
+      all: no intelligence requirement, PIR, EEI, collection plan, selector,
+      keyword, sensor or source. Checked directly 2026-09-03.'
+
+  us_intel_doctrine:
+    what: Standard US intelligence vocabulary - the cycle stages, the requirements
+      decomposition, ICOD, LTIOV, AOR.
+    editable: false
+    verify: true
+    note: CITATION NOT PINNED. These terms are doctrinal and used here in their
+      ordinary sense, but no specific publication has been verified as the source.
+      Pin it to the right one (JP 2-0, ADP 2-0, ICD 203 or similar) before this
+      file is treated as authoritative. Do not invent a citation.
+
+# ==============================================================================
+#  THE APPARATUS
+# ==============================================================================
+apparatus:
+
+  sanctum:
+    means: The whole apparatus. Domain-agnostic OSINT collection and scoring,
+      covering intelligence cycle stages 1 through 3 only.
+    lives_in: the repository root
+    not: A product. It produces a candidate queue, never a finished assessment.
+    source: sanctum
+    status: settled
+
+  domain:
+    means: One subject Sanctum runs, with its own requirements, sensors and
+      vocabulary. Currently `cti` and `s2`.
+    lives_in: a top-level directory per domain
+    see: [effort, pnd_file]
+    source: sanctum
+    status: settled
+
+  effort:
+    means: Used interchangeably with `domain` in the CTI documents. A domain is
+      the directory and its config; an effort is the ongoing work it supports.
+    source: sanctum
+    status: contested
+    note: Two words for one thing. Keep `domain` for anything an engine reads.
+
+  engine:
+    means: Code in core/. Domain-agnostic by rule - it reads config and contains
+      no subject knowledge.
+    lives_in: core/
+    source: sanctum
+    status: settled
+
+  pnd_file:
+    means: A domain's Planning and Direction file - everything that domain needs,
+      in one document, laid out by intelligence cycle stage.
+    lives_in: <domain>/pnd.yaml, or pnd.md for a domain that has not converted
+    source: sanctum
+    status: settled
+
+  acolyte:
+    means: The collector engine. Walks sensors, fetches bodies, writes the corpus.
+    lives_in: core/acolyte.py
+    source: sanctum
+    status: settled
+
+  arbites:
+    means: The scorer engine. Reads the corpus, applies the rules, writes the
+      staging document.
+    lives_in: core/arbites.py
+    source: sanctum
+    status: settled
+
+  lexicanum:
+    means: The archive search engine. Searches collected material over time and
+      reports match frequency.
+    lives_in: core/lexicanum.py
+    source: sanctum
+    status: settled
+
+# ==============================================================================
+#  THE INTELLIGENCE CYCLE - what Sanctum covers and what it does not
+# ==============================================================================
+cycle:
+
+  stage_1:
+    means: Planning and Direction. What we need to know, and where the machine
+      keeps its things.
+    lives_in: the requirements and manifest blocks of a pnd file
+    source: us_intel_doctrine
+    status: settled
+
+  stage_2:
+    means: Collection. Which sources, how hard, and how far back.
+    lives_in: manifest.collection and manifest.sensors
+    source: us_intel_doctrine
+    status: settled
+
+  stage_3a:
+    means: Processing. Deterministic, no model and no judgement. Produces the
+      staging document.
+    lives_in: core/arbites.py
+    source: us_intel_doctrine
+    status: settled
+
+  stage_3b:
+    means: Exploitation. A person and a model working the staging document into
+      the vox.
+    lives_in: production, and the analyst
+    source: us_intel_doctrine
+    status: settled
+    note: 3a's job includes handing 3b everything 3b cannot re-derive.
+
+  stages_4_to_6:
+    means: Dissemination, consumption, feedback. NOT Sanctum.
+    source: us_intel_doctrine
+    status: settled
+
+  staging_document:
+    means: The stage 3a output. A ranked candidate queue with the reasoning
+      behind each score, plus the drop list.
+    lives_in: manifest.staging.filename
+    source: sanctum
+    status: settled
+
+  vox:
+    means: The stage 3b product built from the staging document.
+    source: sanctum
+    status: settled
+    note: Internal shorthand only. The word never appears in a reader-facing
+      document; the reader sees production.vox_title.
+
+  icod:
+    means: Information current as of. The cycle cutoff, printed in the staging
+      document and copied into the product header.
+    lives_in: computed by compute_cycle_window, printed by arbites
+    source: us_intel_doctrine
+    status: settled
+
+  ltiov:
+    means: Latest time information is of value. Planning only.
+    source: us_intel_doctrine
+    status: settled
+    note: Never printed on a product.
+
+  aor:
+    means: Area of responsibility. The geography a domain is accountable for.
+    source: us_intel_doctrine
+    status: settled
+
+# ==============================================================================
+#  REQUIREMENTS - what we need to know, decomposed until it is collectable
+# ==============================================================================
+requirements:
+
+  kiq:
+    means: Key intelligence question. The one question the effort exists to
+      answer. Too broad to task against directly.
+    read_by_code: false
+    source: us_intel_doctrine
+    status: settled
+
+  pir:
+    means: Priority intelligence requirement. A ranked slice of the KIQ. Its
+      `tier` names the scoring tier that answers it.
+    read_by_code: false
+    source: us_intel_doctrine
+    status: settled
+    note: Nothing validates that pirs[].tier matches a real scoring tier.
+
+  sir:
+    means: Specific intelligence requirement. A PIR decomposed into a question
+      with a determinate answer.
+    read_by_code: false
+    source: us_intel_doctrine
+    status: settled
+
+  eei:
+    means: Essential element of information. The floor of the decomposition - a
+      specific fact a source could actually supply. You stop decomposing here.
+    read_by_code: true
+    source: us_intel_doctrine
+    status: settled
+    note: The EEI id is the ONLY field in the requirements tree any code reads.
+      tools/vocab_check.py collects them and warns when a rule names one that
+      does not exist.
+
+  serves:
+    means: A scoring tier's claim about which PIR it answers. Identifier only.
+    lives_in: scoring.tiers[].serves
+    source: sanctum
+    status: settled
+    note: Printed beside the item in the staging document. Not validated.
+
+  serves_eei:
+    means: A rule's claim about which EEIs it can honestly attest.
+    lives_in: scoring.tiers/multipliers/floors/force_surface
+    source: sanctum
+    status: settled
+    note: This is the correct level for requirement attribution, and it is
+      almost entirely undeclared - 3 of 19 EEIs are claimed.
+
+  detector:
+    means: The rule that would recognise an EEI in collected text. An EEI with no
+      detector is a fact nothing can find.
+    source: sanctum
+    status: proposed
+    note: Not built. Three states are wanted, not one silence - collected,
+      uncollected, and not collectable by machine.
+
+# ==============================================================================
+#  TERMS AND MATCHING - settled 2026-09-03
+#
+#  Four levels, and the distinction between the first two is what a token can do
+#  ON ITS OWN.
+# ==============================================================================
+matching:
+
+  term:
+    means: One string that can be matched in text. The atom of the vocabulary.
+    lives_in: an entry in a scoring.groups list
+    source: sanctum
+    status: settled
+
+  selector:
+    means: A term specific enough to identify the thing by itself. Matching it is
+      a set membership test with nothing to tune.
+    examples: ['cve-', 'cisa.gov', 'T1566', a place name unique to one state]
+    source: sanctum
+    status: settled
+    note: The SIGINT sense - the identifier itself, not the logic around it. A
+      selector CAN be attributed to a requirement directly.
+
+  keyword:
+    means: A term that means nothing on its own, because its sense depends on
+      what surrounds it.
+    examples: [breach, water, orange, lake county]
+    source: sanctum
+    status: settled
+    note: A keyword cannot be attributed to a requirement. It needs a rule to
+      supply the context. `breach` beside `california` answers EEI-1.2.a;
+      `breach` beside `levee` answers nothing.
+
+  group:
+    means: A named, FLAT list of terms inside a domain file. Every entry is
+      equal; there is no per-term metadata.
+    lives_in: scoring.groups
+    source: sanctum
+    status: settled
+    see: [library]
+    note: The word also labels three other things in this repository. See
+      `collisions`.
+
+  library:
+    means: An external reference dataset - downloaded or derived - carrying
+      metadata PER ENTRY, which changes how each entry may be used.
+    examples:
+      - Census Gazetteer, derived into cti/data/geo_classified.txt (bucket per name)
+      - CISA KEV, fetched via manifest.reference_lists (CVE identifiers)
+      - MITRE ATT&CK technique identifiers
+      - CPE / the NVD product dictionary
+    source: sanctum
+    status: proposed
+    note: A group is a flat list you match against. A library has structure that
+      says how much weight each entry may carry. Calling both `group` hides the
+      only interesting thing about a library.
+
+  rule:
+    means: Groups plus scope plus conditions, declared as a tree, optionally
+      claiming the requirements it serves. The unit that actually decides
+      anything.
+    lives_in: scoring.tiers, multipliers, floors, force_surface
+    source: sanctum
+    status: settled
+    note: Do NOT call this a selector. A selector is a term; a rule is the
+      tasking built from terms.
+
+  atom:
+    means: One node of a rule tree - group, proximity, not, any, all, always.
+    source: sanctum
+    status: settled
+
+  scope:
+    means: Where a rule looks - title, text (body), blob (title + body), or
+      source (the feed URL and label, not the content).
+    source: sanctum
+    status: settled
+    note: The DEFAULT DIFFERS BY ATOM. `group` defaults to blob; `proximity`
+      defaults to text. Always state it.
+
+  proximity:
+    means: Whether a term from one group and a term from another fall within a
+      stated number of CHARACTERS of each other.
+    source: sanctum
+    status: settled
+
+  word_boundary:
+    means: Whole-word matching. Applied automatically to terms of four characters
+      or fewer, and to anything listed in scoring.word_boundary_terms.
+    source: sanctum
+    status: settled
+    note: Cuts both ways - `hack` does not match `hacks`.
+
+  bucket:
+    means: A confidence class for a name in a derived library. A - unique, match
+      alone. B - shared with two or three states, corroborate. C - shared with
+      four or more, or a common English word, never alone.
+    lives_in: cti/data/geo_classified.txt
+    source: sanctum
+    status: settled
+    note: This is the instrument that decides whether a token is a selector or a
+      keyword. Bucket A is a selector; bucket C is a keyword.
+
+# ==============================================================================
+#  COLLECTION
+# ==============================================================================
+collection:
+
+  sensor:
+    means: One configured source. A record carrying at minimum a url.
+    lives_in: manifest.sensors
+    source: sanctum
+    status: settled
+
+  kind:
+    means: How a sensor is read - `feed` (walked for items, each collected once)
+      or `page` (re-read every run, identified by a hash of its text).
+    source: sanctum
+    status: settled
+    note: Opt-in on purpose. A feed that is temporarily empty also reaches the
+      page path, and re-reading those would write a record whenever an error
+      page reflowed.
+
+  tasking_selector:
+    means: What decides whether material enters the corpus at all - the sensor
+      URLs and the query strings inside them.
+    source: sanctum
+    status: proposed
+    note: A mistake here is PERMANENT. The reporting never arrives and nothing
+      downstream can recover it.
+
+  filtering_selector:
+    means: What decides whether collected material surfaces - the groups and the
+      rules that read them.
+    source: sanctum
+    status: proposed
+    note: A mistake here is REVERSIBLE. The item is still in the corpus and a
+      rescore finds it. This asymmetry is why the corpus is permanent.
+
+  corpus:
+    means: Every article ever collected, stored as dated JSON. Nothing prunes it.
+    lives_in: base_dir/corpus/<date>/
+    source: sanctum
+    status: settled
+    note: Written and read as UTF-8, declared explicitly on both sides.
+
+  seen:
+    means: The set of collected identities, so nothing is collected twice. A feed
+      item is keyed on its URL; a page snapshot on a hash of its text.
+    lives_in: base_dir/seen.txt
+    source: sanctum
+    status: settled
+
+  collection_date:
+    means: When Sanctum fetched the item. Drives manifest.collection.window_days.
+    source: sanctum
+    status: settled
+
+  publish_date:
+    means: When the publisher dated the item. Drives max_publish_age_days and the
+      recency flag.
+    source: sanctum
+    status: settled
+    note: Confusing these two is the most expensive mistake available. Only
+      max_publish_age_days removes anything; the recency gate merely flags.
+
+# ==============================================================================
+#  SCORING
+# ==============================================================================
+scoring:
+
+  tier:
+    means: A band of relevance with a weight. The FIRST tier whose rule matches
+      wins and its weight becomes the score. Tiers do not stack.
+    source: sanctum
+    status: settled
+
+  weight:
+    means: The score a tier assigns before any multiplier. Currently 8 / 4 / 2 / 1.
+    source: sanctum
+    status: settled
+
+  multiplier:
+    means: A factor applied to the tier weight when its rule matches. Multipliers
+      DO stack.
+    source: sanctum
+    status: settled
+    note: Cannot promote an item into a tier. It only makes a scored item heavier.
+
+  floor:
+    means: A minimum a matching item is raised to. Never lowers a score.
+    source: sanctum
+    status: settled
+
+  force_surface:
+    means: A rule that puts an item in the document regardless of its score. The
+      highest-cost position in a domain file.
+    source: sanctum
+    status: settled
+
+  surface:
+    means: To appear in the candidate queue rather than the drop list. The cut is
+      scoring.settings.surface_min_score.
+    source: sanctum
+    status: settled
+
+  drop_list:
+    means: Everything below the cut, printed with its score and reasoning. Listed,
+      never deleted.
+    source: sanctum
+    status: settled
+
+  stale:
+    means: A flag on an item published outside the cycle window. It never removes
+      the item.
+    source: sanctum
+    status: settled
+
+  same_event_clustering:
+    means: Folding several outlets' coverage of one event into a single block.
+      Display only - changes no score and drops nothing.
+    lives_in: scoring.settings.grouping
+    source: sanctum
+    status: misused
+    note: The config key is `grouping`, which collides with scoring.groups.
+      `same_event_clustering` says what it does.
+
+# ==============================================================================
+#  THREAT INFORMATION - borrowed from NIST SP 800-150, not ours to edit
+#
+#  Wording below is as printed in the publication's main text. The glossary at
+#  Appendix B was not reachable when this was written, so treat these as accurate
+#  but unconfirmed against Appendix B, and check them if it ever matters.
+# ==============================================================================
+threat_information:
+
+  cyber_threat_information:
+    means: Any information that can help an organization identify, assess,
+      monitor, and respond to cyber threats.
+    source: nist_sp_800_150
+    quote: true
+    status: settled
+
+  indicator:
+    means: Technical artifacts or observables that suggest an attack is imminent
+      or is currently underway, or that a compromise may have already occurred.
+    source: nist_sp_800_150
+    quote: true
+    status: settled
+    note: Sanctum collects reporting ABOUT indicators. It does not extract or
+      store indicators as data - see the standing indicator-derivation gap.
+
+  ttp:
+    means: Tactics, techniques and procedures - the behaviour of an actor.
+      Tactics are high-level descriptions of behaviour, techniques are detailed
+      descriptions in the context of a tactic, and procedures are lower-level,
+      highly detailed descriptions.
+    source: nist_sp_800_150
+    quote: false
+    status: settled
+    note: PARAPHRASE, not a quotation - the wording was not recovered verbatim.
+      Also collides with the `ttp` scoring group; see `collisions`.
+
+  threat_intelligence:
+    means: Threat information that has been aggregated, transformed, analyzed,
+      interpreted, or enriched to provide the necessary context for
+      decision-making processes.
+    source: nist_sp_800_150
+    quote: true
+    status: settled
+    note: This draws the 3a / 3b line for us, from outside. The staging document
+      is threat INFORMATION. The vox is where it becomes threat INTELLIGENCE.
+
+# ==============================================================================
+#  COLLISIONS - words that currently mean more than one thing
+#
+#  Listed so the next person does not have to discover them. A rename is cheap
+#  for two of these and expensive for one.
+# ==============================================================================
+collisions:
+
+  group:
+    meanings:
+      - scoring.groups - 16 named term lists. THE canonical sense.
+      - vocab.groups - the review records for those same 16. Same sense.
+      - manifest.sensors[].group - 9 SOURCE CATEGORIES. A different object
+        entirely; `category` would be honest.
+      - scoring.settings.grouping - clustering ARTICLES. A third object.
+      - informal use in discussion - an external list or library of names.
+    keep: scoring.groups, which is entrenched across 88 references in the engines
+      and not worth renaming.
+    rename_available:
+    - 'manifest.sensors[].group'
+    - scoring.settings.grouping
+    status: contested
+
+  selector:
+    meanings:
+      - a term specific enough to stand alone. THE agreed sense.
+      - loosely used during design discussion to mean a whole matching rule.
+    keep: the first.
+    status: settled
+    note: The second usage was a drift and is retired. A rule is a rule.
+
+  effort:
+    meanings:
+      - a domain, in the CTI documents.
+      - the ongoing work a domain supports.
+    status: contested
+
+  kev:
+    meanings:
+      - scoring.groups.kev - a vocabulary group, used by no rule.
+      - manifest.reference_lists.kev - the fetched CISA catalogue, wired to nothing.
+      - the KEV multiplier, which reads exploit_strong rather than either.
+    status: contested
+    note: Three things named kev, none of which reads another.
+
+  ttp:
+    meanings:
+      - the concept - actor behaviour at three levels of detail (NIST SP 800-150).
+      - scoring.groups.ttp - 29 terms that detect behaviour language in an article.
+    keep: both, but never write `ttp` unqualified in a document. Say `the ttp
+      group` or `TTPs` for the concept.
+    status: contested
+
