@@ -45,6 +45,18 @@ def uid(url):
     return hashlib.sha256(url.encode()).hexdigest()
 
 
+def content_uid(text):
+    """Identity of a PAGE snapshot: what the page said, not where it lives.
+
+    A portal keeps one URL forever and changes its contents, so the URL is the
+    wrong identity for it — keying on the URL is exactly what made a page
+    source collectable once and never again. Whitespace and case are
+    normalised, so reflowed markup is not mistaken for new reporting.
+    """
+    norm = re.sub(r"\s+", " ", (text or "")).strip().lower()
+    return hashlib.sha256(("page:" + norm).encode()).hexdigest()
+
+
 def normalize_title(title, suffix_separators):
     if not title:
         return ""
@@ -130,12 +142,20 @@ def too_old(entry, max_age_days, now=None):
 
 
 def save(run_dir, art):
+    # ENCODING IS DECLARED, NEVER INHERITED. `ensure_ascii=False` writes real
+    # characters rather than escapes, so the file's encoding decides whether it
+    # can be written and read back at all. Python's default here is the
+    # PLATFORM's: UTF-8 on the collector host, cp1252 on Windows. The scorer has
+    # always read the corpus as UTF-8, so an unstated encoding meant the two
+    # halves agreed only by accident of operating system — and on Windows a
+    # single em dash was enough to make a record unreadable.
     (run_dir / f"{art['id'][:16]}.json").write_text(
-        json.dumps(art, indent=2, ensure_ascii=False))
+        json.dumps(art, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def article(source, title, url, published, text,
-            fetch_status=STATUS_OK, body_source="fetch", final_url=None):
+            fetch_status=STATUS_OK, body_source="fetch", final_url=None,
+            rec_id=None):
     """
     One corpus record.
 
@@ -144,8 +164,12 @@ def article(source, title, url, published, text,
     genuinely short article all produced an identical record — a short `text`
     field — so a broken sensor was indistinguishable from a thin one. Those
     two need opposite responses, so the record now says which it is.
+
+    `rec_id` overrides the identity. It exists for page snapshots, which are
+    identified by their CONTENT rather than their URL; a feed item passes
+    nothing and keeps the URL hash it has always had.
     """
-    rec = {"id": uid(url), "source": source, "title": title.strip(),
+    rec = {"id": rec_id or uid(url), "source": source, "title": title.strip(),
            "url": url, "published": published,
            "collected": datetime.now(timezone.utc).isoformat(), "text": text,
            "fetch_status": fetch_status, "body_source": body_source}
@@ -155,11 +179,11 @@ def article(source, title, url, published, text,
 
 
 def _load_set(path):
-    return set(path.read_text().split()) if path.exists() else set()
+    return set(path.read_text(encoding="utf-8").split()) if path.exists() else set()
 
 
 def _load_titleset(path):
-    return set(path.read_text().split("\n")) - {""} if path.exists() else set()
+    return set(path.read_text(encoding="utf-8").split("\n")) - {""} if path.exists() else set()
 
 
 def process_feed(url, seen, seen_titles, run_dir, ctx, log):
@@ -209,33 +233,79 @@ def process_feed(url, seen, seen_titles, run_dir, ctx, log):
                       text, fetch_status=status, body_source=body_source,
                       final_url=final_url)
         save(run_dir, art)
-        with ctx["seen_path"].open("a") as f:
+        with ctx["seen_path"].open("a", encoding="utf-8") as f:
             f.write(art["id"] + "\n")
         seen.add(art["id"])
         if tkey:
-            with ctx["seen_titles_path"].open("a") as f:
+            with ctx["seen_titles_path"].open("a", encoding="utf-8") as f:
                 f.write(tkey + "\n")
             seen_titles.add(tkey)
         tally["saved"] += 1
     return tally
 
 
-def process_page(url, seen, run_dir, ctx, log):
-    if uid(url) in seen:
-        return {"saved": 0, "too_old": 0, "no_body": 0, "undated": 0, "status": {}}
+def process_page(url, seen, run_dir, ctx, log, record=None):
+    """
+    Collect a source that is not a feed. Returns a tally.
+
+    TWO BEHAVIOURS, and which one you get is DECLARED, never guessed:
+
+      kind: page      A portal. Re-read on EVERY run and identified by its
+                      CONTENT, so new material posted under an unchanging URL
+                      is collected. Identical content saves nothing and is
+                      counted as `unchanged`.
+
+      anything else   The original fallback, untouched: a source that failed to
+                      parse as a feed is collected ONCE, keyed on its URL.
+
+    The distinction is not decoration. `process_feed` returns None whenever a
+    feed yields no entries, including when a real feed is temporarily empty or
+    broken — so this function also receives healthy feeds having a bad day.
+    Re-reading those every run would write a fresh record whenever their error
+    page reflowed. A portal therefore has to say it is one.
+    """
+    kind = (record or {}).get("kind") or "feed"
+
+    if kind != "page":
+        if uid(url) in seen:
+            return {"saved": 0, "too_old": 0, "no_body": 0, "undated": 0,
+                    "unchanged": 0, "status": {}}
+        # A feed that stopped producing looks exactly like a portal from here,
+        # and the difference matters, so say so once per run rather than
+        # collecting in silence.
+        log.warning("NOT-A-FEED collected once as a page — if this is a portal "
+                    "whose contents change, declare `kind: page` on its sensor "
+                    "record: %s", url)
+
     text, status, final_url = fetch_body(url, ctx["fetch"], log)
     if not text:
         log.warning("no text [%s] %s", status, url)
         return {"saved": 0, "too_old": 0, "no_body": 1, "undated": 0,
-                "status": {status: 1}}
-    art = article(url, "", url, "", text, fetch_status=status,
-                  body_source="fetch", final_url=final_url)
+                "unchanged": 0, "status": {status: 1}}
+
+    # A page snapshot is identified by what it said. A once-only fallback keeps
+    # the URL identity it has always had.
+    rec_id = content_uid(text) if kind == "page" else uid(url)
+    if rec_id in seen:
+        log.info("unchanged since last run, nothing saved: %s", url)
+        return {"saved": 0, "too_old": 0, "no_body": 0, "undated": 0,
+                "unchanged": 1, "status": {status: 1}}
+
+    # A page has no headline, and an untitled record is floored and flagged by
+    # the scorer — so a portal without a declared title can never surface,
+    # however fresh it is. `title:` on the sensor record is how the domain says
+    # what the page is. Absent, behaviour is unchanged: no title.
+    title = str((record or {}).get("title") or "")
+    art = article(url, title, url, "", text, fetch_status=status,
+                  body_source="fetch", final_url=final_url, rec_id=rec_id)
+    if kind == "page":
+        art["body_source"] = "page"
     save(run_dir, art)
-    with ctx["seen_path"].open("a") as f:
+    with ctx["seen_path"].open("a", encoding="utf-8") as f:
         f.write(art["id"] + "\n")
     seen.add(art["id"])
     return {"saved": 1, "too_old": 0, "no_body": 0, "undated": 0,
-            "status": {status: 1}}
+            "unchanged": 0, "status": {status: 1}}
 
 
 def main():
@@ -282,21 +352,35 @@ def main():
     seen = _load_set(cfg["seen_path"])
     seen_titles = _load_titleset(cfg["seen_titles_path"])
     urls = cfg["sensors"]                       # from pnd.md inline block (or file fallback)
-    run = {"saved": 0, "too_old": 0, "no_body": 0, "undated": 0}
+    # Same sources, same order, as records. A domain that declares nothing gets
+    # {"url": u} per source and behaves exactly as before.
+    records = cfg.get("sensor_records") or [{"url": u} for u in urls]
+    by_url = {r.get("url"): r for r in records}
+    pages = sum(1 for r in records if r.get("kind") == "page")
+    run = {"saved": 0, "too_old": 0, "no_body": 0, "undated": 0, "unchanged": 0}
     statuses = {}
-    log.info("run start [%s] — %d sources (%s), %d seen, %d seen-titles, "
-             "max_publish_age_days=%s",
-             cfg["domain"], len(urls), cfg["sensors_source"], len(seen),
+    log.info("run start [%s] — %d sources (%s), %d declared as pages, %d seen, "
+             "%d seen-titles, max_publish_age_days=%s",
+             cfg["domain"], len(urls), cfg["sensors_source"], pages, len(seen),
              len(seen_titles), ctx["max_age_days"])
     for url in urls:
         try:
-            t = process_feed(url, seen, seen_titles, run_dir, ctx, log)
-            t = process_page(url, seen, run_dir, ctx, log) if t is None else t
-            log.info("%s -> %d new, %d too old, %d no body, %d undated %s",
+            rec = by_url.get(url) or {"url": url}
+            # A declared page is never handed to the feed parser. Parsing it
+            # would cost a request and, for a portal that happens to emit
+            # something feed-shaped, would silently take the feed path instead.
+            if rec.get("kind") == "page":
+                t = process_page(url, seen, run_dir, ctx, log, record=rec)
+            else:
+                t = process_feed(url, seen, seen_titles, run_dir, ctx, log)
+                if t is None:
+                    t = process_page(url, seen, run_dir, ctx, log, record=rec)
+            log.info("%s -> %d new, %d too old, %d no body, %d undated, "
+                     "%d unchanged %s",
                      url, t["saved"], t["too_old"], t["no_body"], t["undated"],
-                     t["status"] or "")
+                     t.get("unchanged", 0), t["status"] or "")
             for k in run:
-                run[k] += t[k]
+                run[k] += t.get(k, 0)
             for k, v in t["status"].items():
                 statuses[k] = statuses.get(k, 0) + v
         except Exception as e:
@@ -307,9 +391,9 @@ def main():
     # notice, so the counts are printed, not merely logged.
     breakdown = ", ".join(f"{k} {v}" for k, v in sorted(statuses.items()))
     log.info("run done — %d new, %d rejected as too old, %d with no body, "
-             "%d undated, in %s [%s]",
+             "%d undated, %d pages unchanged, in %s [%s]",
              run["saved"], run["too_old"], run["no_body"], run["undated"],
-             run_dir, breakdown)
+             run["unchanged"], run_dir, breakdown)
     print(f"[{cfg['domain']}] {run['saved']} new articles -> {run_dir}")
     print(f"[{cfg['domain']}] rejected as published outside the window: {run['too_old']}")
     nb_line = f"[{cfg['domain']}] collected with no usable body: {run['no_body']}"
@@ -322,6 +406,12 @@ def main():
     if run["undated"]:
         print(f"[{cfg['domain']}] kept despite an unparseable publish date: "
               f"{run['undated']} — these bypass the age cutoff by design")
+    if pages:
+        # A portal that never changes and a portal that broke look identical in
+        # the corpus — both produce nothing — so the re-read is reported even
+        # when it found nothing. Silence here is what cost the last one.
+        print(f"[{cfg['domain']}] page sources re-read: {pages} — "
+              f"{run['unchanged']} unchanged since the last run")
 
     # Corpus push (config-driven; portable). rclone remote comes from the manifest.
     corpus = cfg["manifest"].get("corpus", {})

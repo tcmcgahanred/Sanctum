@@ -26,6 +26,18 @@
 #  Each scoring rule may declare the EEIs it can honestly attest.
 #  vocab_check verifies every declared identifier exists in this tree.
 # ------------------------------------------------------------------------------
+#  HOW THIS TREE CONNECTS TO SCORING
+#    kiq        the one question the whole effort exists to answer. Read by
+#               people only; no engine touches it.
+#    pirs[]     each PIR carries `tier:`, and that number must match an `id:`
+#               under scoring.tiers. That is the link between what we need to
+#               know and what the machine rewards.
+#    sirs[]     the sub-questions that decompose a PIR.
+#    eeis[]     the specific fact that answers a SIR. A scoring rule may name
+#               one in `serves_eei:` to claim it can honestly attest it.
+#  tools/vocab_check.py fails if a rule names a PIR or EEI that is not here.
+#  Nothing else is derived: `fact`, `sensor`, `scoring`, `standard` and `note`
+#  are for the analyst and for whoever builds the next sensor.
 requirements:
   kiq:
     id: KIQ-1
@@ -51,8 +63,12 @@ requirements:
           name: CA AG breach-registry scraper
           status: PENDING
         scoring: Tier-1 CA-direct
-        note: Blocked by the process_page re-collection defect - the registry is a web portal,
-          and page sources are collected once and never revisited.
+        note: 'No longer blocked by the collector. A sensor record may now declare ''kind:
+          page'', which is re-read every run and identified by its contents rather than its
+          URL, so a portal that posts new notifications under one unchanging address is
+          collected. The scraper that turns registry rows into per-victim records is still
+          to build - sensor_roadmap priority 1 - and the record should declare a ''title:''
+          or the scorer will floor it as untitled.'
       - id: EEI-1.1.b
         fact: Extortion/leak-site posts naming California victims.
         sensor:
@@ -75,7 +91,9 @@ requirements:
           also: Cal-CSIC - PENDING
         scoring: Tier-1, primary source
         note: 'Cal-CSIC remains unserved: publishing, but PDF/DOCX on an HTML index with no
-          RSS. Same process_page blocker as EEI-1.1.a.'
+          RSS. The collector blocker is gone - declare the index as ''kind: page'' and it is
+          re-read every run - but reaching the advisories themselves still means parsing that
+          index, or the documents behind it.'
     - id: SIR-1.2
       question: Is the affected organization inside the 34-county CCIC AOR?
       eeis:
@@ -208,13 +226,20 @@ requirements:
           defense-industrial-only, or vendor opinion?'
         standard: Audience filter - developer-targeted (npm poisoning) and defense-industrial-base
           (CMMC) items are out of portfolio unless they reach SLTT through a vendor.
+  # NOT READ BY ANY ENGINE. The build order for collection gaps, kept beside
+  # the requirements so a gap and the thing it starves stay in one file.
+  # `serves:` here points at the EEI that stays unanswered until it is built.
   sensor_roadmap:
   - priority: 0
     build: Fix process_page re-collection (core/acolyte.py)
+    status: DONE 2026-09-03
     serves: []
-    note: Prerequisite, not a sensor. Page sources are deduped on URL hash, so a portal is
-      captured once and never revisited. Priorities 1 and 2 are portals and are useless until
-      this lands.
+    note: 'Kept as the record of a prerequisite, not a sensor. Page sources were deduplicated
+      on URL hash, so a portal was captured once and never revisited, and priorities 1 and
+      2 were both useless until it landed. A record may now declare ''kind: page'': it is
+      re-read every run and identified by a hash of its normalised text. Re-collection is
+      opt-in on purpose - process_feed returns nothing for a healthy feed having a bad day,
+      and re-reading those would write a record every time an error page reflowed.'
   - priority: 1
     build: CA AG breach-registry scraper
     serves:
@@ -254,13 +279,25 @@ requirements:
 #  base_dir is the only host-coupled value. $SANCTUM_BASE overrides it and
 #  WINS over this file - set globally it overrides every domain at once.
 # ------------------------------------------------------------------------------
+#  Every path below is relative to base_dir unless it is absolute.
 manifest:
   domain: cti
   base_dir: /opt/ravenor
   sensors_file: references/sensors.txt
+  # WHERE COLLECTED ARTICLES LIVE, permanently. Nothing in Sanctum prunes the
+  # corpus; scoring re-reads it, so a rule change can be re-run over history.
+  #   backend: local   -> base_dir/corpus/<date>/
+  #   backend: rclone  -> synced to rclone_remote, and rclone must be
+  #                       configured on the collector host or collection fails.
   corpus:
     backend: rclone
     rclone_remote: gdrive:ravenor-corpus
+  # EXTERNAL LISTS FETCHED AND CACHED at collection time, keyed by a pattern
+  # found in the article. Available to the annotator; NOT wired into scoring —
+  # nothing here changes a score today.
+  #   json_path / key_field  where the identifiers sit in the downloaded JSON
+  #   match_pattern          what to look for in an article to key against it
+  #   cache_hours            re-download only when the cache is older than this
   reference_lists:
     kev:
       url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
@@ -268,6 +305,8 @@ manifest:
       key_field: cveID
       match_pattern: CVE-[0-9]{4}-[0-9]{4,7}
       cache_hours: 12
+  # WHERE THE STAGE 3a DOCUMENT IS WRITTEN. {date} is the run date. This is the
+  # handoff to 3b — if the push fails the run still produces the file locally.
   staging:
     backend: rclone
     rclone_remote: gdrive:ravenor-staging
@@ -280,14 +319,39 @@ manifest:
 #  wholesale; AOR relevance is decided later at scoring, never by filtering
 #  here. A feed earns its place only if it is reliable AND additive.
 # ------------------------------------------------------------------------------
+  # THE TWO WINDOWS ARE NOT THE SAME WINDOW, and only one of them drops
+  # anything. Confusing them is the most expensive mistake available here:
+  #   window_days           how far back to GATHER from the corpus, by
+  #                         COLLECTION date. Outside it, an item is absent.
+  #   max_publish_age_days  refuses an item at collection when its PUBLISH date
+  #                         is older than this. The only place Sanctum deletes
+  #                         rather than flags. Reversible — a refused item is
+  #                         not recorded as seen, so lifting this re-admits it.
+  #   scoring.settings.recency is the third and mildest: it only FLAGS.
   collection:
     window_days: 7
     max_publish_age_days: 7
+    # Titles shorter than this are treated as feed artifacts, not articles.
     min_title_len: 15
+    # Publisher suffixes stripped from titles before deduplication, so
+    # "Story - The Record" and "Story | The Record" count as one item.
     suffix_separators:
     - ' - '
     - ' | '
     - ' — '
+    # HOW HARD TO PULL EACH PAGE. These are politeness and reliability
+    # settings, not scoring.
+    #   user_agent          EMPTY ON PURPOSE. Setting one has been measured to
+    #                       lose sensors, not gain them.
+    #   impersonate         TLS fingerprint. Enterprise proxies and TLS
+    #                       inspection break this — first thing to test on a
+    #                       new host.
+    #   min_extracted_size  below this many characters the body is treated as
+    #                       a failed extraction, and the item keeps its title
+    #                       only.
+    #   decode_google_news  Google News links are redirects; this resolves them
+    #                       to the publisher so dedup and source rules work.
+    #   gnews_interval      seconds between Google News requests specifically.
     fetch:
       user_agent: ''
       timeout: 20
@@ -304,6 +368,26 @@ manifest:
 #  Verify every URL against the collector host's own egress before adding;
 #  some publishers refuse datacenter addresses that work from a browser.
 # ------------------------------------------------------------------------------
+  # ONE RECORD PER SOURCE. Adding one changes what is COLLECTED, never how it
+  # scores. A record with no `url` stops the run with that record named, rather
+  # than being skipped in silence.
+  #
+  #   url    required.
+  #   kind   `feed` (the default) or `page`. THIS IS THE ONLY WAY TO WATCH A
+  #          PORTAL. A feed is walked for items and each item is collected
+  #          once. A page is re-read on EVERY run and identified by a hash of
+  #          its text, so new material posted under an unchanging address is
+  #          collected and an unchanged page saves nothing.
+  #          It is opt-in for a reason: the collector also falls through to the
+  #          page path whenever a HEALTHY feed returns no entries, and re-reading
+  #          those every run would write a record each time an error page
+  #          reflowed. So a portal has to say it is one.
+  #   title  a page has no headline, and the scorer floors and flags an
+  #          untitled record — so a `kind: page` source without this can never
+  #          surface however fresh it is. Say what the page IS. Mind that the
+  #          words you choose are matched by any rule using `scope: title`.
+  #   group  a label for the health and yield tools. Not read when scoring.
+  #   note   free text for whoever maintains the list.
   sensors:
   - url: https://www.cisa.gov/cybersecurity-advisories/all.xml
     group: 'National: government / CERT / SLTT'
@@ -461,19 +545,72 @@ manifest:
 #  any elevation multipliers. Tiers do not stack; multipliers do.
 # ==============================================================================
 
+#  ORDER OF OPERATIONS. Nothing outside this list changes a score:
+#    1. TIERS          the FIRST tier whose `require` matches wins, and its
+#                      `weight` becomes the score. Tiers do NOT stack — one
+#                      tier per article.
+#    2. MULTIPLIERS    every `when` that matches multiplies that score. These
+#                      DO stack: two 1.5 factors make 2.25.
+#    3. FLOORS         raise a score to a stated minimum, never lower one.
+#    4. FORCE_SURFACE  ignores the score completely and puts the item in the
+#                      document. The highest-cost position in this file.
+#  settings.surface_min_score is the cut. Below it items go to the drop list,
+#  which is PRINTED, never deleted.
+#
+#  READING A RULE — every rule is a tree of these atoms:
+#    group:      is any term from this vocabulary group present?
+#    scope:      WHERE to look.
+#                  title  headline only
+#                  text   body only
+#                  blob   headline + body
+#                  source feed URL and source label — the article's ORIGIN,
+#                         not its content. "CISA ordered a patch" in a trade
+#                         write-up is not the directive from cisa.gov.
+#                THE DEFAULT DIFFERS BY ATOM: `group` defaults to blob,
+#                `proximity` defaults to text. Always write it explicitly.
+#    proximity:  are a term from group `a` and a term from group `b` within
+#                `window` CHARACTERS of each other, measured both directions
+#                from the a-term?
+#                  all_occurrences  default false, which tests only the FIRST
+#                                   occurrence of each a-term — so the same
+#                                   word in boilerplate can mask a real hit.
+#                                   Set it true unless you want the old
+#                                   behaviour.
+#                  max_occurrences  ceiling on that scan, default 40.
+#                Terms are used VERBATIM here, padding included: ' calif ' and
+#                'uc ' rely on their spaces to act as boundaries.
+#    not:        inverts the atom beneath it — "match, unless".
+#    any / all:  or / and. They nest.
+#    always:     matches everything. Only the last tier should use it.
+#  Rules name GROUPS, never raw words. Every word lives in scoring.groups.
 scoring:
+  # HIGHEST FIRST. Evaluation stops at the first match, so the order of this
+  # list is meaning rather than tidiness — moving a tier up changes what wins.
+  # The last tier should be `require: always` so nothing falls through
+  # unscored.
   tiers:
+  # Worked example — the atoms above, in the tier that matters most. Every
+  # other tier and force-surface rule is built from the same pieces.
   - id: 1
     name: Direct impact to California organizations
+    # Printed beside the item in the staging document so stage 3b can state
+    # which requirement an item answers without re-deriving it. Identifiers
+    # only: they must exist in the requirements tree, and nothing is
+    # calculated from them. A tier with no `serves:` prints nothing.
     serves: PIR-1
     serves_eei:
     - EEI-1.2.a
+    # The score for anything this tier claims, before any multiplier.
     weight: 8.0
     require:
       all:
       - not:
           group: listicle
           scope: title
+      # THE CYBER GATE. Carried by every tier 1-3 rule and every force-surface
+      # rule. It adds no weight; it only refuses articles that use this
+      # domain's words in a non-cyber sense. Removing it from one rule quietly
+      # reopens that rule to homonyms.
       - group: cyber_context
         scope: blob
       - any:
@@ -543,6 +680,9 @@ scoring:
     serves_eei: []
     weight: 1.0
     require: always
+  # ELEVATION. Each matching factor multiplies the tier weight, and they STACK.
+  # A multiplier cannot promote an item into a tier; it only makes a scored
+  # item heavier. An item no tier rewarded stays cheap however many fire.
   multipliers:
   - name: KEV / actively exploited
     serves_eei: []
@@ -623,6 +763,10 @@ scoring:
           window: 150
           scope: blob
           all_occurrences: true
+  # RAISE A SCORE TO A MINIMUM, never lower it. Deliberately weaker than
+  # force-surface: the item becomes visible at the bottom of the surface rather
+  # than guaranteed a place. For signals that are authoritative but of unproven
+  # relevance to this domain.
   floors:
   - name: CISA directive on technology not on the SLTT list
     score: 2.0
@@ -638,6 +782,12 @@ scoring:
       - not:
           group: lowmat_tech
           scope: blob
+  # IMMUNE TO SCORE. If `when` matches, the item is in the document no matter
+  # what it scored or where surface_min_score sits. This is the strongest
+  # statement available in this file and the most expensive to get wrong —
+  # every false positive here reaches the analyst's desk.
+  # These rules deliberately mirror tiers 1-3 rather than inventing new logic,
+  # so a change to a tier and its force-surface twin is one edit in two places.
   force_surface:
   - name: M1 in-AOR entity in an incident
     serves_eei:
@@ -702,18 +852,49 @@ scoring:
             window: 80
             scope: blob
             all_occurrences: true
+  # ENGINE BEHAVIOUR THAT IS NOT A RULE.
   settings:
+    # THE CUT. At or above this an item is a candidate; below it the item is
+    # listed in the drop list with its score and reasoning. Raising this hides
+    # tier-4 items entirely; lowering it floods the queue.
     surface_min_score: 2.0
+    # A feed artifact with no title cannot be judged, so it is floored and
+    # flagged rather than scored — it lands in the drop list where the source
+    # can be checked.
     empty_title:
       score: 0.5
       tier: 4
       flag: 'FLAG: empty title (feed artifact - verify source)'
+    # FLAGS, NEVER DROPS. An item outside this window still appears, marked
+    # STALE. Collection's window_days and max_publish_age_days are what remove
+    # things; this only annotates.
     recency:
       enabled: true
       window_days: 7
+      # The cycle boundary: the most recent <weekday> at <time> in <timezone>
+      # THAT HAS ALREADY PASSED.
       cutoff_weekday: wednesday
+      # MUST BE AT OR BEFORE THE HOUR THE COLLECTOR STARTS. Because the engine
+      # takes the most recent cutoff already passed, declaring a later time
+      # silently returns LAST week's window — every week, with no error.
+      # The timer fires 0400 local; this reads 04:00. Change one, change both.
       cutoff_time: 04:00
+      # An IANA zone name. On Windows this needs the `tzdata` package — there
+      # is no system timezone database, and without it the scorer will not
+      # start at all.
       timezone: America/Los_Angeles
+    # DISPLAY ONLY. Folds several outlets' coverage of one event into a single
+    # block in the staging document. It changes no score, merges no item and
+    # drops nothing.
+    #   similarity         how alike two titles must be to cluster
+    #   min_shared_tokens  floor on overlapping words, so short titles do not
+    #                      cluster on nothing
+    #   min_evidence       floor on how much INFORMATION the overlap carries,
+    #                      so formulaic advisory titles that share many words
+    #                      but say nothing distinctive stay apart
+    #   max_group_size     past this the cluster is treated as template
+    #                      matching, dissolved, and reported in the header
+    #   max_group_display  how much of the document one group may occupy
     grouping:
       enabled: true
       similarity: 0.15
@@ -721,6 +902,13 @@ scoring:
       min_evidence: 8.0
       max_group_size: 25
       max_group_display: 12
+  # WHOLE-WORD MATCHING, for terms that would otherwise match inside a longer
+  # word. Terms of 4 characters or fewer get this automatically — this list is
+  # for the LONGER ones that still need it: 'ransom' inside 'ransomware',
+  # 'cisco' inside 'francisco'.
+  # The reverse trap: a term of 4 characters or fewer is ALREADY whole-word, so
+  # 'hack' does not match 'hacks'. Spell out every form you want, or use a stem
+  # of 5+ characters.
   word_boundary_terms:
   - scada
   - ransom
@@ -728,6 +916,15 @@ scoring:
   - how to
   - what is
   - hacker
+  # THE VOCABULARY. Every word the scorer can see lives here; rules reference
+  # these names and never a raw string.
+  # Matching is case-insensitive substring for terms of 5+ characters, and
+  # whole-word for 4 or fewer (or anything in word_boundary_terms above).
+  # Leading/trailing spaces are STRIPPED for group matching but KEPT for
+  # proximity, which is why some entries look padded.
+  # A group used by no rule is invisible: it costs nothing and does nothing.
+  # tools/vocab_check.py reports those, and the reason can be recorded under
+  # vocab.accepted so it stops being noise.
   groups:
     geo:
     - california
@@ -1115,7 +1312,14 @@ scoring:
 #  Every group declares serves: [PIR-n] or a role. A group that decides
 #  nothing must say why, or vocab_check reports it.
 # ------------------------------------------------------------------------------
+#  REVIEW STATE FOR THE WORD LISTS ABOVE — dates and requirement attribution,
+#  not words. The words themselves live in scoring.groups.
+#  A group named here that does not exist in scoring.groups is an error;
+#  a group in scoring.groups with no entry here is a warning once any group
+#  has one, so a domain that has never used the convention stays quiet.
 vocab:
+  # Default staleness horizon. A group may override it with its own
+  # review_interval_days — fast-moving vocabulary deserves a shorter one.
   review_interval_days: 180
   groups:
     geo:
@@ -1200,6 +1404,10 @@ vocab:
         not a maintenance edit.
 
         '
+  # FINDINGS THAT ARE KNOWN, UNDERSTOOD AND DELIBERATELY LEFT. Each entry
+  # silences one specific tools/vocab_check.py warning by check + subject, and
+  # prints the reason instead. A guard people route around is worse than no
+  # guard, so this exists to keep the real warnings visible.
   accepted:
   - check: padded term
     subject: ''' calif '' in geo'
@@ -1219,6 +1427,10 @@ vocab:
 #  standard the analyst and the model are held to.
 # ==============================================================================
 
+#  MOST OF THIS BLOCK IS A STANDARD FOR PEOPLE, NOT A SETTING.
+#  Read by an engine: report_title, show_scores, staging_annotations.
+#  Everything else — audience, sections, the compliance checklist, notes — is
+#  what the analyst and the model are held to when they build the vox.
 production:
   audience: 'Low-maturity State/Local/Tribal/Territorial (SLTT) organisations in the AOR —
     counties, cities, school and special districts. They consume vendor software; they do
@@ -1239,6 +1451,11 @@ production:
   - CTA TTPs
   - LATEST ATTACKS OR RISKS
   - KEYWORDS
+  # HOW STAGE 3a PRE-SORTS CANDIDATES FOR 3b. First matching section wins, so
+  # the order of this list matters and the last entry should be `when: always`.
+  #   min_body_words  below this the item is listed without an annotation,
+  #                   because there is not enough body text to summarise
+  #                   honestly.
   staging_annotations:
     min_body_words: 40
     sections:

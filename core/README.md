@@ -48,6 +48,31 @@ collected less looks exactly like a period where less happened. On the first rea
 run, hits fell 475 to 122 and read as a collapse; the denominators were 6,585
 articles against 1,370, and the rate had *risen*.
 
+## Feeds and portals are collected differently, and you declare which
+
+A sensor record's `kind` decides how a source is read. This is domain-agnostic —
+every subject gets the same two behaviours.
+
+| | `kind: feed` (default) | `kind: page` |
+|---|---|---|
+| what is read | the feed's items | the page itself |
+| identity | each item's URL | a hash of the page's normalised text |
+| how often | every run, new items only | every run, **re-read in full** |
+| unchanged | nothing to collect | nothing saved, counted as `unchanged` |
+| title | from the feed entry | from the record's `title:`, or none |
+
+**A portal has to say it is one.** `process_feed` returns nothing whenever a feed
+yields no entries, which includes a healthy feed having a bad day — so the page
+path also receives real feeds. Re-reading everything that lands there would write
+a fresh record every time an error page reflowed. An undeclared non-feed is
+therefore still collected once, keyed on its URL, exactly as before, and the log
+says `NOT-A-FEED` so a dead feed is not mistaken for a quiet one.
+
+**A `kind: page` record wants a `title:`.** A page has no headline, and the scorer
+floors and flags an untitled record — so a portal without one can never surface,
+however fresh it is. Choose the words carefully: any rule using `scope: title`
+matches against them on every snapshot.
+
 ## Checking a subject before you run it
 
 ```

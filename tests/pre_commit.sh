@@ -10,6 +10,7 @@
 #   geo_classify_test.py the geography confidence table is sound
 #   cycle_dates_test.py  the staging document states its own ICOD and coverage
 #   merge_test.py        one file per domain assembles, and nothing is declared twice
+#   page_recollect_test.py a declared portal is re-read; a non-feed still is not
 #   fetch_test.py        failure pages never become article bodies, and old
 #                        reports never enter the corpus
 #   changelog_check.sh   you changed something — did you write it down? (warns)
@@ -81,6 +82,15 @@ if command -v python3 >/dev/null 2>&1; then
 
     python3 "$REPO_ROOT/tests/merge_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/merge_test.py failed; a domain file declares something twice, or the one-file layout broke" >&2
+        STATUS=1
+    }
+
+    # A portal is watched only while page sources are keyed on their CONTENT and
+    # a feed having a bad day is still collected once. Break either half and the
+    # symptom is silence: a source that never reports again, or a corpus that
+    # grows a record every run.
+    python3 "$REPO_ROOT/tests/page_recollect_test.py" >/dev/null || {
+        echo "pre-commit: BLOCKED — tests/page_recollect_test.py failed; a declared portal is no longer re-read, or a non-feed source is being re-collected when it should not be" >&2
         STATUS=1
     }
 

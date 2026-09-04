@@ -232,12 +232,17 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
     # Sensors, in order of preference:
     #   1. manifest.sensors  - a list of records (pnd.yaml). A record carries its
     #      url plus whatever else the domain wants to say about that feed; only
-    #      `url` is required, and everything else is ignored by the collector.
+    #      `url` is required.
     #   2. a fenced ```sensors block - one URL per line (pnd.md).
     #   3. the external sensors_file named by the manifest.
-    # The collector consumes a flat list of URLs in every case, so a domain can
-    # move between shapes without the engine noticing. s2 still uses shape 2.
-    sensors, sensors_source = None, None
+    # `sensors` is a flat list of URLs in every case, so a domain can move
+    # between shapes without the engine noticing. s2 still uses shape 2.
+    #
+    # `sensor_records` carries the SAME sources in the same order as dicts, so a
+    # record can say something the collector acts on - `kind: page` and `title:`
+    # today. Shapes 2 and 3 have nowhere to put those, so they yield {"url": u}
+    # and behave exactly as before.
+    sensors, sensors_source, records = None, None, None
     declared = manifest.get("sensors")
     if isinstance(declared, list) and declared:
         missing = [i for i, s in enumerate(declared)
@@ -248,6 +253,7 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
                 f"have no `url`. A record without one is a feed that will never "
                 f"be collected and nothing downstream would say so.")
         sensors = [s["url"] if isinstance(s, dict) else s for s in declared]
+        records = [dict(s) if isinstance(s, dict) else {"url": s} for s in declared]
         sensors_source = f"{pnd.name} (manifest.sensors)"
     if sensors is None:
         sensors = extract_sensors(text)
@@ -255,6 +261,18 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
     if sensors is None:
         sensors = load_sensors(sensors_path) if sensors_path.exists() else []
         sensors_source = str(sensors_path) if sensors else "(none found)"
+    if records is None:
+        records = [{"url": u} for u in (sensors or [])]
+
+    # A `kind` nobody implements is a setting that silently does nothing, which
+    # is the failure mode this apparatus is least able to notice. Refuse it here.
+    bad_kind = sorted({str(r.get("kind")) for r in records
+                       if r.get("kind") not in (None, "feed", "page")})
+    if bad_kind:
+        raise ValueError(
+            f"[{domain}] manifest.sensors declares kind {bad_kind}. "
+            f"Only `feed` (the default) and `page` exist. A page is re-read every "
+            f"run and deduplicated on its content; a feed is walked for items.")
 
     corpus_dir = base_dir / "corpus"
     result = {
@@ -266,6 +284,7 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
         "domain_dir": domain_dir,
         "base_dir": base_dir,
         "sensors": sensors,
+        "sensor_records": records,
         "sensors_source": sensors_source,
         "sensors_path": sensors_path,
         "corpus_dir": corpus_dir,
