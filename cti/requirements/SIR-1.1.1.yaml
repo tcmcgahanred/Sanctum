@@ -20,11 +20,126 @@ status: unsupported
 modified: '2026-09-24'
 fact: Breach notifications affecting Californians (org, date, type, records).
 decidable: machine
+logsource:
+  scope: regional
+  kind: breach_registry
 sensor:
   name: CA AG breach-registry scraper
   status: PENDING
+detection:
+  california:
+    keywords:
+    - california
+    - californian
+    - ' calif '
+    - sacramento
+    - fresno
+    - modesto
+    - stockton
+    - bakersfield
+    - cal oes
+    - cal-csic
+    - ccic
+    - caltrans
+    - 'csu '
+    - 'uc '
+    - calmatters
+    - alpine county
+    - amador county
+    - butte county
+    - calaveras county
+    - colusa county
+    - el dorado county
+    - fresno county
+    - glenn county
+    - inyo county
+    - kern county
+    - kings county
+    - lake county
+    - lassen county
+    - madera county
+    - mariposa county
+    - mendocino county
+    - merced county
+    - modoc county
+    - mono county
+    - nevada county
+    - placer county
+    - plumas county
+    - sacramento county
+    - san joaquin county
+    - shasta county
+    - sierra county
+    - stanislaus county
+    - sutter county
+    - tehama county
+    - trinity county
+    - tulare county
+    - tuolumne county
+    - yolo county
+    - yuba county
+    scope: blob
+  notification:
+    keywords:
+    - breach notification
+    - notice of data breach
+    - notice of a data breach
+    - notifying individuals
+    - notification letter
+    - sample notice
+    - attorney general
+    - records affected
+    - individuals affected
+    - personal information was
+    - consumers affected
+    scope: blob
+  cyber:
+    keywords:
+    - cyber
+    - hacks
+    - hacked
+    - hacker
+    - hacking
+    - hack
+    - ransomware
+    - malware
+    - phish
+    - data breach
+    - security breach
+    - breach notification
+    - personal information
+    - social security
+    - patient record
+    - customer record
+    - credit card
+    - credential
+    - password
+    - database
+    - unauthorized access
+    - exfiltrat
+    - encrypted the
+    - threat actor
+    - security incident
+    - vulnerabilit
+    - exploit
+    - cve-
+    - patch
+    - denial of service
+    - ddos
+    - it systems
+    - computer system
+    - network
+    - server
+    - stolen data
+    - data theft
+    - identity theft
+    - information technology
+    scope: blob
+  condition: california and notification and cyber
 note: 'The collector no longer blocks this. A sensor record may declare ''kind: page'', which
   is re-read every run and identified by its contents rather than its URL, so a portal that
   posts new notifications under one unchanging address is collected. The scraper that turns
   registry rows into per-victim records is still to build, and the record should declare a
-  ''title:'' or the scorer will floor it as untitled.'
+  ''title:'' or the scorer will floor it as untitled. WRITTEN for this requirement and NOT
+  yet measured against the corpus. Run tools/requirement_coverage.py on Ravenor to see what
+  it matches before trusting the count.'

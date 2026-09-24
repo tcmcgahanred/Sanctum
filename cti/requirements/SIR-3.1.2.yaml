@@ -20,6 +20,104 @@ status: stable
 modified: '2026-09-24'
 fact: Vendor PSIRT advisories confirming in-the-wild exploitation.
 decidable: machine
+logsource:
+  scope: national
+  kind: vendor_psirt
 sensor:
   name: vendor PSIRTs (Cisco, Palo Alto, Fortinet)
   status: ACTIVE
+detection:
+  exploited:
+    keywords:
+    - actively exploited
+    - exploited in the wild
+    - in-the-wild
+    - under active exploitation
+    - added to its known exploited
+    - added to the known exploited
+    - kev catalog
+    - cisa kev
+    - exploitation in the wild
+    - weaponized exploit
+    - public proof-of-concept
+    - proof-of-concept exploit
+    - exploit code is available
+    - being exploited
+    - active threat
+    - active exploitation
+    - ongoing exploitation
+    - observed exploitation
+    - actively targeting
+    scope: blob
+  product:
+    keywords:
+    - fortinet
+    - fortigate
+    - sonicwall
+    - mikrotik
+    - routeros
+    - openwrt
+    - sharepoint
+    - exchange server
+    - vpn
+    - rdp
+    - n-able
+    - n-central
+    - kaseya
+    - connectwise
+    - screenconnect
+    - wordpress
+    - plc
+    - programmable logic controller
+    - scada
+    - ics
+    - operational technology
+    - cisco
+    - netgear
+    - tp-link
+    - router
+    - firewall
+    scope: blob
+  listicle:
+    keywords:
+    - top 5
+    - top 7
+    - top 10
+    - top 12
+    - top 15
+    - top 20
+    - top 25
+    - biggest
+    - ranked
+    - you should know
+    - ultimate guide
+    - buyer's guide
+    - buyers guide
+    - roundup
+    - round-up
+    - best solutions
+    - best software
+    - best tools
+    - best vpn
+    - best antivirus
+    - best firewall
+    - best wireless
+    - best wi-fi
+    - best security
+    - cheat sheet
+    - what is
+    - how to
+    - 'explained:'
+    - a beginner's guide
+    - everything you need to know
+    scope: title
+  product_near_exploited:
+    proximity:
+      a: product
+      b: exploited
+      window: 200
+      scope: blob
+      all_occurrences: true
+  condition: product_near_exploited and not listicle
+note: WRITTEN for this requirement and NOT yet measured against the corpus. Run tools/requirement_coverage.py
+  on Ravenor to see what it matches before trusting the count.

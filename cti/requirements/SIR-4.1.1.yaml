@@ -20,6 +20,118 @@ status: stable
 modified: '2026-09-24'
 fact: National advisories or campaigns with an SLTT nexus.
 decidable: machine
+logsource:
+  scope: national
+  kind: official
 sensor:
   name: national feeds
   status: ACTIVE
+detection:
+  infrastructure:
+    keywords:
+    - critical infrastructure
+    - water utility
+    - water district
+    - water treatment
+    - wastewater
+    - drinking water
+    - power grid
+    - electric grid
+    - hospital
+    - healthcare
+    - public sector
+    - local government
+    - municipal
+    - school district
+    - public utility
+    scope: blob
+  advisory:
+    keywords:
+    - advisory
+    - alert
+    - bulletin
+    - joint advisory
+    - guidance
+    - urges organizations
+    - recommends that organizations
+    - issued an alert
+    - published an advisory
+    scope: blob
+  cyber:
+    keywords:
+    - cyber
+    - hacks
+    - hacked
+    - hacker
+    - hacking
+    - hack
+    - ransomware
+    - malware
+    - phish
+    - data breach
+    - security breach
+    - breach notification
+    - personal information
+    - social security
+    - patient record
+    - customer record
+    - credit card
+    - credential
+    - password
+    - database
+    - unauthorized access
+    - exfiltrat
+    - encrypted the
+    - threat actor
+    - security incident
+    - vulnerabilit
+    - exploit
+    - cve-
+    - patch
+    - denial of service
+    - ddos
+    - it systems
+    - computer system
+    - network
+    - server
+    - stolen data
+    - data theft
+    - identity theft
+    - information technology
+    scope: blob
+  listicle:
+    keywords:
+    - top 5
+    - top 7
+    - top 10
+    - top 12
+    - top 15
+    - top 20
+    - top 25
+    - biggest
+    - ranked
+    - you should know
+    - ultimate guide
+    - buyer's guide
+    - buyers guide
+    - roundup
+    - round-up
+    - best solutions
+    - best software
+    - best tools
+    - best vpn
+    - best antivirus
+    - best firewall
+    - best wireless
+    - best wi-fi
+    - best security
+    - cheat sheet
+    - what is
+    - how to
+    - 'explained:'
+    - a beginner's guide
+    - everything you need to know
+    scope: title
+  condition: cyber and infrastructure and advisory and not listicle
+note: WRITTEN for this requirement and NOT yet measured against the corpus. Run tools/requirement_coverage.py
+  on Ravenor to see what it matches before trusting the count.

@@ -20,11 +20,127 @@ status: stable
 modified: '2026-09-24'
 fact: Official California advisories naming an affected California entity.
 decidable: machine
+logsource:
+  scope: regional
+  kind: official
 sensor:
   name: Cal OES + CDT + MS-ISAC
   status: ACTIVE
   also: Cal-CSIC - PENDING
+detection:
+  california:
+    keywords:
+    - california
+    - californian
+    - ' calif '
+    - sacramento
+    - fresno
+    - modesto
+    - stockton
+    - bakersfield
+    - cal oes
+    - cal-csic
+    - ccic
+    - caltrans
+    - 'csu '
+    - 'uc '
+    - calmatters
+    - alpine county
+    - amador county
+    - butte county
+    - calaveras county
+    - colusa county
+    - el dorado county
+    - fresno county
+    - glenn county
+    - inyo county
+    - kern county
+    - kings county
+    - lake county
+    - lassen county
+    - madera county
+    - mariposa county
+    - mendocino county
+    - merced county
+    - modoc county
+    - mono county
+    - nevada county
+    - placer county
+    - plumas county
+    - sacramento county
+    - san joaquin county
+    - shasta county
+    - sierra county
+    - stanislaus county
+    - sutter county
+    - tehama county
+    - trinity county
+    - tulare county
+    - tuolumne county
+    - yolo county
+    - yuba county
+    scope: blob
+  incident:
+    keywords:
+    - breach
+    - ransomware
+    - cyberattack
+    - cyber attack
+    - hacked
+    - hackers
+    - hacker
+    - stolen data
+    - data theft
+    - blackmail
+    - defaced
+    - defacement
+    - data breach
+    - compromise
+    - exfiltrat
+    - extortion
+    - data leak
+    - data stolen
+    - records stolen
+    - security incident
+    - active threat
+    - outage
+    - denial of service
+    - ddos
+    - exploited against
+    - attacks against
+    - attack against
+    - campaign against
+    - targeted
+    - target of
+    - attack on
+    - attacks on
+    - hit by
+    - struck by
+    - victim of
+    - taken offline
+    - forced offline
+    - systems offline
+    - service disruption
+    - state of emergency
+    - disrupted operations
+    - shut down its
+    - knocked offline
+    scope: blob
+  advisory:
+    keywords:
+    - advisory
+    - alert
+    - bulletin
+    - joint advisory
+    - guidance
+    - urges organizations
+    - recommends that organizations
+    - issued an alert
+    - published an advisory
+    scope: blob
+  condition: california and incident and advisory
 note: 'Cal-CSIC remains unserved. It publishes, but as PDF or DOCX on an HTML index with no
   RSS. The collector blocker is gone: declare the index as ''kind: page'' and it is re-read
   every run. Reaching the advisories themselves still means parsing that index, or the documents
-  behind it.'
+  behind it. WRITTEN for this requirement and NOT yet measured against the corpus. Run tools/requirement_coverage.py
+  on Ravenor to see what it matches before trusting the count.'

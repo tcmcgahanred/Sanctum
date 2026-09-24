@@ -20,6 +20,12 @@ status: draft
 modified: '2026-09-24'
 fact: A named tool used.
 decidable: machine
+logsource:
+  scope: any
+  kind: any
 sensor:
   name: MITRE ATT&CK software library
   status: ABSENT
+note: 'No detection yet. The fact is a named tool, which is a set membership test against
+  the MITRE ATT&CK software list. A word list would be wrong here: the set has hundreds of
+  entries and changes on MITRE''s schedule, not ours.'

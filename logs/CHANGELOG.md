@@ -2,6 +2,21 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-09-24] The rules get their detection, and their strings
+
+**Corrective, same evening.** The previous entry moved the requirements into files and gave them a Sigma-shaped container, but not Sigma-shaped contents: **25 of 27 had no `detection:` block at all, none had a `logsource:`, and no rule contained a single literal search term.** A rule you cannot read is the thing the whole move was meant to fix, so this finishes it.
+
+- **Twelve rules gained a `detection:` block, taking the total from 2 to 14 of the 16 marked `decidable: machine`.** Every block carries its terms inline. Opening `cti/requirements/SIR-2.4.1.yaml` now shows the sixteen election terms, the forty-three incident terms, the cyber gate and the listicle exclusion, and a condition line reading `cyber and election_near_incident and not listicle`. Nothing points at a list defined somewhere else.
+- **Two of the twelve are COPIED, not written.** SIR-1.1.3 is the tier 1 scoring expression inlined term for term, and SIR-2.1.1 is tier 2. Both have been scoring the live corpus since August, so those two detectors are proven rather than proposed. One deliberate difference is recorded on SIR-1.1.3: its proximity block states `scope: blob` where tier 1 takes the default of `text`.
+- **The other ten are WRITTEN and NOT yet measured against the corpus**, and each one says so in its own `note:`. `tools/requirement_coverage.py` on Ravenor is what measures them. **This matters: a detector that has not met the corpus is a proposal, and the false positives it will produce are not yet in its `falsepositives:` list.**
+- **Sixteen rules gained a `logsource:`**, naming a source class rather than a list of feeds, the way Sigma names a product rather than a log file. The two axes, `scope` and `kind`, come from the nine group labels already sitting on `manifest.sensors`. **This is the half of the sensor-identifier problem that could be done without touching the file the collector reads every run.**
+- **Two machine-decidable rules deliberately have no detection: SIR-5.4.1 and SIR-5.4.2**, a named tool and a named malware family. Both are set-membership tests against the MITRE ATT&CK software list, which has hundreds of entries and changes on MITRE's schedule rather than ours. **A hand-written word list would be the wrong answer, and writing one to make the count look better would be worse than leaving the gap visible.** Each says so on its face.
+- **New term lists, written inline because each is used by exactly one rule:** breach-notification language, leak-site language, election vocabulary, country names and attribution language, and advisory language. Sixteen to seventeen terms each.
+- **Field order is now fixed across every rule**, so they all read the same way: what it is, how ready it is, what fact it answers, where that fact lives, how to find it, and what will match wrongly.
+- **Coverage moved from 2 testable requirements to 14.** Against a three-article synthetic corpus the tool reports 5 met, 9 testable but unmatched, 2 with no detector, 11 decided by a person. **The real number comes from Ravenor.**
+- **`cti/pnd.yaml` is untouched and byte-identical to `2f18b8d`.** Scoring behaviour cannot have changed, because nothing in the scoring block moved.
+- **Verified:** fourteen test files pass, `tools/vocab_check.py` reports 0 errors, `tests/domain_check.py` is clean. `tests/detect_test.py` gained checks that every detection parses and evaluates, that every rule with a detector also states a logsource, and that the two rules without one name the library they are waiting on.
+
 ## [2026-09-24] One requirement, one file
 
 **The requirements move out of `cti/pnd.yaml` into `cti/requirements/`, and the detection logic is rewritten in Sigma's shape.** No scoring behaviour changes: `manifest`, `scoring`, `vocab` and `production` are byte-identical after the move, and the assembled tree was compared field for field against the block it replaced, 27 requirements, identical in position and content.

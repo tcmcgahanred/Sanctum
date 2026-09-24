@@ -20,6 +20,11 @@ status: draft
 modified: '2026-09-24'
 fact: A named malware family.
 decidable: machine
+logsource:
+  scope: any
+  kind: any
 sensor:
   name: MITRE ATT&CK software library
   status: ABSENT
+note: 'No detection yet. Same as SIR-5.4.1: the malware families are the same ATT&CK software
+  list, and it should be pointed at rather than copied.'

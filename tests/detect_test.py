@@ -175,30 +175,58 @@ def main():
     sirs = [s for p in live["pirs"] for i in p["indicators"] for s in i["sirs"]]
     check("cti declares 27 requirements", len(sirs), 27)
     with_det = [s for s in sirs if s.get("detection") is not None]
-    check("...two of which carry a detector",
-          [s["id"] for s in with_det], ["SIR-5.1.1", "SIR-5.2.1"])
+    machine = [s for s in sirs if s.get("decidable") == "machine"]
+    check("...16 of which a machine can decide", len(machine), 16)
+    check("...14 of those carry a detection block", len(with_det), 14)
+    check("...and the two without both say why in a note",
+          sorted(s["id"] for s in machine if s.get("detection") is None),
+          ["SIR-5.4.1", "SIR-5.4.2"])
+    check("...each of which names the library it is waiting on",
+          all("ATT&CK software" in (s.get("note") or "")
+              for s in machine if s.get("detection") is None), True)
+    check("every machine rule with a detector also states a logsource",
+          all(s.get("logsource") for s in with_det), True)
     check("...each loaded from its own file in cti/requirements/",
           sorted(s["id"] for s in sirs)[:3],
           ["SIR-1.1.1", "SIR-1.1.2", "SIR-1.1.3"])
     check("...and every rule carries a status",
           sorted({s.get("status") for s in sirs}),
           ["analyst", "draft", "stable", "unsupported"])
-    probe = art("Volt Typhoon used T1059.003", "tracked as G0016 by MITRE")
-    matcher = make_matcher([])
+    # Every detection must PARSE and EVALUATE. Whether it matches this one
+    # probe is not the test; that is what the corpus is for.
+    probe = art("California county election office hit by ransomware",
+                "The registrar of voters confirmed a cyberattack. CVE-2026-1234 "
+                "is actively exploited in FortiGate. T1190 was used. Attributed "
+                "to Russia, a state-sponsored group.")
+    matcher = make_matcher(cfg["scoring"].get("word_boundary_terms"))
     _t, pscopes, ptext = _scopes(probe)
+    bad = []
     for s in with_det:
-        check(f"{s['id']} evaluates without raising",
-              eval_detection(s["detection"], cfg["scoring"]["groups"],
-                             matcher, pscopes, ptext), True)
+        try:
+            eval_detection(s["detection"], cfg["scoring"]["groups"],
+                           matcher, pscopes, ptext)
+        except Exception as e:
+            bad.append(f"{s['id']}: {e}")
+    check("every detection parses and evaluates", bad, [])
+    check("the technique-identifier rule matches a probe that carries one",
+          eval_detection(
+              [s for s in with_det if s["id"] == "SIR-5.1.1"][0]["detection"],
+              cfg["scoring"]["groups"], matcher, pscopes, ptext), True)
     live_det = detectable_requirements(live, cfg["scoring"])
     cov5 = requirement_coverage(probe, live, cfg["scoring"], detectable=live_det)
-    check("the probe answers both live detectors",
-          [x for x in cov5["sirs_met"] if x.startswith("SIR-5")],
-          ["SIR-5.1.1", "SIR-5.2.1"])
-    check("an article with no identifiers answers neither",
-          [x for x in requirement_coverage(
-              art("Top 10 predictions", "nothing here"), live, cfg["scoring"],
-              detectable=live_det)["sirs_met"] if x.startswith("SIR-5")], [])
+    check("the probe answers the technique-identifier requirement",
+          "SIR-5.1.1" in cov5["sirs_met"], True)
+    check("...and the country-of-origin one, which it also carries",
+          "SIR-5.2.2" in cov5["sirs_met"], True)
+    check("...but not the group-identifier one, which needs a G number",
+          "SIR-5.2.1" in cov5["sirs_met"], False)
+    # A listicle with no identifiers and no incident language answers nothing
+    # under PIR-5, which is the exclusion every rule there carries.
+    quiet = requirement_coverage(
+        art("Top 10 predictions", "nothing here"), live, cfg["scoring"],
+        detectable=live_det)
+    check("a listicle with nothing in it answers nothing under PIR-5",
+          [x for x in quiet["sirs_met"] if x.startswith("SIR-5")], [])
 
     print()
     if FAILURES:

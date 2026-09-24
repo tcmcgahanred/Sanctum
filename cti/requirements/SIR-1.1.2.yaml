@@ -20,6 +20,90 @@ status: unsupported
 modified: '2026-09-24'
 fact: Extortion or leak-site posts naming California victims.
 decidable: machine
+logsource:
+  scope: national
+  kind: leak_site
 sensor:
   name: ransomware leak-site aggregator, CA-filtered
   status: PENDING
+detection:
+  california:
+    keywords:
+    - california
+    - californian
+    - ' calif '
+    - sacramento
+    - fresno
+    - modesto
+    - stockton
+    - bakersfield
+    - cal oes
+    - cal-csic
+    - ccic
+    - caltrans
+    - 'csu '
+    - 'uc '
+    - calmatters
+    - alpine county
+    - amador county
+    - butte county
+    - calaveras county
+    - colusa county
+    - el dorado county
+    - fresno county
+    - glenn county
+    - inyo county
+    - kern county
+    - kings county
+    - lake county
+    - lassen county
+    - madera county
+    - mariposa county
+    - mendocino county
+    - merced county
+    - modoc county
+    - mono county
+    - nevada county
+    - placer county
+    - plumas county
+    - sacramento county
+    - san joaquin county
+    - shasta county
+    - sierra county
+    - stanislaus county
+    - sutter county
+    - tehama county
+    - trinity county
+    - tulare county
+    - tuolumne county
+    - yolo county
+    - yuba county
+    scope: blob
+  leak_site:
+    keywords:
+    - leak site
+    - leak-site
+    - data leak site
+    - extortion site
+    - victim list
+    - listed the
+    - posted the victim
+    - named the victim
+    - claimed responsibility
+    - ransom note
+    - double extortion
+    - publish the stolen
+    - threatened to publish
+    scope: blob
+  ransom:
+    keywords:
+    - ransomware
+    - ransom
+    - extortion
+    - encrypt
+    - leak site
+    - double extortion
+    scope: blob
+  condition: california and (leak_site or ransom)
+note: WRITTEN for this requirement and NOT yet measured against the corpus. Run tools/requirement_coverage.py
+  on Ravenor to see what it matches before trusting the count.

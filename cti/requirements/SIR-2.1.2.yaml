@@ -20,7 +20,111 @@ status: stable
 modified: '2026-09-24'
 fact: Sector ISAC or agency advisories (WaterISAC, MS-ISAC, CISA sector alerts).
 decidable: machine
+logsource:
+  scope: national
+  kind: official
 sensor:
   name: MS-ISAC + CISA (4 feeds)
   status: ACTIVE
   also: WaterISAC - PENDING
+detection:
+  sector:
+    keywords:
+    - water utility
+    - water utilities
+    - water district
+    - water authority
+    - water sector
+    - utility sector
+    - public works
+    - transit authority
+    - school system
+    - public schools
+    - water treatment
+    - water system
+    - drinking water
+    - wastewater
+    - utility district
+    - public utility
+    - electric utility
+    - school district
+    - k-12
+    - k12
+    - higher ed
+    - community college
+    - university
+    - municipal
+    - city government
+    - county government
+    - local government
+    - tribal government
+    - tribal nation
+    - public sector
+    - election office
+    - election systems
+    - registrar of voters
+    - transit agency
+    - special district
+    - sheriff's office
+    - sheriff's department
+    - police department
+    - superior court
+    - county court
+    scope: blob
+  advisory:
+    keywords:
+    - advisory
+    - alert
+    - bulletin
+    - joint advisory
+    - guidance
+    - urges organizations
+    - recommends that organizations
+    - issued an alert
+    - published an advisory
+    scope: blob
+  cyber:
+    keywords:
+    - cyber
+    - hacks
+    - hacked
+    - hacker
+    - hacking
+    - hack
+    - ransomware
+    - malware
+    - phish
+    - data breach
+    - security breach
+    - breach notification
+    - personal information
+    - social security
+    - patient record
+    - customer record
+    - credit card
+    - credential
+    - password
+    - database
+    - unauthorized access
+    - exfiltrat
+    - encrypted the
+    - threat actor
+    - security incident
+    - vulnerabilit
+    - exploit
+    - cve-
+    - patch
+    - denial of service
+    - ddos
+    - it systems
+    - computer system
+    - network
+    - server
+    - stolen data
+    - data theft
+    - identity theft
+    - information technology
+    scope: blob
+  condition: sector and advisory and cyber
+note: WRITTEN for this requirement and NOT yet measured against the corpus. Run tools/requirement_coverage.py
+  on Ravenor to see what it matches before trusting the count.

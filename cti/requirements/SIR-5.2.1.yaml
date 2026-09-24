@@ -20,6 +20,9 @@ status: draft
 modified: '2026-09-24'
 fact: A MITRE ATT&CK group identifier, or a vendor group name.
 decidable: machine
+logsource:
+  scope: any
+  kind: any
 sensor:
   name: MITRE ATT&CK group library
   status: ABSENT

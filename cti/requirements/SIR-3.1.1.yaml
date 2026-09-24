@@ -20,9 +20,48 @@ status: unsupported
 modified: '2026-09-24'
 fact: CISA KEV additions (CVE, date, exploitation status, ransomware-use flag).
 decidable: machine
+logsource:
+  scope: national
+  kind: exploitation_evidence
 sensor:
   name: dedicated KEV feed
   status: ABSENT
+detection:
+  cve:
+    pattern: \bCVE-\d{4}-\d{4,7}\b
+    scope: blob
+  exploited:
+    keywords:
+    - actively exploited
+    - exploited in the wild
+    - in-the-wild
+    - under active exploitation
+    - added to its known exploited
+    - added to the known exploited
+    - kev catalog
+    - cisa kev
+    - exploitation in the wild
+    - weaponized exploit
+    - public proof-of-concept
+    - proof-of-concept exploit
+    - exploit code is available
+    - being exploited
+    - active threat
+    - active exploitation
+    - ongoing exploitation
+    - observed exploitation
+    - actively targeting
+    scope: blob
+  cve_near_exploited:
+    proximity:
+      a: cve
+      b: exploited
+      window: 200
+      scope: blob
+      all_occurrences: true
+  condition: cve and exploited
 note: 'No dedicated KEV sensor. KEV additions reach the corpus only when an advisory or aggregator
   mentions them, which is the single-aggregator dependence the ICD 203 review flagged. Cheap
-  to close: manifest.reference_lists.kev is already fetched and cached.'
+  to close: manifest.reference_lists.kev is already fetched and cached. WRITTEN for this requirement
+  and NOT yet measured against the corpus. Run tools/requirement_coverage.py on Ravenor to
+  see what it matches before trusting the count.'

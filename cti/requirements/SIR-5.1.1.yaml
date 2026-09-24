@@ -20,12 +20,15 @@ status: draft
 modified: '2026-09-24'
 fact: A MITRE ATT&CK technique identifier in the reporting.
 decidable: machine
+logsource:
+  scope: any
+  kind: any
 sensor:
   name: MITRE ATT&CK technique library
   status: ABSENT
-note: An identifier library, not a word list. Set membership, nothing to tune.
 detection:
   technique_code:
     pattern: \bT\d{4}(\.\d{3})?\b
     scope: blob
   condition: technique_code
+note: An identifier library, not a word list. Set membership, nothing to tune.

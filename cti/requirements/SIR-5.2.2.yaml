@@ -20,8 +20,95 @@ status: draft
 modified: '2026-09-24'
 fact: A stated country of origin.
 decidable: machine
-note: Ambiguous alone. A country name needs the cyber gate and attribution language in proximity,
-  or it fires on trade reporting.
+logsource:
+  scope: any
+  kind: any
+detection:
+  country:
+    keywords:
+    - china
+    - chinese
+    - russia
+    - russian
+    - iran
+    - iranian
+    - north korea
+    - north korean
+    - dprk
+    - belarus
+    - belarusian
+    scope: blob
+  attribution:
+    keywords:
+    - state-sponsored
+    - state sponsored
+    - nation-state
+    - nation state
+    - attributed to
+    - attribution to
+    - linked to
+    - tied to
+    - backed hackers
+    - backed group
+    - backed actors
+    - government hackers
+    - intelligence service
+    - apt
+    scope: blob
+  cyber:
+    keywords:
+    - cyber
+    - hacks
+    - hacked
+    - hacker
+    - hacking
+    - hack
+    - ransomware
+    - malware
+    - phish
+    - data breach
+    - security breach
+    - breach notification
+    - personal information
+    - social security
+    - patient record
+    - customer record
+    - credit card
+    - credential
+    - password
+    - database
+    - unauthorized access
+    - exfiltrat
+    - encrypted the
+    - threat actor
+    - security incident
+    - vulnerabilit
+    - exploit
+    - cve-
+    - patch
+    - denial of service
+    - ddos
+    - it systems
+    - computer system
+    - network
+    - server
+    - stolen data
+    - data theft
+    - identity theft
+    - information technology
+    scope: blob
+  country_near_attribution:
+    proximity:
+      a: country
+      b: attribution
+      window: 100
+      scope: blob
+      all_occurrences: true
+  condition: cyber and country_near_attribution
 falsepositives:
 - A country name in trade or geopolitical reporting with no attribution language nearby. This
   is why the term cannot stand alone.
+note: Ambiguous alone. A country name needs the cyber gate and attribution language in proximity,
+  or it fires on trade reporting. WRITTEN for this requirement and NOT yet measured against
+  the corpus. Run tools/requirement_coverage.py on Ravenor to see what it matches before trusting
+  the count.
