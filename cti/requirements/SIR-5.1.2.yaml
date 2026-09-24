@@ -5,18 +5,28 @@
 #  starting from a skeleton; the one you copy is live and tested.
 #
 #  status   stable      finished, and something collects for it
-#           unsupported finished, but no sensor reaches it yet
+#           unsupported finished, but its `logsource:` matches no sensor in
+#                       the manifest, so nothing can ever reach it
 #           draft       the wording is proposed, not settled
-#           analyst     no expression will ever answer it, and it is therefore
-#                       NOT a collection gap
+#           blocked     a machine could decide it, but the input it needs does
+#                       not exist yet. `blocked_by:` names that input.
 #
-#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  When more than one fits, the precedence is blocked, then unsupported, then
+#  draft, then stable.
+#
+#  EVERY requirement is machine decidable. There is no value that parks one
+#  permanently. A requirement with no `detection:` block is either a detector
+#  nobody has written or a named missing input, and both are meant to be
+#  worked off rather than excused.
+#
 #  `falsepositives:` records what WILL match and should not. Write it here,
 #  beside the rule, not in a changelog nobody reads beside the rule.
 # ------------------------------------------------------------------------------
 id: SIR-5.1.2
 title: A tactic, technique or procedure described in prose
-status: analyst
+status: blocked
+blocked_by: The MITRE ATT&CK technique NAME list. SIR-5.1.1 already matches the technique
+  identifier by pattern; prose names the technique instead, and that is a set-membership test
+  against the same library.
 modified: '2026-09-24'
 fact: A named tactic, technique or procedure described in prose.
-decidable: analyst

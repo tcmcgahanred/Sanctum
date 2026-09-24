@@ -5,12 +5,20 @@
 #  starting from a skeleton; the one you copy is live and tested.
 #
 #  status   stable      finished, and something collects for it
-#           unsupported finished, but no sensor reaches it yet
+#           unsupported finished, but its `logsource:` matches no sensor in
+#                       the manifest, so nothing can ever reach it
 #           draft       the wording is proposed, not settled
-#           analyst     no expression will ever answer it, and it is therefore
-#                       NOT a collection gap
+#           blocked     a machine could decide it, but the input it needs does
+#                       not exist yet. `blocked_by:` names that input.
 #
-#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  When more than one fits, the precedence is blocked, then unsupported, then
+#  draft, then stable.
+#
+#  EVERY requirement is machine decidable. There is no value that parks one
+#  permanently. A requirement with no `detection:` block is either a detector
+#  nobody has written or a named missing input, and both are meant to be
+#  worked off rather than excused.
+#
 #  `falsepositives:` records what WILL match and should not. Write it here,
 #  beside the rule, not in a changelog nobody reads beside the rule.
 # ------------------------------------------------------------------------------
@@ -19,7 +27,6 @@ title: A vendor advisory confirming exploitation in the wild
 status: stable
 modified: '2026-09-24'
 fact: Vendor PSIRT advisories confirming in-the-wild exploitation.
-decidable: machine
 logsource:
   scope: national
   kind: vendor_psirt

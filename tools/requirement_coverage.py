@@ -24,15 +24,18 @@ WHAT IT REPORTS
       MET n       n articles satisfied it
       NONE        it can be tested and nothing matched. A real gap in the
                   reporting, or a detector that is too narrow.
-      no detector nothing can test it. No `detect:` block on the requirement
-                  and no scoring rule names it in `serves_sir:`. This is a
-                  BUILD gap, not a quiet week, and the two must not be added
-                  together.
-      analyst     `decidable: analyst`. No vocabulary will ever answer it and
-                  it is not a collection gap. Reported, never counted as a
-                  miss.
+      no source   it has a detector, but its `logsource:` matches NO sensor in
+                  the manifest, so nothing it could read is ever collected.
+                  This reads identically to NONE and means the opposite: not a
+                  quiet month, an impossible one. Four rules were in this
+                  state the morning the logsource filter shipped.
+      no detector nothing can test it. No `detection:` block on the
+                  requirement and no scoring rule names it in `serves_sir:`.
+                  This is a BUILD gap, not a quiet week, and the two must not
+                  be added together. A rule with `status: blocked` lands here
+                  and says in `blocked_by:` what it is waiting for.
 
-  Per indicator, the state across the window: satisfied, needs_analyst,
+  Per indicator, the state across the window: satisfied, needs_detector,
   unsatisfied, or no_detector. `satisfied_by: all` means every requirement
   under it must be met; `any` means one is enough.
 
@@ -48,8 +51,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core.pnd import load_domain                                    # noqa: E402
-from core.rules import (detectable_requirements, requirement_coverage,  # noqa: E402
-                        satisfied_elements, score_article)
+from core.rules import (detectable_requirements, logsource_match,  # noqa: E402
+                        requirement_coverage, satisfied_elements,
+                        score_article)
 
 
 def load(corpus_dir, days):
@@ -129,12 +133,12 @@ def main():
             if args.sir and sid == args.sir:
                 examples.setdefault(sid, []).append(art.get("title", "(untitled)"))
         for iid, state in cov["indicators"].items():
-            rank = {"satisfied": 3, "needs_analyst": 2,
+            rank = {"satisfied": 3, "needs_detector": 2,
                     "unsatisfied": 1, "no_detector": 0}
             if rank[state] > rank.get(ind_states.get(iid, "no_detector"), 0):
                 ind_states[iid] = state
 
-    counts = {"MET": 0, "NONE": 0, "no detector": 0, "analyst": 0}
+    counts = {"MET": 0, "NONE": 0, "no source": 0, "no detector": 0}
     for pir in req["pirs"]:
         head = f"{pir['id']}  {pir.get('name', '')}"
         if pir.get("status") == "DRAFT":
@@ -146,10 +150,17 @@ def main():
             print(f"        {ind.get('statement', '')}")
             for sir in ind.get("sirs", []) or []:
                 sid = sir["id"]
-                if sir.get("decidable") == "analyst":
-                    verdict, key = "analyst", "analyst"
-                elif sid not in detectable:
+                # A REQUIREMENT NOTHING COLLECTS FOR IS NOT A QUIET MONTH.
+                # Counting the sensors a logsource matches is what separates
+                # the two, and it is one line because both sides declare the
+                # same two axes.
+                nsens = (sum(1 for v in (classes or {}).values()
+                             if logsource_match(sir.get("logsource"), v))
+                         if sir.get("logsource") else len(classes or {}))
+                if sid not in detectable:
                     verdict, key = "no detector", "no detector"
+                elif not nsens:
+                    verdict, key = "no source", "no source"
                 elif met.get(sid):
                     verdict, key = f"MET {met[sid]}", "MET"
                 else:
@@ -166,8 +177,8 @@ def main():
 
     total = sum(counts.values())
     print(f"{total} requirement(s): {counts['MET']} met, {counts['NONE']} "
-          f"testable but unmatched, {counts['no detector']} with no detector, "
-          f"{counts['analyst']} decided by a person")
+          f"testable but unmatched, {counts['no source']} with no source, "
+          f"{counts['no detector']} with no detector")
 
     if args.sir:
         titles = examples.get(args.sir, [])

@@ -28,7 +28,8 @@ WHAT IS CHECKED
   rule claim         still works, and the two paths are a union
   satisfied_by       `all` needs every component, `any` needs one
   no detector        an indicator nothing can test is NOT reported as a miss
-  analyst            an analyst requirement is never counted as a gap
+  needs_detector     an `all` indicator with one detector written and one not
+                     is neither satisfied nor a miss
   live domain        cti still loads and its detectors compile
 
     tests/detect_test.py           # exit 0 = a requirement can detect itself
@@ -106,16 +107,15 @@ def main():
     print("\nA detector satisfies its requirement, and changes no score")
     req = {"pirs": [{"id": "PIR-9", "name": "t", "question": "q", "indicators": [
         {"id": "IND-9.1", "statement": "s", "satisfied_by": "any", "sirs": [
-            {"id": "SIR-9.1.1", "fact": "a technique code", "decidable": "machine",
-             "detect": TCODE}]},
+            {"id": "SIR-9.1.1", "fact": "a technique code", "detect": TCODE}]},
         {"id": "IND-9.2", "statement": "s", "satisfied_by": "all", "sirs": [
-            {"id": "SIR-9.2.1", "fact": "a", "decidable": "machine", "detect": TCODE},
-            {"id": "SIR-9.2.2", "fact": "b", "decidable": "machine",
+            {"id": "SIR-9.2.1", "fact": "a", "detect": TCODE},
+            {"id": "SIR-9.2.2", "fact": "b",
              "detect": {"pattern": r"\bG\d{4}\b"}}]},
         {"id": "IND-9.3", "statement": "s", "satisfied_by": "any", "sirs": [
-            {"id": "SIR-9.3.1", "fact": "c", "decidable": "machine"}]},
+            {"id": "SIR-9.3.1", "fact": "c"}]},
         {"id": "IND-9.4", "statement": "s", "satisfied_by": "any", "sirs": [
-            {"id": "SIR-9.4.1", "fact": "d", "decidable": "analyst"}]},
+            {"id": "SIR-9.4.1", "fact": "d"}]},
     ]}]}
     scoring = {"groups": {}, "tiers": [{"id": 1, "weight": 1.0, "require": "always"}],
                "multipliers": [], "floors": [], "force_surface": []}
@@ -132,7 +132,7 @@ def main():
           cov["indicators"]["IND-9.2"], "satisfied")
     check("an indicator nothing can test is NOT a miss",
           cov["indicators"]["IND-9.3"], "no_detector")
-    check("...nor is one only a person can decide",
+    check("...nor is one whose detector nobody has written",
           cov["indicators"]["IND-9.4"], "no_detector")
     check("the score is untouched by any of it",
           score_article(a1, scoring)[0], score_article(art("plain", "plain"), scoring)[0])
@@ -159,15 +159,18 @@ def main():
     check("the detector path is unaffected and found nothing",
           cov3["indicators"]["IND-9.1"], "unsatisfied")
 
-    print("\nAn `all` indicator still needing a person says so")
+    print("\nAn `all` indicator half built says so, and is not a miss")
     req2 = {"pirs": [{"id": "PIR-8", "name": "t", "question": "q", "indicators": [
         {"id": "IND-8.1", "statement": "s", "satisfied_by": "all", "sirs": [
-            {"id": "SIR-8.1.1", "fact": "a", "decidable": "machine", "detect": TCODE},
-            {"id": "SIR-8.1.2", "fact": "b", "decidable": "analyst"}]}]}]}
+            {"id": "SIR-8.1.1", "fact": "a", "detect": TCODE},
+            {"id": "SIR-8.1.2", "fact": "b"}]}]}]}
     det3 = detectable_requirements(req2, scoring)
     cov4 = requirement_coverage(art("T1059 seen"), req2, scoring, detectable=det3)
-    check("the machine half passed, the person half has not",
-          cov4["indicators"]["IND-8.1"], "needs_analyst")
+    check("the written half passed, the unwritten half is named as unwritten",
+          cov4["indicators"]["IND-8.1"], "needs_detector")
+    cov4b = requirement_coverage(art("nothing here"), req2, scoring, detectable=det3)
+    check("...and when the written half fails it is an ordinary miss",
+          cov4b["indicators"]["IND-8.1"], "unsatisfied")
 
     print("\nThe live domain still loads and its detectors compile")
     cfg = load_domain(domain="cti")
@@ -175,23 +178,24 @@ def main():
     sirs = [s for p in live["pirs"] for i in p["indicators"] for s in i["sirs"]]
     check("cti declares 27 requirements", len(sirs), 27)
     with_det = [s for s in sirs if s.get("detection") is not None]
-    machine = [s for s in sirs if s.get("decidable") == "machine"]
-    check("...16 of which a machine can decide", len(machine), 16)
-    check("...14 of those carry a detection block", len(with_det), 14)
-    check("...and the two without both say why in a note",
-          sorted(s["id"] for s in machine if s.get("detection") is None),
-          ["SIR-5.4.1", "SIR-5.4.2"])
-    check("...each of which names the library it is waiting on",
-          all("ATT&CK software" in (s.get("note") or "")
-              for s in machine if s.get("detection") is None), True)
-    check("every machine rule with a detector also states a logsource",
+    blocked = [s for s in sirs if s.get("status") == "blocked"]
+    check("...14 of which carry a detection block", len(with_det), 14)
+    check("...none is parked as undecidable any more",
+          [s["id"] for s in sirs if "decidable" in s], [])
+    check("...9 are blocked on an input that does not exist yet",
+          len(blocked), 9)
+    check("...every one of those names the input it is waiting for",
+          all(str(s.get("blocked_by") or "").strip() for s in blocked), True)
+    check("...and none of them pretends to have a detector",
+          [s["id"] for s in blocked if s.get("detection") is not None], [])
+    check("every rule with a detector also states a logsource",
           all(s.get("logsource") for s in with_det), True)
     check("...each loaded from its own file in cti/requirements/",
           sorted(s["id"] for s in sirs)[:3],
           ["SIR-1.1.1", "SIR-1.1.2", "SIR-1.1.3"])
-    check("...and every rule carries a status",
+    check("...and every rule carries a readiness value from the four",
           sorted({s.get("status") for s in sirs}),
-          ["analyst", "draft", "stable", "unsupported"])
+          ["blocked", "draft", "stable", "unsupported"])
     # Every detection must PARSE and EVALUATE. Whether it matches this one
     # probe is not the test; that is what the corpus is for.
     probe = art("California county election office hit by ransomware",

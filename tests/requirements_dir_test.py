@@ -31,6 +31,8 @@ WHAT IS CHECKED
   orphan          a file nobody lists is refused, naming it
   filename        a rule whose id does not match its filename is refused
   no tree         a directory with no _tree.yaml is refused
+  bad status      a readiness value outside the four is refused
+  blocked         `status: blocked` with no `blocked_by:` is refused
   dead block      a detection block nothing references is refused
   proximity       an operand of a proximity block counts as a reference
   condition       named blocks plus a condition line, with and / or / not
@@ -102,10 +104,9 @@ detection:
 RULE_B = """\
 id: SIR-9.1.2
 title: second
-status: analyst
+status: draft
 fact: the second fact
-decidable: analyst
-standard: a person decides this
+standard: nobody has written this detector yet
 """
 
 
@@ -141,7 +142,7 @@ def main():
         check("the rules are assembled under `sirs`, the old name",
               [s["id"] for s in ind["sirs"]], ["SIR-9.1.1", "SIR-9.1.2"])
         check("...with their whole contents, not just identifiers",
-              ind["sirs"][1]["standard"], "a person decides this")
+              ind["sirs"][1]["standard"], "nobody has written this detector yet")
         check("...and `requirements:` is consumed, not left beside `sirs`",
               "requirements" in ind, False)
 
@@ -177,6 +178,28 @@ def main():
         d6 = build(tmp / "notree", tree=None)
         refuses("a directory with no _tree.yaml is refused",
                 lambda: load_requirements(d6, None), "_tree.yaml")
+
+        print("\nA readiness value must be one of the four, and `blocked` says by what")
+        d7 = build(tmp / "badstatus", rules=(
+            ("SIR-9.1.1", RULE_A.replace("status: stable", "status: analyst")),
+            ("SIR-9.1.2", RULE_B)))
+        refuses("a status outside the four is refused, naming it",
+                lambda: load_requirements(d7, None), "analyst")
+
+        d8 = build(tmp / "blocked", rules=(
+            ("SIR-9.1.1", RULE_A.replace("status: stable", "status: blocked")),
+            ("SIR-9.1.2", RULE_B)))
+        refuses("`blocked` with no `blocked_by:` is refused",
+                lambda: load_requirements(d8, None), "blocked_by")
+
+        d9 = build(tmp / "blockedok", rules=(
+            ("SIR-9.1.1", RULE_A.replace(
+                "status: stable",
+                "status: blocked\nblocked_by: the ATT&CK software list")),
+            ("SIR-9.1.2", RULE_B)))
+        check("...and accepted when it does",
+              load_requirements(d9, None)["pirs"][0]["indicators"][0]
+              ["sirs"][0]["blocked_by"], "the ATT&CK software list")
 
         # THE MIRROR OF A FILE NOBODY LISTS, and the worse of the two, because
         # the rule looks finished. SIR-3.1.1 shipped with a proximity block its
@@ -251,9 +274,14 @@ def main():
               sorted(p.stem for p in (ROOT / "cti" / "requirements").glob("*.yaml")
                      if p.stem != "_tree"),
               sorted(s["id"] for s in sirs))
-        check("...and every one carries a status",
+        check("...and every one carries a readiness value from the four",
               sorted({s.get("status") for s in sirs}),
-              ["analyst", "draft", "stable", "unsupported"])
+              ["blocked", "draft", "stable", "unsupported"])
+        check("...none of which is the retired `decidable:`",
+              [s["id"] for s in sirs if "decidable" in s], [])
+        check("...and every blocked rule names its missing input",
+              [s["id"] for s in sirs if s.get("status") == "blocked"
+               and not str(s.get("blocked_by") or "").strip()], [])
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

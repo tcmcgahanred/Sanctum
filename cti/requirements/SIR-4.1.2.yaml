@@ -5,21 +5,33 @@
 #  starting from a skeleton; the one you copy is live and tested.
 #
 #  status   stable      finished, and something collects for it
-#           unsupported finished, but no sensor reaches it yet
+#           unsupported finished, but its `logsource:` matches no sensor in
+#                       the manifest, so nothing can ever reach it
 #           draft       the wording is proposed, not settled
-#           analyst     no expression will ever answer it, and it is therefore
-#                       NOT a collection gap
+#           blocked     a machine could decide it, but the input it needs does
+#                       not exist yet. `blocked_by:` names that input.
 #
-#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  When more than one fits, the precedence is blocked, then unsupported, then
+#  draft, then stable.
+#
+#  EVERY requirement is machine decidable. There is no value that parks one
+#  permanently. A requirement with no `detection:` block is either a detector
+#  nobody has written or a named missing input, and both are meant to be
+#  worked off rather than excused.
+#
 #  `falsepositives:` records what WILL match and should not. Write it here,
 #  beside the rule, not in a changelog nobody reads beside the rule.
 # ------------------------------------------------------------------------------
 id: SIR-4.1.2
 title: Audience-portfolio relevance
-status: analyst
+status: blocked
+blocked_by: 'The audience technology profile: a declared list of the products, providers and
+  technologies California SLTT organizations actually run. This fact is not in the reporting
+  and no word list will ever find it, because it is a property of the audience rather than
+  of the article. Declared once, this requirement becomes a set-membership test against that
+  list. Only the audience can write it.'
 modified: '2026-09-24'
 fact: 'Audience-portfolio relevance: does it reach the SLTT audience, or is it developer-only,
   defense-industrial-only, or vendor opinion?'
-decidable: analyst
 standard: Audience filter. Developer-targeted items such as npm poisoning and defense-industrial-base
   items such as CMMC are out of portfolio unless they reach SLTT through a vendor.

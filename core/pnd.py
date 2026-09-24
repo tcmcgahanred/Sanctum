@@ -321,6 +321,11 @@ def sensor_classes(records):
     return out
 
 
+# The four readiness values a rule may carry. `blocked` is the only one that
+# says a rule cannot be built, and it has to name the input it is waiting for.
+RULE_STATUS = {"stable", "unsupported", "draft", "blocked"}
+
+
 def load_requirements(domain_dir, inline):
     """
     Assemble the requirements tree from `<domain>/requirements/`, or fall back
@@ -343,6 +348,11 @@ def load_requirements(domain_dir, inline):
     A LISTED RULE WITH NO FILE, AND A FILE NOBODY LISTS, ARE BOTH REFUSED. A
     rule nothing runs and a listing with no rule look exactly like a working
     tree from the outside.
+
+    A STATUS OUTSIDE THE FOUR IS REFUSED, AND `blocked` MUST SAY WHAT BY.
+    There is no value that parks a requirement permanently any more. Either
+    something can test it, or a detector is unwritten, or a named input does
+    not exist yet - and the third one has to name the input.
 
     Fallback, never a flag day: a domain with no directory keeps its inline
     block and behaves exactly as before. The second domain has never been
@@ -378,6 +388,21 @@ def load_requirements(domain_dir, inline):
         if rid != f.stem:
             raise ValueError(f"{f} declares id {rid!r} but is named {f.stem!r}. "
                              f"The filename is how a rule is found.")
+        # A READINESS VALUE NOBODY READS IS A REQUIREMENT NOBODY WORKS OFF.
+        # `decidable: analyst` used to park a requirement permanently, and
+        # measured against all eleven that carried it, not one was actually
+        # unanswerable. `status:` carries the readiness now, and `blocked`
+        # must name what it is waiting for or it is the old excuse wearing a
+        # new word.
+        st = rule.get("status")
+        if st not in RULE_STATUS:
+            raise ValueError(
+                f"{f} declares status {st!r}. It must be one of "
+                f"{sorted(RULE_STATUS)}.")
+        if st == "blocked" and not str(rule.get("blocked_by") or "").strip():
+            raise ValueError(
+                f"{f} is `status: blocked` but names no `blocked_by:`. A rule "
+                f"that cannot be built states what it is waiting for.")
         rules[rid] = rule
 
     for pir in tree.get("pirs", []) or []:

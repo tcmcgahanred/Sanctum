@@ -5,20 +5,31 @@
 #  starting from a skeleton; the one you copy is live and tested.
 #
 #  status   stable      finished, and something collects for it
-#           unsupported finished, but no sensor reaches it yet
+#           unsupported finished, but its `logsource:` matches no sensor in
+#                       the manifest, so nothing can ever reach it
 #           draft       the wording is proposed, not settled
-#           analyst     no expression will ever answer it, and it is therefore
-#                       NOT a collection gap
+#           blocked     a machine could decide it, but the input it needs does
+#                       not exist yet. `blocked_by:` names that input.
 #
-#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  When more than one fits, the precedence is blocked, then unsupported, then
+#  draft, then stable.
+#
+#  EVERY requirement is machine decidable. There is no value that parks one
+#  permanently. A requirement with no `detection:` block is either a detector
+#  nobody has written or a named missing input, and both are meant to be
+#  worked off rather than excused.
+#
 #  `falsepositives:` records what WILL match and should not. Write it here,
 #  beside the rule, not in a changelog nobody reads beside the rule.
 # ------------------------------------------------------------------------------
 id: SIR-3.3.1
 title: Patch availability and remediation deadline
-status: analyst
+status: blocked
+blocked_by: The remediation deadline from the CISA Known Exploited Vulnerabilities catalogue.
+  The whole catalogue is already fetched and cached on the collection host under reflists/,
+  but core/reflist.py keeps only the identifier from each entry and discards every other field,
+  the due date included. Letting a reference list carry a second field makes this a lookup.
 modified: '2026-09-24'
 fact: Patch availability and KEV remediation deadline.
-decidable: analyst
 standard: 'Actionability. Frame as a vendor-accountability ask: confirm your vendor or IT
   provider patched X.'

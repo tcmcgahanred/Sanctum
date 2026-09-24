@@ -191,10 +191,22 @@ manifest:
     check("...every indicator says whether its SIRs are components or routes",
           sorted({i.get("satisfied_by") for p in cfg["requirements"]["pirs"]
                   for i in p["indicators"]}), ["all", "any"])
-    check("...every SIR says who can decide it",
-          sorted({s.get("decidable") for p in cfg["requirements"]["pirs"]
+    # `decidable:` is GONE. It said a requirement could never be answered by
+    # an expression, and measured against all eleven that carried it, that was
+    # false every time. Readiness lives on `status:` now, and `blocked` names
+    # the input it waits for.
+    check("...no SIR carries `decidable:` any more",
+          [s["id"] for p in cfg["requirements"]["pirs"]
+           for i in p["indicators"] for s in i["sirs"] if "decidable" in s], [])
+    check("...every SIR carries one of the four readiness values",
+          sorted({s.get("status") for p in cfg["requirements"]["pirs"]
                   for i in p["indicators"] for s in i["sirs"]}),
-          ["analyst", "machine"])
+          ["blocked", "draft", "stable", "unsupported"])
+    check("...and every blocked one names what it is waiting for",
+          [s["id"] for p in cfg["requirements"]["pirs"]
+           for i in p["indicators"] for s in i["sirs"]
+           if s.get("status") == "blocked"
+           and not str(s.get("blocked_by") or "").strip()], [])
     check("the domain still loads through the normal path",
           cfg["scoring"]["settings"]["recency"]["cutoff_weekday"], "wednesday")
 

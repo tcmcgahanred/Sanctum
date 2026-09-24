@@ -405,24 +405,26 @@ def check_domain(domain, cfg, vocab, today):
                     f"{source}. The staging document would print an "
                     f"identifier nobody can look up."))
 
-        # A SCORING RULE CANNOT DETECT WHAT ONLY A PERSON CAN DECIDE. If a
-        # rule claims a requirement marked `decidable: analyst`, one of the
-        # two is wrong: either the rule is matching a proxy and calling it the
-        # fact, or the requirement is machine decidable after all. Left
-        # unflagged it inflates coverage with requirements nothing really
-        # answered, which is worse than reporting them uncovered.
+        # A SCORING RULE CANNOT DETECT WHAT NOTHING CAN BUILD YET. If a rule
+        # claims a requirement marked `status: blocked`, one of the two is
+        # wrong: either the rule is matching a proxy and calling it the fact,
+        # or the requirement is not blocked after all. Left unflagged it
+        # inflates coverage with requirements nothing really answered, which
+        # is worse than reporting them uncovered. Unchanged in substance from
+        # the `decidable: analyst` form it replaces, and it still fires on the
+        # same two requirements.
         for pir in (declared_tree or {}).get("pirs", []) or []:
             for ind in pir.get("indicators", []) or []:
                 for s in ind.get("sirs", []) or []:
-                    if s.get("id") in declared and s.get("decidable") == "analyst":
+                    if s.get("id") in declared and s.get("status") == "blocked":
                         findings.append(Finding(
-                            WARN, domain, "analyst requirement claimed by a rule",
+                            WARN, domain, "blocked requirement claimed by a rule",
                             s["id"],
-                            "marked `decidable: analyst` but named in a "
-                            "scoring rule's serves_sir. Either the rule is "
-                            "matching a proxy rather than the fact, or the "
-                            "requirement is machine decidable. Coverage "
-                            "counts it as answered either way."))
+                            "marked `status: blocked` but named in a scoring "
+                            "rule's serves_sir. Either the rule is matching a "
+                            "proxy rather than the fact, or the requirement "
+                            "is not blocked. Coverage counts it as answered "
+                            "either way."))
 
     # --- staleness -----------------------------------------------------
     # A WARN, never an ERROR. A date passing is not a reason to block a commit;

@@ -540,14 +540,26 @@ def requirement_coverage(art, requirements, scoring, force_rules=None,
 
     FOUR STATES PER INDICATOR, because one silence would hide three different
     situations:
-      satisfied      the machine test passed, and nothing else is required
-      needs_analyst  the machine test passed, but a `decidable: analyst`
-                     requirement under the same `all` still needs a person
-      unsatisfied    the machine test ran and did not pass
-      no_detector    nothing can test it - no requirement under it has a
-                     `detect:` block or is claimed by any scoring rule. This
-                     is a build gap, NOT a quiet week, and counting it as a
-                     miss would make collection look worse than it is.
+      satisfied       every requirement that could be tested passed, and every
+                      requirement under it could be tested
+      needs_detector  everything testable passed, but at least one requirement
+                      under the same `all` has no detector yet. The gap is a
+                      detector to write, not a quiet week.
+      unsatisfied     the test ran and did not pass
+      no_detector     nothing under it can be tested at all - no requirement
+                      has a `detection:` block and none is claimed by a
+                      scoring rule. This is a build gap, NOT a quiet week, and
+                      counting it as a miss would make collection look worse
+                      than it is.
+
+    `needs_detector` replaces `needs_analyst`, which asked whether a person
+    had to decide. Nothing declares that any more: every requirement is
+    machine decidable and `status: blocked` names the input a rule is waiting
+    for. The old `all` arithmetic ALSO had a defect this fixes - it required a
+    hit from every requirement under the indicator including ones nothing
+    could test, so an indicator with one working detector and one unwritten
+    one read `unsatisfied`, which is a miss, when the honest answer is that
+    half of it was never built.
 
     `detectable` is the set of requirement ids some scoring rule COULD claim,
     computed once per run by `detectable_requirements`. Passing it is what
@@ -597,25 +609,26 @@ def requirement_coverage(art, requirements, scoring, force_rules=None,
     indicators = {}
     for pir in (requirements or {}).get("pirs", []) or []:
         for ind in pir.get("indicators", []) or []:
-            sirs = ind.get("sirs", []) or []
-            machine = [s for s in sirs if s.get("decidable") == "machine"]
-            analyst = [s for s in sirs if s.get("decidable") == "analyst"]
-            reachable = [s for s in machine if s.get("id") in detectable]
+            ids = [s.get("id") for s in (ind.get("sirs", []) or [])
+                   if s.get("id")]
+            reachable = [i for i in ids if i in detectable]
+            unbuilt = [i for i in ids if i not in detectable]
             mode = ind.get("satisfied_by", "any")
             if not reachable:
                 state = "no_detector"
             else:
-                hits = [s for s in reachable if s.get("id") in met]
+                hits = [i for i in reachable if i in met]
                 if mode == "all":
-                    ok = len(hits) == len(machine) and bool(machine)
+                    if len(hits) != len(reachable):
+                        state = "unsatisfied"
+                    elif unbuilt:
+                        state = "needs_detector"
+                    else:
+                        state = "satisfied"
                 else:
-                    ok = bool(hits)
-                if not ok:
-                    state = "unsatisfied"
-                elif mode == "all" and analyst:
-                    state = "needs_analyst"
-                else:
-                    state = "satisfied"
+                    # Alternative routes to one fact. One is enough, and an
+                    # unwritten sibling is thinner sourcing, not a hole.
+                    state = "satisfied" if hits else "unsatisfied"
             indicators[ind["id"]] = state
 
     return {"sirs_met": sorted(met), "sirs_tested": sorted(tested),

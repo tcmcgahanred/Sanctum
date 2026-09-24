@@ -5,20 +5,30 @@
 #  starting from a skeleton; the one you copy is live and tested.
 #
 #  status   stable      finished, and something collects for it
-#           unsupported finished, but no sensor reaches it yet
+#           unsupported finished, but its `logsource:` matches no sensor in
+#                       the manifest, so nothing can ever reach it
 #           draft       the wording is proposed, not settled
-#           analyst     no expression will ever answer it, and it is therefore
-#                       NOT a collection gap
+#           blocked     a machine could decide it, but the input it needs does
+#                       not exist yet. `blocked_by:` names that input.
 #
-#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  When more than one fits, the precedence is blocked, then unsupported, then
+#  draft, then stable.
+#
+#  EVERY requirement is machine decidable. There is no value that parks one
+#  permanently. A requirement with no `detection:` block is either a detector
+#  nobody has written or a named missing input, and both are meant to be
+#  worked off rather than excused.
+#
 #  `falsepositives:` records what WILL match and should not. Write it here,
 #  beside the rule, not in a changelog nobody reads beside the rule.
 # ------------------------------------------------------------------------------
 id: SIR-2.3.1
 title: Incidents sharing behaviour or sector across geographies
-status: analyst
+status: blocked
+blocked_by: A rule that reads the whole collection window rather than one article. Every rule
+  today takes one article and returns true or false; this fact is a pattern ACROSS articles,
+  so no per-article expression can carry it.
 modified: '2026-09-24'
 fact: Multiple incidents sharing tactics, techniques and procedures, or sector, across geographies.
-decidable: analyst
 analytic: Convergence. Supports a widening-campaign framing, for example the multistate water
   attacks.
