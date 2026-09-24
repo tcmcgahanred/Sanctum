@@ -218,6 +218,19 @@ def matched_evidence(art, scoring):
     return found
 
 
+def _claimed(rule):
+    """
+    The requirements a scoring rule claims to detect.
+
+    `serves_sir:` is the name. `serves_eei:` is the name it had before the
+    requirements tree moved to PIR / indicator / SIR, and it is still read so
+    that a domain which has not been converted keeps working untouched - the
+    second domain cannot be edited from this repo at all. Fallback, never a
+    flag day. A rule declaring both is a mistake, so both are taken.
+    """
+    return (rule.get("serves_sir") or []) + (rule.get("serves_eei") or [])
+
+
 def satisfied_elements(art, scoring, force_rules=None):
     """
     The essential elements of information this article actually satisfied, as
@@ -245,21 +258,21 @@ def satisfied_elements(art, scoring, force_rules=None):
 
     for tier in scoring.get("tiers", []) or []:
         if _eval_atom(tier.get("require", "always"), groups, matcher, scopes, text_l):
-            out.update(tier.get("serves_eei") or [])
+            out.update(_claimed(tier))
             break                      # first qualifying tier wins, as in scoring
 
     for m in scoring.get("multipliers", []) or []:
         if _eval_atom(m["when"], groups, matcher, scopes, text_l):
-            out.update(m.get("serves_eei") or [])
+            out.update(_claimed(m))
 
     for f in scoring.get("floors", []) or []:
         if _eval_atom(f["when"], groups, matcher, scopes, text_l):
-            out.update(f.get("serves_eei") or [])
+            out.update(_claimed(f))
 
     for f in (force_rules if force_rules is not None
               else scoring.get("force_surface", []) or []):
         if _eval_atom(f["when"], groups, matcher, scopes, text_l):
-            out.update(f.get("serves_eei") or [])
+            out.update(_claimed(f))
 
     return sorted(out)
 

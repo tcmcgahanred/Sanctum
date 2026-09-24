@@ -197,36 +197,46 @@ cycle:
 requirements:
 
   kiq:
-    means: Key intelligence question. The one question the effort exists to
-      answer. Too broad to task against directly.
+    means: Key intelligence question. The one question an effort exists to answer.
+      Too broad to task against directly.
     read_by_code: false
     source: us_intel_doctrine
-    status: settled
+    status: retired
+    note: Removed from cti/pnd.yaml on 2026-09-24. The tree now starts at the
+      priority intelligence requirement. The scope sentence it carried survives
+      as a comment at the top of the requirements block, which is the only
+      statement of this domain's scope in the repository.
 
   pir:
-    means: Priority intelligence requirement. A ranked slice of the KIQ. Its
-      `tier` names the scoring tier that answers it.
+    means: Priority intelligence requirement. A question the effort needs
+      answered. The top of the requirements tree.
     read_by_code: false
     source: us_intel_doctrine
     status: settled
-    note: Nothing validates that pirs[].tier matches a real scoring tier.
+    note: Carries no tier and no weight as of 2026-09-24. A requirement never
+      points at an implementation; scoring rules point at requirements.
 
   sir:
-    means: Specific intelligence requirement. A PIR decomposed into a question
-      with a determinate answer.
-    read_by_code: false
-    source: us_intel_doctrine
-    status: settled
-
-  eei:
-    means: Essential element of information. The floor of the decomposition - a
-      specific fact a source could actually supply. You stop decomposing here.
+    means: Specific information requirement. The bottom of the tree - a fact a
+      source could actually supply. You stop decomposing here.
     read_by_code: true
     source: us_intel_doctrine
     status: settled
-    note: The EEI id is the ONLY field in the requirements tree any code reads.
-      tools/vocab_check.py collects them and warns when a rule names one that
-      does not exist.
+    note: 'MEANING CHANGED 2026-09-24. It used to mean the middle layer, a PIR
+      decomposed into a question. It is now the bottom layer, which is what
+      Army ATP 2-01 means by it and what an EEI used to mean here. Its
+      identifier is the only field in the requirements tree any code reads.'
+
+  eei:
+    means: Essential element of information. The former name for the bottom of
+      the tree, the specific fact a source could supply.
+    read_by_code: true
+    source: us_intel_doctrine
+    status: retired
+    note: Retired from cti on 2026-09-24 when the tree moved to PIR / indicator
+      / SIR. Still live in the second domain, which cannot be edited from this
+      repository, so tools/vocab_check.py and core/rules.py both still read the
+      old names alongside the new ones.
 
   serves:
     means: A scoring tier's claim about which PIR it answers. Identifier only.
@@ -235,21 +245,61 @@ requirements:
     status: settled
     note: Printed beside the item in the staging document. Not validated.
 
-  serves_eei:
-    means: A rule's claim about which EEIs it can honestly attest.
+  serves_sir:
+    means: A rule's claim about which specific information requirements it can
+      honestly attest.
     lives_in: scoring.tiers/multipliers/floors/force_surface
     source: sanctum
     status: settled
-    note: This is the correct level for requirement attribution, and it is
-      almost entirely undeclared - 3 of 19 EEIs are claimed.
+    note: This is the correct level for requirement attribution, and it is the
+      only connection between the requirements and anything stage 3a produces.
+      Measured 2026-09-24 after the conversion - 2 of 12 rules claim anything.
+  serves_eei:
+    means: The former name for serves_sir.
+    lives_in: scoring.tiers/multipliers/floors/force_surface
+    source: sanctum
+    status: retired
+    note: Still read, so an unconverted domain keeps working. Do not use it in
+      a new rule.
+  indicator_requirement:
+    means: A statement, true or false, of what would be observed if a priority
+      intelligence requirement were answered yes. The middle layer of the tree.
+    read_by_code: false
+    source: us_intel_doctrine
+    status: settled
+    note: 'Named indicator_requirement here, not indicator, because indicator
+      already means an artifact of compromise in this domain - see collisions.
+      In cti/pnd.yaml the field is spelled `indicators:`. Carries
+      satisfied_by: all or any, which decides whether its SIRs are components
+      or alternative routes.'
+  satisfied_by:
+    means: Whether the specific information requirements under an indicator are
+      components that must all be present (all) or alternative routes to one
+      fact (any).
+    lives_in: requirements.pirs[].indicators[]
+    read_by_code: false
+    source: sanctum
+    status: settled
+    note: Without it a coverage report calls both shapes half answered and is
+      wrong about one of them.
+  decidable:
+    means: Whether a specific information requirement can be found by a scoring
+      rule (machine) or only by a person (analyst).
+    lives_in: requirements.pirs[].indicators[].sirs[]
+    read_by_code: false
+    source: sanctum
+    status: settled
+    note: An analyst-decidable requirement must not be counted as a collection
+      gap. Measured 2026-09-24 - 16 machine, 11 analyst, of 27.
 
   detector:
-    means: The rule that would recognise an EEI in collected text. An EEI with no
-      detector is a fact nothing can find.
+    means: The rule that would recognise a specific information requirement in
+      collected text. One with no detector is a fact nothing can find.
     source: sanctum
     status: proposed
     note: Not built. Three states are wanted, not one silence - collected,
-      uncollected, and not collectable by machine.
+      uncollected, and not collectable by machine. `decidable:` now carries the
+      third of those.
 
 # ==============================================================================
 #  TERMS AND MATCHING - settled 2026-09-03
@@ -569,6 +619,26 @@ collisions:
     status: contested
     note: Three things named kev, none of which reads another.
 
+  indicator:
+    meanings:
+    - an artifact or observable suggesting a compromise (NIST SP 800-150). This
+      is what it means to any cyber threat intelligence reader.
+    - the middle layer of the requirements tree - a statement of what would be
+      observed if a priority intelligence requirement were answered yes (Army
+      ATP 2-01). Adopted 2026-09-24.
+    keep: both. Never write `indicator` unqualified. Say `indicator of
+      compromise` for the first and `indicator requirement` for the second. The
+      field in cti/pnd.yaml is spelled `indicators:` and always sits under a
+      priority intelligence requirement, which is what disambiguates it there.
+    status: contested
+  sir:
+    meanings:
+    - the bottom of the requirements tree, the collectable fact. Current.
+    - the middle layer of the tree, a PIR decomposed into a question. Used here
+      until 2026-09-24, and still the meaning in the second domain's files.
+    keep: only the first, in cti. A SIR identifier with two numbers (SIR-1.1) is
+      the old meaning; three numbers (SIR-1.1.1) is the new one.
+    status: contested
   ttp:
     meanings:
       - the concept - actor behaviour at three levels of detail (NIST SP 800-150).

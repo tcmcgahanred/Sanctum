@@ -56,7 +56,7 @@ satisfies the machine is one nobody can maintain.
 
 | `vocab.md` | **EXPECTED** | The reasoning behind the word lists — collisions, dropped terms, per-group review dates, known gaps. Never the terms themselves. See `VOCABULARY.md`. |
 | `README.md` | **EXPECTED** | What this domain is, who it serves, how to run it, how to adapt it. |
-| `requirements.md` | **EXPECTED** | The whole requirements tree — KIQ → PIR → SIR → EEI — each collectable fact mapped to the sensor that serves it. **This is the file that makes a coverage gap visible** — see below. Owns no numbers. |
+| `requirements.md` | **EXPECTED** | The whole requirements tree — PIR → indicator → SIR — each collectable fact mapped to the sensor that serves it. (`cti` keeps this inside `pnd.yaml`; the older split-markdown shape is still read.) **This is the file that makes a coverage gap visible** — see below. Owns no numbers. |
 | `mandate.md` | **EXPECTED** | Standing operating directives plus the dated lessons log. The continuity mechanism: a fresh session handed this can run the cycle. |
 | `policy.md` | **EXPECTED** | The product specification — format, structure, locked content standards. CTI's is `vox_policy.md`. A domain can run without one; it just means the vox's standards live in someone's head instead of in git. |
 | `editions/` | **REQUIRED once the domain produces its first vox** | The committed record of what was actually put out, and the only way to answer "what did we say in August?" a year later. |
@@ -100,7 +100,7 @@ remote that had been public since publication.
 
 | Fact | Owner | Everyone else |
 |---|---|---|
-| The whole requirements tree — KIQ, PIRs, SIRs, collectable facts, and which sensor serves each | `requirements.md` | Reference by name; do not restate the wording |
+| The whole requirements tree — PIRs, indicators, SIRs, and which sensor serves each | `requirements.md`, or the `requirements:` block of `pnd.yaml` | Reference by name; do not restate the wording |
 | **Tier weights, multiplier factors, group terms, thresholds, force-surface rules** | **`pnd.md`** | **Never restate a number.** Explain design *intent* freely; the values live in config because config is what executes |
 | Product format and content standards | `policy.md` (if the domain has one) | Reference and state that the policy wins; do not reproduce the rules |
 | Vocabulary collisions, dropped terms, review dates | `vocab.md` | — |
@@ -150,7 +150,8 @@ pointed at the split being wrong rather than the content.
    working domain and would have taught a stranger the wrong shape. Copy the
    domain that actually runs. Folders whose name begins with `_` are not
    domains and are skipped by tooling.
-2. **Run the Planning & Direction survey** (`PND_SURVEY.md`) to fill `pnd.md`.
+2. **Write the requirements tree first** - PIR, then indicator, then SIR -
+   in the domain's `pnd.yaml`. There is no survey document any more.
    Do not write word lists first — see `VOCABULARY.md` §3, and note that the
    method there is marked unvalidated.
 3. **Give every group a `reviewed:` date in `vocab.md`** as you create it. A date

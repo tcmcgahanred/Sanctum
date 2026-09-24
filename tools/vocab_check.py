@@ -351,6 +351,10 @@ def check_domain(domain, cfg, vocab, today):
     declared = set()
     for coll in ("tiers", "multipliers", "floors", "force_surface"):
         for rule in (scoring.get(coll) or []):
+            # `serves_sir:` is the name; `serves_eei:` is what it was called
+            # before the tree moved to PIR / indicator / SIR, and is still read
+            # so an unconverted domain keeps working. Fallback, never a flag day.
+            declared.update(rule.get("serves_sir") or [])
             declared.update(rule.get("serves_eei") or [])
     if declared and req_path:
         # Three shapes, in order of how much they can be trusted:
@@ -363,8 +367,16 @@ def check_domain(domain, cfg, vocab, today):
         tree, source = None, None
         declared_tree = cfg.get("requirements") or {}
         if declared_tree:
+            # Two shapes. The current one is PIR -> indicator -> SIR, where
+            # the SIR is the collectable fact a rule can claim. The former one
+            # was PIR -> SIR -> EEI, where the EEI was. Both are walked so a
+            # domain that has not been converted still validates.
             tree = set()
             for pir in declared_tree.get("pirs", []) or []:
+                for ind in pir.get("indicators", []) or []:
+                    for s in ind.get("sirs", []) or []:
+                        if s.get("id"):
+                            tree.add(s["id"])
                 for sir in pir.get("sirs", []) or []:
                     for eei in sir.get("eeis", []) or []:
                         if eei.get("id"):
@@ -379,7 +391,7 @@ def check_domain(domain, cfg, vocab, today):
             if rp is None:
                 findings.append(Finding(
                     WARN, domain, "no requirements tree", "requirements",
-                    "rules declare serves_eei but the domain declares no "
+                    "rules declare serves_sir but the domain declares no "
                     "requirements tree and has no markdown file to scrape."))
             else:
                 tree = set(re.findall(r"EEI-\d+\.\d+\.[a-z]",

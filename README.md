@@ -50,7 +50,7 @@ That includes the schedule. Sanctum has no built-in cadence — weekly, monthly 
 | If you want to | Read |
 |---|---|
 | Run it, or understand the engine | [`core/README.md`](core/README.md) |
-| Set up a new subject **(in development)** | [`docs/PND_SURVEY.md`](docs/PND_SURVEY.md), then [`docs/DOMAINS.md`](docs/DOMAINS.md) |
+| Set up a new subject **(in development)** | [`docs/DOMAINS.md`](docs/DOMAINS.md). There is no survey: `docs/PND_SURVEY.md` was removed on 2026-09-24 because it taught the five-file markdown layout that no longer exists, and it predated `kind: page`, the taxonomy, and the move to PIR / indicator / SIR. |
 | Build or maintain its word lists | [`docs/VOCABULARY.md`](docs/VOCABULARY.md) |
 | Turn the scored output into a vox | [`docs/EXPLOITATION.md`](docs/EXPLOITATION.md) |
 

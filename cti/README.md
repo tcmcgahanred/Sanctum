@@ -33,7 +33,7 @@ and falls back, so a domain converts when it is ready and not before.
 
 | Stage | Banner in `pnd.yaml` | The block it owns |
 |---|---|---|
-| 1 · Planning & Direction | `STAGE 1` | `requirements:` — KIQ / PIR / SIR / EEI, and the sensor roadmap. Then `manifest:` runtime and storage |
+| 1 · Planning & Direction | `STAGE 1` | `requirements:` — PIR / indicator / SIR. Then `manifest:` runtime and storage |
 | 2 · Collection | `STAGE 2` | `manifest.collection:` and `manifest.sensors:` — 55 feed records |
 | 3a · Processing | `STAGE 3a` | `scoring:` — tiers (8/4/2/1), keyword groups, multipliers, the cyber-domain gate — and `vocab:`, the per-group requirement attribution |
 | 3b · Exploitation | `STAGE 3b` | `production:` — only `report_title` is read by an engine; the rest is the standard the analyst and the model are held to |

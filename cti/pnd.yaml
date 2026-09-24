@@ -20,266 +20,314 @@
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-#  REQUIREMENTS - KIQ / PIR / SIR / EEI
+#  REQUIREMENTS - PIR / INDICATOR / SIR
 #
-#  Each scoring tier declares the PIR it answers, by identifier only.
-#  Each scoring rule may declare the EEIs it can honestly attest.
-#  vocab_check verifies every declared identifier exists in this tree.
-# ------------------------------------------------------------------------------
+#  The scope of the whole effort, and the only statement of it in this
+#  repository: what cyber threats endanger California SLTT organizations and
+#  the critical infrastructure they operate or depend on?
+#
+#  The chain follows Army ATP 2-01. A priority intelligence requirement asks a
+#  question. An indicator STATES what would be true if the answer were yes. A
+#  specific information requirement names a fact to go and collect.
+#
 #  HOW THIS TREE CONNECTS TO SCORING
-#    kiq        the one question the whole effort exists to answer. Read by
-#               people only; no engine touches it.
-#    pirs[]     each PIR carries `tier:`, and that number must match an `id:`
-#               under scoring.tiers. That is the link between what we need to
-#               know and what the machine rewards.
-#    sirs[]     the sub-questions that decompose a PIR.
-#    eeis[]     the specific fact that answers a SIR. A scoring rule may name
-#               one in `serves_eei:` to claim it can honestly attest it.
-#  tools/vocab_check.py fails if a rule names a PIR or EEI that is not here.
-#  Nothing else is derived: `fact`, `sensor`, `scoring`, `standard` and `note`
-#  are for the analyst and for whoever builds the next sensor.
+#    pirs[]         the questions. They carry no weight and no tier. A
+#                   requirement never points at an implementation; scoring
+#                   points here, and never the other way round.
+#    indicators[]   a statement, true or false, never a question.
+#                   `satisfied_by: any` means its SIRs are alternative routes
+#                   to one fact, so a missing one is thinner sourcing.
+#                   `satisfied_by: all` means they are components, so a missing
+#                   one is a real hole. A coverage report that ignores this
+#                   calls both of them half answered and is wrong about one.
+#    sirs[]         the fact to collect.
+#                   `decidable: machine` - a scoring rule can find it.
+#                   `decidable: analyst` - no vocabulary ever will. These must
+#                   not be counted as collection gaps. An indicator is machine
+#                   decidable only when every SIR under it is; that is computed,
+#                   never stored twice.
+#                   A scoring rule claims one by naming it in `serves_sir:`.
+#
+#  `serves_eei:` is still read as the former name for `serves_sir:`, so the
+#  second domain keeps working untouched. Do not use it in a new rule.
+#
+#  Nothing else here is derived. `fact`, `sensor`, `standard`, `analytic` and
+#  `note` are for the analyst and for whoever builds the next sensor.
+#
+#  Items marked `status: DRAFT` are wording proposed for review, not settled.
+# ------------------------------------------------------------------------------
 requirements:
-  kiq:
-    id: KIQ-1
-    question: What cyber threats endanger California SLTT organizations and the critical infrastructure
-      they operate or depend on?
-    collection_posture: Cast a wide net. Any credible cyber-threat reporting is in scope at
-      collection. Trusted sources are ingested wholesale and AOR relevance is decided at scoring,
-      never by keyword pre-filtering at collection.
   pirs:
   - id: PIR-1
-    tier: 1
     name: Direct impact to California organizations
-    question: What incidents, breaches, or targeting have directly affected California-based
-      organizations or entities?
-    sirs:
-    - id: SIR-1.1
-      question: Which California SLTT / critical-infrastructure organizations reported a breach
-        or incident this window?
-      eeis:
-      - id: EEI-1.1.a
+    question: What incidents, breaches, or targeting have directly affected California-based organizations
+      or entities?
+    indicators:
+    - id: IND-1.1
+      statement: A California SLTT or critical-infrastructure organization reported a cyber incident
+        this window.
+      satisfied_by: any
+      sirs:
+      - id: SIR-1.1.1
         fact: Breach notifications affecting Californians (org, date, type, records).
+        decidable: machine
         sensor:
           name: CA AG breach-registry scraper
           status: PENDING
-        scoring: Tier-1 CA-direct
-        note: 'No longer blocked by the collector. A sensor record may now declare ''kind:
-          page'', which is re-read every run and identified by its contents rather than its
-          URL, so a portal that posts new notifications under one unchanging address is
-          collected. The scraper that turns registry rows into per-victim records is still
-          to build - sensor_roadmap priority 1 - and the record should declare a ''title:''
-          or the scorer will floor it as untitled.'
-      - id: EEI-1.1.b
-        fact: Extortion/leak-site posts naming California victims.
+        note: 'The collector no longer blocks this. A sensor record may declare ''kind: page'',
+          which is re-read every run and identified by its contents rather than its URL, so a portal
+          that posts new notifications under one unchanging address is collected. The scraper that
+          turns registry rows into per-victim records is still to build, and the record should declare
+          a ''title:'' or the scorer will floor it as untitled.'
+      - id: SIR-1.1.2
+        fact: Extortion or leak-site posts naming California victims.
+        decidable: machine
         sensor:
           name: ransomware leak-site aggregator, CA-filtered
           status: PENDING
-        scoring: Tier-1 + ransomware/CI
-      - id: EEI-1.1.c
-        fact: Regional/local press reports of incidents at CA local-gov, school, utility or
-          tribal entities.
+      - id: SIR-1.1.3
+        fact: Regional or local press reports of incidents at California local government, school,
+          utility or tribal entities.
+        decidable: machine
         sensor:
           name: curated CA regional press
           status: PENDING
-        scoring: Tier-1 CA-direct
-        note: StateScoop is SLTT trade press, not CA regional press. This EEI remains unserved.
-      - id: EEI-1.1.d
-        fact: Official CA advisories naming an affected CA entity.
+        note: StateScoop is SLTT trade press, not California regional press. This requirement remains
+          unserved.
+      - id: SIR-1.1.4
+        fact: Official California advisories naming an affected California entity.
+        decidable: machine
         sensor:
           name: Cal OES + CDT + MS-ISAC
           status: ACTIVE
           also: Cal-CSIC - PENDING
-        scoring: Tier-1, primary source
-        note: 'Cal-CSIC remains unserved: publishing, but PDF/DOCX on an HTML index with no
-          RSS. The collector blocker is gone - declare the index as ''kind: page'' and it is
-          re-read every run - but reaching the advisories themselves still means parsing that
-          index, or the documents behind it.'
-    - id: SIR-1.2
-      question: Is the affected organization inside the 34-county CCIC AOR?
-      eeis:
-      - id: EEI-1.2.a
-        fact: Org county/location matched against the 34-county list.
-        sensor:
-          name: derived at scoring
-          status: ACTIVE
-        scoring: AOR-county match - all 34 counties present in the geo group
-        note: 'Known precision gap: several county names are not California-exclusive. kings
-          county is Brooklyn; lake county is Illinois, Florida, Indiana and Ohio; trinity
-          county is also Texas; sierra county is also New Mexico. Any of these plus an incident
-          term in proximity scores Tier-1. The reasoning line makes it auditable; the analyst
-          must catch it.'
-      - id: EEI-1.2.b
-        fact: In-AOR vs near-AOR vs out-of-AOR-but-CA classification.
-        scoring: annotation - e.g. Suisun/Solano = near-AOR
-    - id: SIR-1.3
-      question: What is the verified operational impact, versus what is merely claimed?
-      eeis:
-      - id: EEI-1.3.a
-        fact: Confirmed disruption (systems down, public-safety/911 impact, operational degradation),
+        note: 'Cal-CSIC remains unserved. It publishes, but as PDF or DOCX on an HTML index with
+          no RSS. The collector blocker is gone: declare the index as ''kind: page'' and it is re-read
+          every run. Reaching the advisories themselves still means parsing that index, or the documents
+          behind it.'
+    - id: IND-1.2
+      statement: The reported impact is verified rather than merely claimed.
+      satisfied_by: all
+      sirs:
+      - id: SIR-1.2.1
+        fact: Confirmed disruption (systems down, public-safety or 911 impact, operational degradation),
           verified against a primary source.
-        standard: Verify specific impact claims before publishing; soften or cut unverifiable
-          specifics. Anti-FUD.
-      - id: EEI-1.3.b
-        fact: 'Attribution status: confirmed / suspected / unknown.'
-        standard: Attribution discipline - never state suspected as fact.
+        decidable: analyst
+        standard: Verify specific impact claims before publishing. Soften or cut unverifiable specifics.
+          Anti-FUD.
+      - id: SIR-1.2.2
+        fact: 'Attribution status: confirmed, suspected, or unknown.'
+        decidable: analyst
+        standard: Attribution discipline. Never state suspected as fact.
   - id: PIR-2
-    tier: 2
-    name: SLTT sector targeting anywhere (leading indicator)
-    question: What threat activity is targeting SLTT-relevant sectors anywhere, as a leading
-      indicator for the AOR?
-    sirs:
-    - id: SIR-2.1
-      question: Which SLTT sectors are being targeted this window (water/wastewater, K-12/higher-ed,
-        local gov, tribal/territorial)?
-      eeis:
-      - id: EEI-2.1.a
-        fact: Reported attacks/targeting of a named SLTT sector, any geography.
+    name: SLTT sector targeting anywhere
+    question: What threat activity is targeting SLTT-relevant sectors anywhere, as a leading indicator
+      for California?
+    indicators:
+    - id: IND-2.1
+      statement: An SLTT-relevant sector is under active targeting this window.
+      satisfied_by: any
+      sirs:
+      - id: SIR-2.1.1
+        fact: Reported attacks or targeting of a named SLTT sector, any geography.
+        decidable: machine
         sensor:
           name: national trusted feeds + StateScoop
           status: ACTIVE
           also: K-12 Dive, WaterISAC - PENDING; GovTech - REJECTED
-        scoring: Tier-2 sector
-        note: GovTech advertises no working feed - both candidate paths returned 0 entries
-          and HTTP 404. Do not retry without new evidence.
-      - id: EEI-2.1.b
-        fact: Sector ISAC/agency advisories (WaterISAC, MS-ISAC, CISA sector alerts).
+        note: GovTech advertises no working feed. Both candidate paths returned 0 entries and HTTP
+          404. Do not retry without new evidence.
+      - id: SIR-2.1.2
+        fact: Sector ISAC or agency advisories (WaterISAC, MS-ISAC, CISA sector alerts).
+        decidable: machine
         sensor:
           name: MS-ISAC + CISA (4 feeds)
           status: ACTIVE
           also: WaterISAC - PENDING
-        scoring: Tier-2, primary source
-    - id: SIR-2.2
-      question: Does the targeted sector/technology generalize to the AOR?
-      eeis:
-      - id: EEI-2.2.a
-        fact: Whether the targeted tech/config is common in AOR SLTT orgs (e.g. internet-exposed
-          PLCs in small water systems).
-        scoring: low-maturity SLTT tech multiplier
-        note: 'This is the leading-indicator logic: out-of-state targeting matters because
-          the same exposure exists here.'
-    - id: SIR-2.3
-      question: Is this an isolated incident or a widening campaign?
-      eeis:
-      - id: EEI-2.3.a
-        fact: Multiple incidents sharing TTPs/sector across geographies.
-        analytic: convergence - supports a widening-campaign framing, e.g. the multistate
-          water attacks
+    - id: IND-2.2
+      statement: The targeted technology or configuration is present in California SLTT organizations.
+      satisfied_by: all
+      sirs:
+      - id: SIR-2.2.1
+        fact: Whether the targeted technology or configuration is common in California SLTT organizations,
+          for example internet-exposed PLCs in small water systems.
+        decidable: analyst
+        note: This is the leading-indicator logic. Out-of-state targeting matters because the same
+          exposure exists here.
+    - id: IND-2.3
+      statement: The activity is a widening campaign rather than an isolated incident.
+      satisfied_by: all
+      sirs:
+      - id: SIR-2.3.1
+        fact: Multiple incidents sharing tactics, techniques and procedures, or sector, across geographies.
+        decidable: analyst
+        analytic: Convergence. Supports a widening-campaign framing, for example the multistate
+          water attacks.
+    - id: IND-2.4
+      status: DRAFT
+      statement: Election infrastructure is being targeted somewhere in the United States.
+      satisfied_by: any
+      sirs:
+      - id: SIR-2.4.1
+        fact: Reported attacks or targeting of election offices, election systems, or voter registration
+          data, any geography.
+        decidable: machine
+        status: DRAFT
+        sensor:
+          name: national trusted feeds
+          status: ACTIVE
+      - id: SIR-2.4.2
+        fact: Election-sector advisories from CISA or the Elections Infrastructure ISAC.
+        decidable: machine
+        status: DRAFT
+        sensor:
+          name: CISA (4 feeds)
+          status: ACTIVE
+          also: EI-ISAC - PENDING
   - id: PIR-3
-    tier: 3
     name: Actively-exploited vulnerabilities in SLTT-common technology
-    question: What in-the-wild / KEV vulnerabilities affect technology common in low-maturity
-      SLTT environments?
-    sirs:
-    - id: SIR-3.1
-      question: What is actively exploited in the wild this window?
-      eeis:
-      - id: EEI-3.1.a
+    question: What in-the-wild or KEV vulnerabilities affect technology common in low-maturity SLTT
+      environments?
+    indicators:
+    - id: IND-3.1
+      statement: A vulnerability is under active exploitation in the wild this window.
+      satisfied_by: any
+      sirs:
+      - id: SIR-3.1.1
         fact: CISA KEV additions (CVE, date, exploitation status, ransomware-use flag).
+        decidable: machine
         sensor:
           name: dedicated KEV feed
           status: ABSENT
-        scoring: KEV multiplier
-        note: No dedicated KEV sensor. KEV additions reach the corpus only when an advisory
-          or aggregator mentions them - the single-aggregator dependence the ICD 203 review
-          flagged. Cheap to close.
-      - id: EEI-3.1.b
+        note: 'No dedicated KEV sensor. KEV additions reach the corpus only when an advisory or
+          aggregator mentions them, which is the single-aggregator dependence the ICD 203 review
+          flagged. Cheap to close: manifest.reference_lists.kev is already fetched and cached.'
+      - id: SIR-3.1.2
         fact: Vendor PSIRT advisories confirming in-the-wild exploitation.
+        decidable: machine
         sensor:
           name: vendor PSIRTs (Cisco, Palo Alto, Fortinet)
           status: ACTIVE
-        scoring: KEV/exploitation
-    - id: SIR-3.2
-      question: Does the affected technology exist in low-maturity SLTT environments?
-      eeis:
-      - id: EEI-3.2.a
-        fact: Whether the product is commonly deployed by SLTT orgs (edge appliances, on-prem
+    - id: IND-3.2
+      statement: The affected technology is present in low-maturity SLTT environments.
+      satisfied_by: all
+      sirs:
+      - id: SIR-3.2.1
+        fact: Whether the product is commonly deployed by SLTT organizations (edge appliances, on-prem
           SharePoint, RMM, routers).
-        scoring: low-maturity SLTT tech multiplier
-      - id: EEI-3.2.b
-        fact: Which providers/versions are affected, and does the audience use them?
-        standard: Provider-dependent relevance - a webmail/product item is relevant only if
-          it hits providers the audience runs (Google Workspace, Microsoft 365). MSP-only
-          software is low-relevance if few orgs in the AOR use MSPs.
-    - id: SIR-3.3
-      question: What is the remediation posture?
-      eeis:
-      - id: EEI-3.3.a
+        decidable: analyst
+      - id: SIR-3.2.2
+        fact: Which providers or versions are affected, and whether the audience uses them.
+        decidable: analyst
+        standard: Provider-dependent relevance. A webmail or product item is relevant only if it
+          hits providers the audience runs, such as Google Workspace or Microsoft 365. MSP-only
+          software is low-relevance if few organizations here use MSPs.
+    - id: IND-3.3
+      statement: A remediation path exists that the audience can act on.
+      satisfied_by: all
+      sirs:
+      - id: SIR-3.3.1
         fact: Patch availability and KEV remediation deadline.
-        standard: 'Actionability - frame as a vendor-accountability ask: ''confirm your vendor
-          or IT provider patched X''.'
+        decidable: analyst
+        standard: 'Actionability. Frame as a vendor-accountability ask: confirm your vendor or IT
+          provider patched X.'
   - id: PIR-4
-    tier: 4
-    name: Broad/national threats with SLTT relevance
+    name: Broad or national threats with SLTT relevance
     question: What national-scale threats carry material relevance to SLTT defenders?
-    sirs:
-    - id: SIR-4.1
-      question: What national-scale threats materially affect SLTT defenders?
-      eeis:
-      - id: EEI-4.1.a
-        fact: National advisories/campaigns with an SLTT nexus.
+    indicators:
+    - id: IND-4.1
+      statement: A national-scale threat materially affects SLTT defenders.
+      satisfied_by: all
+      sirs:
+      - id: SIR-4.1.1
+        fact: National advisories or campaigns with an SLTT nexus.
+        decidable: machine
         sensor:
           name: national feeds
           status: ACTIVE
-        scoring: Tier-4
-      - id: EEI-4.1.b
+      - id: SIR-4.1.2
         fact: 'Audience-portfolio relevance: does it reach the SLTT audience, or is it developer-only,
           defense-industrial-only, or vendor opinion?'
-        standard: Audience filter - developer-targeted (npm poisoning) and defense-industrial-base
-          (CMMC) items are out of portfolio unless they reach SLTT through a vendor.
-  # NOT READ BY ANY ENGINE. The build order for collection gaps, kept beside
-  # the requirements so a gap and the thing it starves stay in one file.
-  # `serves:` here points at the EEI that stays unanswered until it is built.
-  sensor_roadmap:
-  - priority: 0
-    build: Fix process_page re-collection (core/acolyte.py)
-    status: DONE 2026-09-03
-    serves: []
-    note: 'Kept as the record of a prerequisite, not a sensor. Page sources were deduplicated
-      on URL hash, so a portal was captured once and never revisited, and priorities 1 and
-      2 were both useless until it landed. A record may now declare ''kind: page'': it is
-      re-read every run and identified by a hash of its normalised text. Re-collection is
-      opt-in on purpose - process_feed returns nothing for a healthy feed having a bad day,
-      and re-reading those would write a record every time an error page reflowed.'
-  - priority: 1
-    build: CA AG breach-registry scraper
-    serves:
-    - EEI-1.1.a
-    note: 'Highest value: the only authoritative AOR-direct breach sensor. PIR-1 has almost
-      no active collection without it.'
-  - priority: 2
-    build: Cal-CSIC advisories
-    serves:
-    - EEI-1.1.d
-    note: Confirmed publishing. Extracting the index page may be enough, since titles and
-      dates are what the scorer consumes - prove that before building PDF parsing.
-  - priority: 3
-    build: Ransomware leak-site aggregator, CA-filtered
-    serves:
-    - EEI-1.1.b
-    note: 'Early-warning AOR-direct: victims appear before local press.'
-  - priority: 4
-    build: CISA KEV as a primary feed
-    serves:
-    - EEI-3.1.a
-    note: Cheapest item on this list. Reduces single-aggregator dependence.
-  - priority: 5
-    build: Curated CA regional press
-    serves:
-    - EEI-1.1.c
-    note: Still unserved; StateScoop does not cover it.
-  - priority: 6
-    build: Remaining sector trade press (K-12 Dive, WaterISAC)
-    serves:
-    - EEI-2.1.a
-    - EEI-2.1.b
-
-# ------------------------------------------------------------------------------
-#  RUNTIME & STORAGE
-#
-#  base_dir is the only host-coupled value. $SANCTUM_BASE overrides it and
-#  WINS over this file - set globally it overrides every domain at once.
-# ------------------------------------------------------------------------------
-#  Every path below is relative to base_dir unless it is absolute.
+        decidable: analyst
+        standard: Audience filter. Developer-targeted items such as npm poisoning and defense-industrial-base
+          items such as CMMC are out of portfolio unless they reach SLTT through a vendor.
+  - id: PIR-5
+    status: DRAFT
+    name: Adversary behaviour SLTT defenders should detect or hunt for
+    question: What adversary behaviour should SLTT defenders detect or hunt for this cycle?
+    note: 'DRAFT. Written to give the CTA TTPs section of the vox a requirement behind it, which
+      it has never had. No scoring rule reads any of this yet: the `ttp` group holds 29 terms and
+      no rule uses it, and no MITRE technique identifier appears anywhere in this file.'
+    indicators:
+    - id: IND-5.1
+      status: DRAFT
+      statement: Adversary behaviour is described specifically enough to act on.
+      satisfied_by: any
+      sirs:
+      - id: SIR-5.1.1
+        fact: A MITRE ATT&CK technique identifier in the reporting.
+        decidable: machine
+        status: DRAFT
+        sensor:
+          name: MITRE ATT&CK technique library
+          status: ABSENT
+        note: An identifier library, not a word list. Set membership, nothing to tune.
+      - id: SIR-5.1.2
+        fact: A named tactic, technique or procedure described in prose.
+        decidable: analyst
+        status: DRAFT
+    - id: IND-5.2
+      status: DRAFT
+      statement: The activity is attributed to a named threat actor.
+      satisfied_by: any
+      note: DRAFT. Attribution is not a TTP and does not change what a defender detects. It is collected
+        because it carries the reporting, not because it drives the outcome.
+      sirs:
+      - id: SIR-5.2.1
+        fact: A MITRE ATT&CK group identifier, or a vendor group name.
+        decidable: machine
+        status: DRAFT
+        sensor:
+          name: MITRE ATT&CK group library
+          status: ABSENT
+      - id: SIR-5.2.2
+        fact: A stated country of origin.
+        decidable: machine
+        status: DRAFT
+        note: Ambiguous alone. A country name needs the cyber gate and attribution language in proximity,
+          or it fires on trade reporting.
+    - id: IND-5.3
+      status: DRAFT
+      statement: Adversary intent is identifiable from the reporting.
+      satisfied_by: all
+      sirs:
+      - id: SIR-5.3.1
+        fact: A stated goal, or an observed impact that indicates the objective.
+        decidable: analyst
+        status: DRAFT
+    - id: IND-5.4
+      status: DRAFT
+      statement: Adversary capability is identifiable from the reporting.
+      satisfied_by: any
+      sirs:
+      - id: SIR-5.4.1
+        fact: A named tool used.
+        decidable: machine
+        status: DRAFT
+        sensor:
+          name: MITRE ATT&CK software library
+          status: ABSENT
+      - id: SIR-5.4.2
+        fact: A named malware family.
+        decidable: machine
+        status: DRAFT
+        sensor:
+          name: MITRE ATT&CK software library
+          status: ABSENT
+      - id: SIR-5.4.3
+        fact: Assessed sophistication, skill level, or modus operandi.
+        decidable: analyst
+        status: DRAFT
 manifest:
   domain: cti
   base_dir: /opt/ravenor
@@ -388,6 +436,11 @@ manifest:
   #          words you choose are matched by any rule using `scope: title`.
   #   group  a label for the health and yield tools. Not read when scoring.
   #   note   free text for whoever maintains the list.
+  # COLLECTION POSTURE. Cast a wide net: any credible cyber-threat reporting is
+  # in scope at collection, and relevance is decided at scoring, never by keyword
+  # pre-filtering here. A trusted publisher is ingested wholesale. A search engine
+  # is not a publisher, and a query is how you address one - which is why the
+  # keyword-filtered Google News entries below do not break this rule.
   sensors:
   - url: https://www.cisa.gov/cybersecurity-advisories/all.xml
     group: 'National: government / CERT / SLTT'
@@ -598,8 +651,7 @@ scoring:
     # only: they must exist in the requirements tree, and nothing is
     # calculated from them. A tier with no `serves:` prints nothing.
     serves: PIR-1
-    serves_eei:
-    - EEI-1.2.a
+    serves_sir: []
     # The score for anything this tier claims, before any multiplier.
     weight: 8.0
     require:
@@ -631,7 +683,7 @@ scoring:
   - id: 2
     name: SLTT sector targeting anywhere (leading indicator)
     serves: PIR-2
-    serves_eei: []
+    serves_sir: []
     weight: 4.0
     require:
       all:
@@ -655,7 +707,7 @@ scoring:
   - id: 3
     name: Actively-exploited vulnerabilities in SLTT-common technology
     serves: PIR-3
-    serves_eei: []
+    serves_sir: []
     weight: 2.0
     require:
       all:
@@ -677,7 +729,7 @@ scoring:
   - id: 4
     name: Broad/national threats with SLTT relevance
     serves: PIR-4
-    serves_eei: []
+    serves_sir: []
     weight: 1.0
     require: always
   # ELEVATION. Each matching factor multiplies the tier weight, and they STACK.
@@ -685,7 +737,7 @@ scoring:
   # item heavier. An item no tier rewarded stays cheap however many fire.
   multipliers:
   - name: KEV / actively exploited
-    serves_eei: []
+    serves_sir: []
     factor: 1.5
     when:
       all:
@@ -708,9 +760,9 @@ scoring:
             scope: blob
             all_occurrences: true
   - name: low-maturity SLTT tech
-    serves_eei:
-    - EEI-2.2.a
-    - EEI-3.2.a
+    serves_sir:
+    - SIR-2.2.1
+    - SIR-3.2.1
     factor: 1.5
     when:
       all:
@@ -733,7 +785,7 @@ scoring:
             scope: blob
             all_occurrences: true
   - name: supply-chain / procurement
-    serves_eei: []
+    serves_sir: []
     factor: 1.3
     when:
       all:
@@ -750,7 +802,7 @@ scoring:
             scope: blob
             all_occurrences: true
   - name: ransomware vs public-sector/CI
-    serves_eei: []
+    serves_sir: []
     factor: 1.3
     when:
       all:
@@ -790,8 +842,7 @@ scoring:
   # so a change to a tier and its force-surface twin is one edit in two places.
   force_surface:
   - name: M1 in-AOR entity in an incident
-    serves_eei:
-    - EEI-1.2.a
+    serves_sir: []
     when:
       all:
       - not:
@@ -812,8 +863,8 @@ scoring:
             scope: blob
             all_occurrences: true
   - name: M2 exploited flaw affecting SLTT-relevant technology
-    serves_eei:
-    - EEI-3.2.a
+    serves_sir:
+    - SIR-3.2.1
     when:
       all:
       - not:
@@ -832,7 +883,7 @@ scoring:
           scope: blob
           all_occurrences: true
   - name: M3 SLTT sector in an incident
-    serves_eei: []
+    serves_sir: []
     when:
       all:
       - not:

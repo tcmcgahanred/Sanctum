@@ -174,9 +174,21 @@ manifest:
     check("...and every sensor survived", len(cfg["sensors"]), 55)
     check("...read from the sensor records, not a fenced block",
           "manifest.sensors" in cfg["sensors_source"], True)
+    # The tree is PIR -> indicator -> SIR as of 2026-09-24. The SIR is the
+    # collectable fact, which is what an EEI used to be, and its identifier is
+    # what a scoring rule claims in `serves_sir:`.
     check("...every requirement identifier is declared, not scraped",
-          sum(len(s.get("eeis", [])) for p in cfg["requirements"]["pirs"]
-              for s in p["sirs"]), 19)
+          sum(len(i.get("sirs", [])) for p in cfg["requirements"]["pirs"]
+              for i in p["indicators"]), 27)
+    check("...no priority intelligence requirement carries a tier",
+          [p["id"] for p in cfg["requirements"]["pirs"] if "tier" in p], [])
+    check("...every indicator says whether its SIRs are components or routes",
+          sorted({i.get("satisfied_by") for p in cfg["requirements"]["pirs"]
+                  for i in p["indicators"]}), ["all", "any"])
+    check("...every SIR says who can decide it",
+          sorted({s.get("decidable") for p in cfg["requirements"]["pirs"]
+                  for i in p["indicators"] for s in i["sirs"]}),
+          ["analyst", "machine"])
     check("the domain still loads through the normal path",
           cfg["scoring"]["settings"]["recency"]["cutoff_weekday"], "wednesday")
 
