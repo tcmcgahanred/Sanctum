@@ -279,7 +279,7 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
         "manifest": manifest,
         "scoring": cfg["scoring"],
         "production": cfg.get("production", {}),
-        "requirements": cfg.get("requirements", {}),
+        "requirements": load_requirements(domain_dir, cfg.get("requirements")),
         "domain": domain,
         "domain_dir": domain_dir,
         "base_dir": base_dir,
@@ -294,6 +294,86 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
         "staging_out": base_dir / "staging_candidates.md",
     }
     return result
+
+
+def load_requirements(domain_dir, inline):
+    """
+    Assemble the requirements tree from `<domain>/requirements/`, or fall back
+    to the `requirements:` block inside the domain file.
+
+    WHY A DIRECTORY. One requirement is one file, roughly a screen, holding its
+    own strings so it can be read without opening anything else. Written out in
+    full inside the domain file they would have taken it past 3,000 lines and
+    six levels of indentation, which is exactly why nobody opened it to work on
+    requirements.
+
+    `_tree.yaml` holds the priority intelligence requirements, their indicators
+    and `satisfied_by`, and lists which rule identifiers sit under each. Every
+    other file in the directory is one rule, named for its identifier.
+
+    TWO COPIES ARE REFUSED. A domain that has both a directory and an inline
+    block is not half-converted, it is two sources of truth, and the loader
+    would silently pick one.
+
+    A LISTED RULE WITH NO FILE, AND A FILE NOBODY LISTS, ARE BOTH REFUSED. A
+    rule nothing runs and a listing with no rule look exactly like a working
+    tree from the outside.
+
+    Fallback, never a flag day: a domain with no directory keeps its inline
+    block and behaves exactly as before. The second domain has never been
+    converted and must not notice this.
+    """
+    req_dir = Path(domain_dir) / "requirements"
+    if not req_dir.is_dir():
+        return inline or {}
+    if inline:
+        raise ValueError(
+            f"{domain_dir} has BOTH a requirements/ directory and a "
+            f"`requirements:` block in its domain file. Two sources of truth; "
+            f"delete the block.")
+
+    tree_path = req_dir / "_tree.yaml"
+    if not tree_path.exists():
+        raise FileNotFoundError(
+            f"{req_dir} has no _tree.yaml, so nothing says which rules sit "
+            f"under which indicator.")
+    tree = yaml.load(tree_path.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader) or {}
+
+    rules, seen = {}, set()
+    for f in sorted(req_dir.glob("*.yaml")):
+        if f.name == "_tree.yaml":
+            continue
+        rule = yaml.load(f.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader) or {}
+        rid = rule.get("id")
+        if not rid:
+            raise ValueError(f"{f} declares no `id:`.")
+        if rid in rules:
+            raise ValueError(f"{f} declares id {rid!r}, which another file "
+                             f"already declares.")
+        if rid != f.stem:
+            raise ValueError(f"{f} declares id {rid!r} but is named {f.stem!r}. "
+                             f"The filename is how a rule is found.")
+        rules[rid] = rule
+
+    for pir in tree.get("pirs", []) or []:
+        for ind in pir.get("indicators", []) or []:
+            listed = ind.pop("requirements", []) or []
+            missing = [r for r in listed if r not in rules]
+            if missing:
+                raise ValueError(
+                    f"{tree_path}: {ind.get('id')} lists {missing}, which have "
+                    f"no file in {req_dir}.")
+            seen.update(listed)
+            # `sirs` is the assembled name, so everything downstream - the
+            # coverage tool, vocab_check, the tests - is untouched by the move.
+            ind["sirs"] = [rules[r] for r in listed]
+
+    orphans = sorted(set(rules) - seen)
+    if orphans:
+        raise ValueError(
+            f"{req_dir}: {orphans} have files but are listed under no indicator "
+            f"in _tree.yaml, so nothing would ever evaluate them.")
+    return tree
 
 
 def load_sensors(sensors_path):

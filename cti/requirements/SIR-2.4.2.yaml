@@ -1,0 +1,26 @@
+# ------------------------------------------------------------------------------
+#  SIR-2.4.2 · An election-sector advisory
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-2.4.2
+title: An election-sector advisory
+status: draft
+modified: '2026-09-24'
+fact: Election-sector advisories from CISA or the Elections Infrastructure ISAC.
+decidable: machine
+sensor:
+  name: CISA (4 feeds)
+  status: ACTIVE
+  also: EI-ISAC - PENDING

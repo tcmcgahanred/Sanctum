@@ -1,0 +1,36 @@
+# ------------------------------------------------------------------------------
+#  SIR-1.1.3 · Press reporting of an incident at a California organization
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-1.1.3
+title: Press reporting of an incident at a California organization
+status: unsupported
+modified: '2026-09-24'
+fact: Regional or local press reports of incidents at California local government, school,
+  utility or tribal entities.
+decidable: machine
+sensor:
+  name: curated CA regional press
+  status: PENDING
+note: StateScoop is SLTT trade press, not California regional press. This requirement remains
+  unserved.
+falsepositives:
+- A great white shark breaching off a California beach town. `breach` beside a place name
+  is not a cyber incident, which is why the cyber gate is a required conjunct rather than
+  a scoring bonus.
+- County names California does not own. Kings is also Brooklyn. Lake is also Illinois, Florida,
+  Indiana and Ohio. Trinity is also Texas. Sierra is also New Mexico.
+- Short padded terms matching inside longer words. 'uc ' fired on 190 articles by matching
+  inside "product" and "reduce".

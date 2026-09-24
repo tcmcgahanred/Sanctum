@@ -1,0 +1,31 @@
+# ------------------------------------------------------------------------------
+#  SIR-5.1.1 · A MITRE ATT&CK technique identifier in the reporting
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-5.1.1
+title: A MITRE ATT&CK technique identifier in the reporting
+status: draft
+modified: '2026-09-24'
+fact: A MITRE ATT&CK technique identifier in the reporting.
+decidable: machine
+sensor:
+  name: MITRE ATT&CK technique library
+  status: ABSENT
+note: An identifier library, not a word list. Set membership, nothing to tune.
+detection:
+  technique_code:
+    pattern: \bT\d{4}(\.\d{3})?\b
+    scope: blob
+  condition: technique_code

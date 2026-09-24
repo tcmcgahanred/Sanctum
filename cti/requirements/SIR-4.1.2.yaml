@@ -1,0 +1,25 @@
+# ------------------------------------------------------------------------------
+#  SIR-4.1.2 · Audience-portfolio relevance
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-4.1.2
+title: Audience-portfolio relevance
+status: analyst
+modified: '2026-09-24'
+fact: 'Audience-portfolio relevance: does it reach the SLTT audience, or is it developer-only,
+  defense-industrial-only, or vendor opinion?'
+decidable: analyst
+standard: Audience filter. Developer-targeted items such as npm poisoning and defense-industrial-base
+  items such as CMMC are out of portfolio unless they reach SLTT through a vendor.

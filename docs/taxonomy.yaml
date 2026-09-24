@@ -58,6 +58,22 @@ sources:
       ordinary sense, but no specific publication has been verified as the source.
       Pin it to the right one (JP 2-0, ADP 2-0, ICD 203 or similar) before this
       file is treated as authoritative. Do not invent a citation.
+  sigma:
+    name: Sigma
+    what: A community format for writing detection logic in yaml, backend
+      agnostic. Named selection blocks plus a `condition:` line combining them.
+    where: https://github.com/SigmaHQ/sigma
+    note: Borrowed for shape, not wholesale. Sigma matches structured log
+      fields; Sanctum matches prose, so its field-equality model does not
+      transfer and its `level:` is deliberately not adopted - severity is the
+      tier and a requirement never points at an implementation.
+  atomic_red_team:
+    name: Atomic Red Team
+    what: A library of small, self-contained tests, one file per ATT&CK
+      technique, each test ending in something that actually runs.
+    where: https://github.com/redcanaryco/atomic-red-team
+    note: Borrowed for packaging. The rule taken from it is that an entry
+      without something that runs is not an entry.
 
 # ==============================================================================
 #  THE APPARATUS
@@ -283,6 +299,36 @@ requirements:
       worth surfacing" and a detector answers "which requirement did this
       answer", and forcing one expression to do both left cheap requirements
       undetectable. A detector changes no score.'
+  keywords:
+    means: A literal list of terms written inside the rule that uses them,
+      rather than named elsewhere. The inline form of a group.
+    lives_in: a detection block
+    read_by_code: true
+    source: sanctum
+    status: settled
+    note: 'Added 2026-09-24. Inline if the list is used once, a named group if
+      used twice or more, a library pointer if maintained outside this
+      repository. It exists so a rule can be read without opening another file.'
+  condition:
+    means: The line naming which of a detection's blocks must match, using and,
+      or, not and parentheses.
+    lives_in: a detection block
+    read_by_code: true
+    source: sigma
+    status: settled
+    note: 'Borrowed from Sigma. Named blocks above, one sentence below. It
+      replaced inline nesting that ran four levels deep. A condition naming a
+      block that does not exist raises rather than returning false.'
+  rule_file:
+    means: One requirement in one file, named for its identifier, under
+      <domain>/requirements/.
+    read_by_code: true
+    source: sanctum
+    status: settled
+    note: 'Added 2026-09-24, modelled on Sigma and Atomic Red Team. _tree.yaml
+      beside it holds the PIRs, indicators and satisfied_by and lists which
+      rules sit under each. A listed rule with no file and a file nobody lists
+      are both refused at load.'
   pattern:
     means: A rule atom matching a regular expression against a scope. For a
       fact that is an identifier rather than a vocabulary.

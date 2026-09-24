@@ -1,0 +1,28 @@
+# ------------------------------------------------------------------------------
+#  SIR-3.1.1 · A vulnerability added to the CISA known exploited catalogue
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-3.1.1
+title: A vulnerability added to the CISA known exploited catalogue
+status: unsupported
+modified: '2026-09-24'
+fact: CISA KEV additions (CVE, date, exploitation status, ransomware-use flag).
+decidable: machine
+sensor:
+  name: dedicated KEV feed
+  status: ABSENT
+note: 'No dedicated KEV sensor. KEV additions reach the corpus only when an advisory or aggregator
+  mentions them, which is the single-aggregator dependence the ICD 203 review flagged. Cheap
+  to close: manifest.reference_lists.kev is already fetched and cached.'

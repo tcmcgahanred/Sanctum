@@ -1,0 +1,25 @@
+# ------------------------------------------------------------------------------
+#  SIR-4.1.1 · A national advisory or campaign with an SLTT nexus
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-4.1.1
+title: A national advisory or campaign with an SLTT nexus
+status: stable
+modified: '2026-09-24'
+fact: National advisories or campaigns with an SLTT nexus.
+decidable: machine
+sensor:
+  name: national feeds
+  status: ACTIVE

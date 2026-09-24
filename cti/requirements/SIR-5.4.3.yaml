@@ -1,0 +1,22 @@
+# ------------------------------------------------------------------------------
+#  SIR-5.4.3 · Assessed sophistication, skill level or modus operandi
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-5.4.3
+title: Assessed sophistication, skill level or modus operandi
+status: analyst
+modified: '2026-09-24'
+fact: Assessed sophistication, skill level, or modus operandi.
+decidable: analyst

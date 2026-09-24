@@ -1,0 +1,139 @@
+# ==============================================================================
+#  THE REQUIREMENTS TREE
+#
+#  Priority intelligence requirements, their indicators, and which rules sit
+#  under each. The rules themselves are one file apiece beside this one.
+#
+#  A PIR asks a question. An indicator STATES what would be true if the answer
+#  were yes. A rule names one fact to collect and says how to find it.
+#
+#  `satisfied_by: any`  its rules are alternative routes to one fact, so a
+#                       missing one is thinner sourcing.
+#  `satisfied_by: all`  its rules are components, so a missing one is a hole.
+#                       A report that ignores this calls both half answered
+#                       and is wrong about one of them.
+#
+#  Every identifier listed under `requirements:` must have a file beside this
+#  one, and every file must be listed here. The loader refuses either way
+#  round, because a rule nothing runs and a listing with no rule both look
+#  exactly like a working tree.
+# ==============================================================================
+pirs:
+- id: PIR-1
+  name: Direct impact to California organizations
+  question: What incidents, breaches, or targeting have directly affected California-based
+    organizations or entities?
+  indicators:
+  - id: IND-1.1
+    statement: A California SLTT or critical-infrastructure organization reported a cyber
+      incident this window.
+    satisfied_by: any
+    requirements:
+    - SIR-1.1.1
+    - SIR-1.1.2
+    - SIR-1.1.3
+    - SIR-1.1.4
+  - id: IND-1.2
+    statement: The reported impact is verified rather than merely claimed.
+    satisfied_by: all
+    requirements:
+    - SIR-1.2.1
+    - SIR-1.2.2
+- id: PIR-2
+  name: SLTT sector targeting anywhere
+  question: What threat activity is targeting SLTT-relevant sectors anywhere, as a leading
+    indicator for California?
+  indicators:
+  - id: IND-2.1
+    statement: An SLTT-relevant sector is under active targeting this window.
+    satisfied_by: any
+    requirements:
+    - SIR-2.1.1
+    - SIR-2.1.2
+  - id: IND-2.2
+    statement: The targeted technology or configuration is present in California SLTT organizations.
+    satisfied_by: all
+    requirements:
+    - SIR-2.2.1
+  - id: IND-2.3
+    statement: The activity is a widening campaign rather than an isolated incident.
+    satisfied_by: all
+    requirements:
+    - SIR-2.3.1
+  - id: IND-2.4
+    statement: Election infrastructure is being targeted somewhere in the United States.
+    satisfied_by: any
+    status: DRAFT
+    requirements:
+    - SIR-2.4.1
+    - SIR-2.4.2
+- id: PIR-3
+  name: Actively-exploited vulnerabilities in SLTT-common technology
+  question: What in-the-wild or KEV vulnerabilities affect technology common in low-maturity
+    SLTT environments?
+  indicators:
+  - id: IND-3.1
+    statement: A vulnerability is under active exploitation in the wild this window.
+    satisfied_by: any
+    requirements:
+    - SIR-3.1.1
+    - SIR-3.1.2
+  - id: IND-3.2
+    statement: The affected technology is present in low-maturity SLTT environments.
+    satisfied_by: all
+    requirements:
+    - SIR-3.2.1
+    - SIR-3.2.2
+  - id: IND-3.3
+    statement: A remediation path exists that the audience can act on.
+    satisfied_by: all
+    requirements:
+    - SIR-3.3.1
+- id: PIR-4
+  name: Broad or national threats with SLTT relevance
+  question: What national-scale threats carry material relevance to SLTT defenders?
+  indicators:
+  - id: IND-4.1
+    statement: A national-scale threat materially affects SLTT defenders.
+    satisfied_by: all
+    requirements:
+    - SIR-4.1.1
+    - SIR-4.1.2
+- id: PIR-5
+  name: Adversary behaviour SLTT defenders should detect or hunt for
+  question: What adversary behaviour should SLTT defenders detect or hunt for this cycle?
+  status: DRAFT
+  note: 'DRAFT. Written to give the CTA TTPs section of the vox a requirement behind it, which
+    it has never had. No scoring rule reads any of this yet: the `ttp` group holds 29 terms
+    and no rule uses it, and no MITRE technique identifier appears anywhere in this file.'
+  indicators:
+  - id: IND-5.1
+    statement: Adversary behaviour is described specifically enough to act on.
+    satisfied_by: any
+    status: DRAFT
+    requirements:
+    - SIR-5.1.1
+    - SIR-5.1.2
+  - id: IND-5.2
+    statement: The activity is attributed to a named threat actor.
+    satisfied_by: any
+    status: DRAFT
+    note: DRAFT. Attribution is not a TTP and does not change what a defender detects. It
+      is collected because it carries the reporting, not because it drives the outcome.
+    requirements:
+    - SIR-5.2.1
+    - SIR-5.2.2
+  - id: IND-5.3
+    statement: Adversary intent is identifiable from the reporting.
+    satisfied_by: all
+    status: DRAFT
+    requirements:
+    - SIR-5.3.1
+  - id: IND-5.4
+    statement: Adversary capability is identifiable from the reporting.
+    satisfied_by: any
+    status: DRAFT
+    requirements:
+    - SIR-5.4.1
+    - SIR-5.4.2
+    - SIR-5.4.3

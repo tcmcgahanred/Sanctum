@@ -1,0 +1,30 @@
+# ------------------------------------------------------------------------------
+#  SIR-2.1.1 · Reported targeting of a named SLTT sector
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-2.1.1
+title: Reported targeting of a named SLTT sector
+status: stable
+modified: '2026-09-24'
+fact: Reported attacks or targeting of a named SLTT sector, any geography.
+decidable: machine
+sensor:
+  name: national trusted feeds + StateScoop
+  status: ACTIVE
+  also: K-12 Dive, WaterISAC - PENDING; GovTech - REJECTED
+note: GovTech advertises no working feed. Both candidate paths returned 0 entries and HTTP
+  404. Do not retry without new evidence.
+falsepositives:
+- An Australian hotel with a water park, matched on a sector word with no cyber context.

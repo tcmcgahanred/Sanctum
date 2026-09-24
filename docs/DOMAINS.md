@@ -100,7 +100,7 @@ remote that had been public since publication.
 
 | Fact | Owner | Everyone else |
 |---|---|---|
-| The whole requirements tree — PIRs, indicators, SIRs, and which sensor serves each | `requirements.md`, or the `requirements:` block of `pnd.yaml` | Reference by name; do not restate the wording |
+| The whole requirements tree — PIRs, indicators, SIRs, and which sensor serves each | `<domain>/requirements/`, one file per rule plus `_tree.yaml`. An unconverted domain may still use `requirements.md` or a `requirements:` block in `pnd.yaml`; the loader reads either | Reference by name; do not restate the wording |
 | **Tier weights, multiplier factors, group terms, thresholds, force-surface rules** | **`pnd.md`** | **Never restate a number.** Explain design *intent* freely; the values live in config because config is what executes |
 | Product format and content standards | `policy.md` (if the domain has one) | Reference and state that the policy wins; do not reproduce the rules |
 | Vocabulary collisions, dropped terms, review dates | `vocab.md` | — |

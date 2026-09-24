@@ -1,0 +1,25 @@
+# ------------------------------------------------------------------------------
+#  SIR-3.2.2 · The affected providers or versions reach this audience
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-3.2.2
+title: The affected providers or versions reach this audience
+status: analyst
+modified: '2026-09-24'
+fact: Which providers or versions are affected, and whether the audience uses them.
+decidable: analyst
+standard: Provider-dependent relevance. A webmail or product item is relevant only if it hits
+  providers the audience runs, such as Google Workspace or Microsoft 365. MSP-only software
+  is low-relevance if few organizations here use MSPs.

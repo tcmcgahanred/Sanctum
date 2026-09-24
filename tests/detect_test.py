@@ -42,8 +42,8 @@ sys.path.insert(0, str(ROOT))
 
 from core.pnd import load_domain                                    # noqa: E402
 from core.rules import (_eval_atom, _scopes, detectable_requirements,  # noqa: E402
-                        make_matcher, requirement_coverage,
-                        score_article)
+                        eval_detection, make_matcher,
+                        requirement_coverage, score_article)
 
 FAILURES = []
 
@@ -174,13 +174,22 @@ def main():
     live = cfg["requirements"]
     sirs = [s for p in live["pirs"] for i in p["indicators"] for s in i["sirs"]]
     check("cti declares 27 requirements", len(sirs), 27)
-    with_det = [s for s in sirs if s.get("detect") is not None]
+    with_det = [s for s in sirs if s.get("detection") is not None]
     check("...two of which carry a detector",
           [s["id"] for s in with_det], ["SIR-5.1.1", "SIR-5.2.1"])
+    check("...each loaded from its own file in cti/requirements/",
+          sorted(s["id"] for s in sirs)[:3],
+          ["SIR-1.1.1", "SIR-1.1.2", "SIR-1.1.3"])
+    check("...and every rule carries a status",
+          sorted({s.get("status") for s in sirs}),
+          ["analyst", "draft", "stable", "unsupported"])
     probe = art("Volt Typhoon used T1059.003", "tracked as G0016 by MITRE")
+    matcher = make_matcher([])
+    _t, pscopes, ptext = _scopes(probe)
     for s in with_det:
         check(f"{s['id']} evaluates without raising",
-              ev(s["detect"], probe, cfg["scoring"]["groups"]), True)
+              eval_detection(s["detection"], cfg["scoring"]["groups"],
+                             matcher, pscopes, ptext), True)
     live_det = detectable_requirements(live, cfg["scoring"])
     cov5 = requirement_coverage(probe, live, cfg["scoring"], detectable=live_det)
     check("the probe answers both live detectors",

@@ -1,0 +1,26 @@
+# ------------------------------------------------------------------------------
+#  SIR-2.4.1 · Reported targeting of election infrastructure
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-2.4.1
+title: Reported targeting of election infrastructure
+status: draft
+modified: '2026-09-24'
+fact: Reported attacks or targeting of election offices, election systems, or voter registration
+  data, any geography.
+decidable: machine
+sensor:
+  name: national trusted feeds
+  status: ACTIVE

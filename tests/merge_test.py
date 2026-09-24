@@ -168,8 +168,14 @@ manifest:
     root = Path(__file__).resolve().parent.parent
     raw = yaml.safe_load((root / "cti" / "pnd.yaml").read_text())
     cfg = load_domain(domain="cti")
-    check("cti/pnd.yaml carries all five top-level blocks", sorted(raw),
-          ["manifest", "production", "requirements", "scoring", "vocab"])
+    # FOUR blocks since 2026-09-24. `requirements:` moved to
+    # cti/requirements/, one file per rule plus _tree.yaml, and is assembled
+    # by core/pnd.py:load_requirements into the same structure it used to
+    # hold. What stays here is only what the engine reads during a run.
+    check("cti/pnd.yaml carries the four runtime blocks", sorted(raw),
+          ["manifest", "production", "scoring", "vocab"])
+    check("...and no requirements block, which would be a second copy",
+          "requirements" in raw, False)
     check("...the vocabulary came with it", len(raw["vocab"]["groups"]), 16)
     check("...and every sensor survived", len(cfg["sensors"]), 55)
     check("...read from the sensor records, not a fenced block",

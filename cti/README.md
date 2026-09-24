@@ -2,7 +2,7 @@
 
 *The operational weekly OSINT cyber-threat-intelligence cycle — an example Sanctum domain, tuned for a State/Local/Tribal/Territorial (SLTT) audience across a regional Area of Responsibility (AOR).*
 
-**BLUF:** This folder is a **domain instance** — configuration and outputs, no engine code. The generic engines live in `../core/` and are pointed at this domain with `../run.sh cti`. Everything CTI-specific — requirements, feeds, scoring, vocabulary and the product spec — is in the single `pnd.yaml`.
+**BLUF:** This folder is a **domain instance** — configuration and outputs, no engine code. The generic engines live in `../core/` and are pointed at this domain with `../run.sh cti`. Feeds, scoring, vocabulary and the product spec are in the single `pnd.yaml`. The requirements are in `requirements/`, one file per requirement plus `_tree.yaml`, moved there on 2026-09-24 so a rule can carry its own search terms and be read on its own.
 
 ## What's here
 
@@ -33,7 +33,7 @@ and falls back, so a domain converts when it is ready and not before.
 
 | Stage | Banner in `pnd.yaml` | The block it owns |
 |---|---|---|
-| 1 · Planning & Direction | `STAGE 1` | `requirements:` — PIR / indicator / SIR. Then `manifest:` runtime and storage |
+| 1 · Planning & Direction | `requirements/` | One file per requirement, PIR / indicator / SIR, plus `_tree.yaml`. Then `manifest:` in `pnd.yaml` for runtime and storage |
 | 2 · Collection | `STAGE 2` | `manifest.collection:` and `manifest.sensors:` — 55 feed records |
 | 3a · Processing | `STAGE 3a` | `scoring:` — tiers (8/4/2/1), keyword groups, multipliers, the cyber-domain gate — and `vocab:`, the per-group requirement attribution |
 | 3b · Exploitation | `STAGE 3b` | `production:` — only `report_title` is read by an engine; the rest is the standard the analyst and the model are held to |

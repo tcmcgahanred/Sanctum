@@ -117,6 +117,21 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
             raise KeyError(f"rule references unknown scope '{scope}'")
         return matcher(scopes[scope], groups[g]) is not None
 
+    # KEYWORDS. A literal list of terms, written in the rule rather than named
+    # somewhere else. This is what lets a rule be read on its own: you can see
+    # what it searches for without opening another file. Same matching as a
+    # `group`, same word-boundary rule for short terms.
+    #
+    # `group` is still here and still correct for a list used by several rules,
+    # and for one too large to write out - the derived place table is 1,672
+    # rows. The choice: inline if used once, a named group if used twice or
+    # more, a library pointer if maintained outside this repository.
+    if "keywords" in atom:
+        scope = atom.get("scope", "blob")
+        if scope not in scopes:
+            raise KeyError(f"keywords references unknown scope '{scope}'")
+        return matcher(scopes[scope], atom["keywords"] or []) is not None
+
     # PATTERN. For a fact that is an identifier rather than a vocabulary: a
     # MITRE ATT&CK technique code, a CVE, a CPE string. Set membership with
     # nothing to tune, which is why an identifier can carry a requirement on
@@ -210,6 +225,10 @@ def _rule_matched_terms(atom, groups, matcher, scopes, text_l):
         scope = (pat.get("scope") if isinstance(pat, dict) else None) or "blob"
         m = _compiled(expr).search(scopes[scope])
         return f"pattern:'{m.group(0) if m else None}'@{scope}"
+    if "keywords" in atom:
+        scope = atom.get("scope", "blob")
+        hit = matcher(scopes[scope], atom["keywords"] or [])
+        return f"keywords:'{hit}'@{scope}"
     if "proximity" in atom:
         p = atom["proximity"]
         return f"{p['a']}~{p['b']}"
@@ -325,6 +344,146 @@ def satisfied_elements(art, scoring, force_rules=None):
     return sorted(out)
 
 
+# ------------------------------------------------------------------
+# Sigma-shaped detection: named blocks above, one condition line below
+# ------------------------------------------------------------------
+def _tokenise(expr):
+    """Split a condition line into names, operators and parentheses."""
+    return re.findall(r"\(|\)|\b(?:and|or|not)\b|[A-Za-z_][A-Za-z0-9_]*", expr)
+
+
+def _parse_condition(tokens, pos=0):
+    """
+    A three-level grammar, standard precedence: not binds tightest, then and,
+    then or.
+
+        expr   := term   (or term)*
+        term   := factor (and factor)*
+        factor := not factor | ( expr ) | NAME
+
+    Returns (node, next_position). A node is ("name", str), ("not", node),
+    ("and", [nodes]) or ("or", [nodes]).
+    """
+    def factor(i):
+        if i >= len(tokens):
+            raise ValueError("condition ended unexpectedly")
+        tok = tokens[i]
+        if tok == "not":
+            node, i = factor(i + 1)
+            return ("not", node), i
+        if tok == "(":
+            node, i = expr(i + 1)
+            if i >= len(tokens) or tokens[i] != ")":
+                raise ValueError("condition has an unclosed '('")
+            return node, i + 1
+        if tok in ("and", "or", ")"):
+            raise ValueError(f"condition has {tok!r} where a block name was expected")
+        return ("name", tok), i + 1
+
+    def term(i):
+        node, i = factor(i)
+        parts = [node]
+        while i < len(tokens) and tokens[i] == "and":
+            node, i = factor(i + 1)
+            parts.append(node)
+        return (parts[0] if len(parts) == 1 else ("and", parts)), i
+
+    def expr(i):
+        node, i = term(i)
+        parts = [node]
+        while i < len(tokens) and tokens[i] == "or":
+            node, i = term(i + 1)
+            parts.append(node)
+        return (parts[0] if len(parts) == 1 else ("or", parts)), i
+
+    node, i = expr(pos)
+    if i != len(tokens):
+        raise ValueError(f"condition has trailing tokens: {' '.join(tokens[i:])}")
+    return node, i
+
+
+_CONDITION_CACHE = {}
+
+
+def _condition(expr):
+    node = _CONDITION_CACHE.get(expr)
+    if node is None:
+        toks = _tokenise(str(expr))
+        if not toks:
+            raise ValueError("condition is empty")
+        node, _ = _parse_condition(toks)
+        _CONDITION_CACHE[expr] = node
+    return node
+
+
+def eval_detection(detection, groups, matcher, scopes, text_l):
+    """
+    Evaluate a Sigma-shaped detection block.
+
+    A detection is named blocks plus one `condition:` line naming them:
+
+        detection:
+          technique_code:
+            pattern: '\bT\d{4}(\.\d{3})?\b'
+          listicle:
+            keywords: [top 10, biggest, ranked]
+            scope: title
+          condition: technique_code and not listicle
+
+    WHY THIS SHAPE. The old one nested the logic inline, so a rule was four
+    levels of any/all/not and you had to hold the structure in your head. Here
+    the blocks are named pieces and the condition is a sentence. It is the
+    same evaluator underneath; only the writing changes.
+
+    A block is any rule atom: `keywords`, `group`, `pattern`, `proximity`, or
+    a nested `any`/`all`/`not`. A `proximity` block may name OTHER BLOCKS in
+    the same detection as its `a` and `b`, which keeps a rule self-contained.
+
+    A condition naming a block that does not exist RAISES. A silent false
+    would report the requirement as unanswered forever with nothing saying why.
+    """
+    if not isinstance(detection, dict):
+        raise ValueError("detection must be a mapping of named blocks plus "
+                         "a `condition:` line")
+    if "condition" not in detection:
+        raise ValueError("detection has no `condition:` line naming which of "
+                         f"its blocks must match: {sorted(detection)}")
+    blocks = {k: v for k, v in detection.items() if k != "condition"}
+    if not blocks:
+        raise ValueError("detection declares a condition but no blocks")
+
+    # A proximity block may reference sibling blocks rather than global groups.
+    # Resolve those to term lists first, so `a:` and `b:` mean the same thing
+    # whether they name a group or a `keywords` block in this rule.
+    local = dict(groups)
+    for name, blk in blocks.items():
+        if isinstance(blk, dict) and "keywords" in blk:
+            local[name] = blk["keywords"] or []
+
+    cache = {}
+
+    def value(name):
+        if name not in cache:
+            if name not in blocks:
+                raise ValueError(
+                    f"condition names {name!r}, which is not a block in this "
+                    f"detection. Blocks here: {sorted(blocks)}")
+            cache[name] = _eval_atom(blocks[name], local, matcher, scopes, text_l)
+        return cache[name]
+
+    def walk(node):
+        kind = node[0]
+        if kind == "name":
+            return value(node[1])
+        if kind == "not":
+            return not walk(node[1])
+        if kind == "and":
+            return all(walk(x) for x in node[1])
+        return any(walk(x) for x in node[1])
+
+    return walk(_condition(detection["condition"]))
+
+
 def requirement_coverage(art, requirements, scoring, force_rules=None,
                          detectable=None):
     """
@@ -382,11 +541,19 @@ def requirement_coverage(art, requirements, scoring, force_rules=None,
                 sid = sir.get("id")
                 if not sid:
                     continue
-                det = sir.get("detect")
+                # `detection:` is the Sigma shape - named blocks plus a
+                # condition line. `detect:` was the first shape, a bare atom,
+                # and is still read so nothing has to convert on a flag day.
+                det = sir.get("detection")
                 if det is not None:
                     tested.add(sid)
                     detectable.add(sid)
-                    if _eval_atom(det, groups, matcher, scopes, text_l):
+                    if eval_detection(det, groups, matcher, scopes, text_l):
+                        met.add(sid)
+                elif sir.get("detect") is not None:
+                    tested.add(sid)
+                    detectable.add(sid)
+                    if _eval_atom(sir["detect"], groups, matcher, scopes, text_l):
                         met.add(sid)
                 if sid in by_rule:
                     met.add(sid)
@@ -436,7 +603,8 @@ def detectable_requirements(requirements, scoring):
     for pir in (requirements or {}).get("pirs", []) or []:
         for ind in pir.get("indicators", []) or []:
             for sir in ind.get("sirs", []) or []:
-                if sir.get("detect") is not None and sir.get("id"):
+                if sir.get("id") and (sir.get("detection") is not None
+                                      or sir.get("detect") is not None):
                     out.add(sir["id"])
     return out
 

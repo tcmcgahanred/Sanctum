@@ -1,0 +1,30 @@
+# ------------------------------------------------------------------------------
+#  SIR-1.1.1 · A breach notification naming a California organization
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-1.1.1
+title: A breach notification naming a California organization
+status: unsupported
+modified: '2026-09-24'
+fact: Breach notifications affecting Californians (org, date, type, records).
+decidable: machine
+sensor:
+  name: CA AG breach-registry scraper
+  status: PENDING
+note: 'The collector no longer blocks this. A sensor record may declare ''kind: page'', which
+  is re-read every run and identified by its contents rather than its URL, so a portal that
+  posts new notifications under one unchanging address is collected. The scraper that turns
+  registry rows into per-victim records is still to build, and the record should declare a
+  ''title:'' or the scorer will floor it as untitled.'

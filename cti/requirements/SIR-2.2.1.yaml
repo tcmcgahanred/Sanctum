@@ -1,0 +1,25 @@
+# ------------------------------------------------------------------------------
+#  SIR-2.2.1 · The targeted technology is present in California SLTT organizations
+#
+#  One requirement, one file. Copy the closest existing rule rather than
+#  starting from a skeleton; the one you copy is live and tested.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but no sensor reaches it yet
+#           draft       the wording is proposed, not settled
+#           analyst     no expression will ever answer it, and it is therefore
+#                       NOT a collection gap
+#
+#  `decidable: machine` carries a `detection:` block or it is not finished.
+#  `falsepositives:` records what WILL match and should not. Write it here,
+#  beside the rule, not in a changelog nobody reads beside the rule.
+# ------------------------------------------------------------------------------
+id: SIR-2.2.1
+title: The targeted technology is present in California SLTT organizations
+status: analyst
+modified: '2026-09-24'
+fact: Whether the targeted technology or configuration is common in California SLTT organizations,
+  for example internet-exposed PLCs in small water systems.
+decidable: analyst
+note: This is the leading-indicator logic. Out-of-state targeting matters because the same
+  exposure exists here.

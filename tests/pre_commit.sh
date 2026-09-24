@@ -12,6 +12,7 @@
 #   merge_test.py        one file per domain assembles, and nothing is declared twice
 #   page_recollect_test.py a declared portal is re-read; a non-feed still is not
 #   detect_test.py       a requirement can carry its own detector
+#   requirements_dir_test.py  one requirement is one file
 #   fetch_test.py        failure pages never become article bodies, and old
 #                        reports never enter the corpus
 #   changelog_check.sh   you changed something — did you write it down? (warns)
@@ -92,6 +93,11 @@ if command -v python3 >/dev/null 2>&1; then
     # grows a record every run.
     python3 "$REPO_ROOT/tests/page_recollect_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/page_recollect_test.py failed; a declared portal is no longer re-read, or a non-feed source is being re-collected when it should not be" >&2
+        STATUS=1
+    }
+
+    python3 "$REPO_ROOT/tests/requirements_dir_test.py" >/dev/null || {
+        echo "pre-commit: BLOCKED — tests/requirements_dir_test.py failed; the requirements directory and its tree disagree, or a condition line no longer parses" >&2
         STATUS=1
     }
 
