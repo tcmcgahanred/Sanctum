@@ -2,7 +2,7 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
-## [2026-09-25] The logsource becomes the first filter
+## [2026-09-24] The logsource becomes the first filter
 
 **The fix for nine detectors that were far too loose, and it changes no condition.** Measured the evening before: 13 of 14 testable requirements matched, but nine of them returned four to nine percent of the corpus each. **The cause was that `logsource:` was declared on sixteen rules and read by nothing, so every detector ran against every article.**
 
