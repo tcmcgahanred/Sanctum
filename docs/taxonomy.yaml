@@ -272,6 +272,27 @@ requirements:
       In cti/pnd.yaml the field is spelled `indicators:`. Carries
       satisfied_by: all or any, which decides whether its SIRs are components
       or alternative routes.'
+  detect:
+    means: An expression on a specific information requirement that decides
+      whether an article satisfies it. Same atom language as a scoring rule.
+    lives_in: requirements.pirs[].indicators[].sirs[]
+    read_by_code: true
+    source: sanctum
+    status: settled
+    note: 'Added 2026-09-24. It exists because a scoring rule answers "is this
+      worth surfacing" and a detector answers "which requirement did this
+      answer", and forcing one expression to do both left cheap requirements
+      undetectable. A detector changes no score.'
+  pattern:
+    means: A rule atom matching a regular expression against a scope. For a
+      fact that is an identifier rather than a vocabulary.
+    lives_in: any rule or detect expression
+    read_by_code: true
+    source: sanctum
+    status: settled
+    note: Case-insensitive. Scope is stated, not inherited, because `group`
+      defaults to blob and `proximity` defaults to text. A pattern that does
+      not compile raises rather than silently never matching.
   satisfied_by:
     means: Whether the specific information requirements under an indicator are
       components that must all be present (all) or alternative routes to one

@@ -2,6 +2,20 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-09-24] A requirement can detect itself
+
+**Additive. No scoring behaviour changes** — proven by comparing the parsed `scoring`, `vocab`, `production` and `manifest` blocks against HEAD, all four identical.
+
+- **The problem this fixes.** A scoring rule answers "is this article worth surfacing." A detector answers "which requirement did this article satisfy." Those were the same expression, because the only path to attribution was a scoring rule naming a requirement in `serves_sir:`. The consequence was concrete: a MITRE ATT&CK technique identifier is a one-line pattern that should never move a score, so no scoring rule would own it, so the requirement stayed unanswerable.
+- **New: `detect:` on a specific information requirement**, written in the same atom language the scoring rules use. It changes no score. `core/rules.py:requirement_coverage` evaluates it, and treats the detector path and the `serves_sir:` path as a union, so a requirement reachable both ways is satisfied by either.
+- **New rule atom: `pattern:`**, a case-insensitive regular expression against a named scope. For facts that are identifiers rather than vocabulary. **Scope is stated, never inherited**, because the two existing atoms disagree about their default: `group` defaults to blob and `proximity` defaults to text, and a third silent default would be worse than none. **A pattern that does not compile raises**, because a detector that silently never fires would report its requirement as uncollected forever with nothing saying why.
+- **Four states per indicator, not one silence:** satisfied; `needs_analyst`, the machine half passed but an analyst requirement under the same `all` still needs a person; unsatisfied; and `no_detector`, nothing can test it. **The last one is a build gap, not a quiet week, and adding them together would make collection look worse than it is.**
+- **First two detectors, both patterns, both in the DRAFT PIR-5:** SIR-5.1.1 matches `T` and four digits with an optional sub-technique, which is exactly the stated fact. SIR-5.2.1 matches `G` and four digits and **says on its face that it is partial** — the "or a vendor group name" half of that fact needs the ATT&CK group library with its aliases, so an actor named only in words is not detected.
+- **New tool, read-only: `tools/requirement_coverage.py`.** Reports per requirement whether it was met, testable but unmatched, has no detector, or is decided by a person; and per indicator which of the four states it reached, honouring `satisfied_by`. `--corpus` reads a copy, `--surfaced-only` counts just what clears the score cut, `--sir` lists matching titles.
+- **New guard in `tools/vocab_check.py`: a scoring rule cannot detect what only a person can decide.** It fired immediately on the live file: SIR-2.2.1 and SIR-3.2.1 are marked `decidable: analyst` and are both named by the "low-maturity SLTT tech" multiplier. Either that rule is matching a proxy and calling it the fact, or those two are machine decidable. **Left unflagged it inflates coverage with requirements nothing really answered.** Not resolved here; it is the owner's call.
+- **Measured against the tree as it stands:** 27 requirements, 2 met by something, 0 testable but unmatched, 14 with no detector, 11 decided by a person.
+- **Verified:** thirteen test files pass, `tools/vocab_check.py` reports 0 errors, `tests/domain_check.py` is clean. `tests/detect_test.py` is new, 30 checks, and is wired into `tests/pre_commit.sh`.
+
 ## [2026-09-24] The requirements tree becomes PIR / indicator / SIR
 
 **Planning and Direction restructure. No scoring behaviour changes** — proven by parsing the file before and after and comparing the `scoring`, `vocab`, `production` and `manifest` blocks, which are identical once the requirement claims on each rule are set aside.

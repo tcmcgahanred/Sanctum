@@ -7,7 +7,8 @@ multipliers, and tier-assignment rules come from a domain's P&D config
 (see core/pnd.py). This module only knows how to:
   - match keyword groups against an article (with the same word-boundary
     semantics the CTI pre-filter used), and
-  - evaluate a small rule tree (any / all / group / proximity / always)
+  - evaluate a small rule tree (any / all / not / group / proximity /
+    pattern / always)
     to assign the single highest qualifying tier, then apply multipliers.
 
 Faithful to the original hardcoded CTI arbites.py: same _hit semantics,
@@ -74,6 +75,31 @@ def _scopes(art):
 # ------------------------------------------------------------------
 # Rule-tree evaluation
 # ------------------------------------------------------------------
+# A compiled-pattern cache. Patterns come from a domain file, so the set is
+# small and fixed for a run; recompiling one per article per atom would be the
+# only expensive thing in this module.
+_PATTERN_CACHE = {}
+
+
+def _compiled(expr):
+    """Compile a domain-supplied regular expression, case-insensitively.
+
+    A BAD PATTERN IS A LOUD FAILURE, not a silent non-match. A requirement
+    whose detector never fires because its pattern does not compile would
+    report as an uncollected requirement forever, and nothing would say why.
+    """
+    rx = _PATTERN_CACHE.get(expr)
+    if rx is None:
+        try:
+            rx = re.compile(expr, re.IGNORECASE)
+        except re.error as e:
+            raise ValueError(
+                f"detector pattern {expr!r} is not a valid regular "
+                f"expression: {e}") from None
+        _PATTERN_CACHE[expr] = rx
+    return rx
+
+
 def _eval_atom(atom, groups, matcher, scopes, text_l):
     # bare string "always"
     if isinstance(atom, str):
@@ -91,6 +117,22 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
             raise KeyError(f"rule references unknown scope '{scope}'")
         return matcher(scopes[scope], groups[g]) is not None
 
+    # PATTERN. For a fact that is an identifier rather than a vocabulary: a
+    # MITRE ATT&CK technique code, a CVE, a CPE string. Set membership with
+    # nothing to tune, which is why an identifier can carry a requirement on
+    # its own where an ordinary word never can.
+    #
+    # Scope is DECLARED, never inherited, because the two existing atoms
+    # disagree about their default - `group` defaults to blob, `proximity`
+    # defaults to text - and a third silent default would be worse than none.
+    # Written bare (`pattern: "..."`) the scope is blob, the widest.
+    if "pattern" in atom:
+        pat = atom["pattern"]
+        expr = pat["match"] if isinstance(pat, dict) else pat
+        scope = (pat.get("scope") if isinstance(pat, dict) else None) or "blob"
+        if scope not in scopes:
+            raise KeyError(f"pattern references unknown scope '{scope}'")
+        return _compiled(expr).search(scopes[scope]) is not None
     if "proximity" in atom:
         p = atom["proximity"]
         a_terms = groups[p["a"]]
@@ -162,6 +204,12 @@ def _rule_matched_terms(atom, groups, matcher, scopes, text_l):
         scope = atom.get("scope", "blob")
         hit = matcher(scopes[scope], groups[atom["group"]])
         return f"{atom['group']}:'{hit}'@{scope}"
+    if "pattern" in atom:
+        pat = atom["pattern"]
+        expr = pat["match"] if isinstance(pat, dict) else pat
+        scope = (pat.get("scope") if isinstance(pat, dict) else None) or "blob"
+        m = _compiled(expr).search(scopes[scope])
+        return f"pattern:'{m.group(0) if m else None}'@{scope}"
     if "proximity" in atom:
         p = atom["proximity"]
         return f"{p['a']}~{p['b']}"
@@ -275,6 +323,122 @@ def satisfied_elements(art, scoring, force_rules=None):
             out.update(_claimed(f))
 
     return sorted(out)
+
+
+def requirement_coverage(art, requirements, scoring, force_rules=None,
+                         detectable=None):
+    """
+    Which requirements this one article satisfied, and what that leaves.
+
+    TWO WAYS A REQUIREMENT CAN BE SATISFIED, and they are deliberately
+    different jobs:
+
+      `detect:` on the requirement itself - an expression written to answer
+                THAT FACT, in the same atom language the scoring rules use.
+                It does not have to change any score. A MITRE ATT&CK technique
+                code is a one-line pattern and should never move a score, so
+                no scoring rule would ever want to own it.
+
+      `serves_sir:` on a scoring rule - a rule that fired and claims it can
+                honestly attest the requirement. This is the older path and it
+                stays, because where a scoring rule genuinely IS the detector,
+                writing the expression twice would be two copies of one fact.
+
+    The two are a union. A requirement reachable both ways is satisfied by
+    either.
+
+    AN INDICATOR IS NOT A COUNT. `satisfied_by: all` means its requirements are
+    components, so every one must be present. `satisfied_by: any` means they
+    are alternative routes to one fact, so one is enough. A report that treated
+    both as a percentage would call them both half answered and be wrong about
+    one of them.
+
+    FOUR STATES PER INDICATOR, because one silence would hide three different
+    situations:
+      satisfied      the machine test passed, and nothing else is required
+      needs_analyst  the machine test passed, but a `decidable: analyst`
+                     requirement under the same `all` still needs a person
+      unsatisfied    the machine test ran and did not pass
+      no_detector    nothing can test it - no requirement under it has a
+                     `detect:` block or is claimed by any scoring rule. This
+                     is a build gap, NOT a quiet week, and counting it as a
+                     miss would make collection look worse than it is.
+
+    `detectable` is the set of requirement ids some scoring rule COULD claim,
+    computed once per run by `detectable_requirements`. Passing it is what
+    separates "nothing matched" from "nothing could".
+    """
+    groups = scoring["groups"]
+    matcher = make_matcher(scoring.get("word_boundary_terms"))
+    _title, scopes, text_l = _scopes(art)
+
+    by_rule = set(satisfied_elements(art, scoring, force_rules))
+    detectable = set(detectable if detectable is not None else by_rule)
+
+    met, tested = set(), set()
+    for pir in (requirements or {}).get("pirs", []) or []:
+        for ind in pir.get("indicators", []) or []:
+            for sir in ind.get("sirs", []) or []:
+                sid = sir.get("id")
+                if not sid:
+                    continue
+                det = sir.get("detect")
+                if det is not None:
+                    tested.add(sid)
+                    detectable.add(sid)
+                    if _eval_atom(det, groups, matcher, scopes, text_l):
+                        met.add(sid)
+                if sid in by_rule:
+                    met.add(sid)
+                    tested.add(sid)
+
+    indicators = {}
+    for pir in (requirements or {}).get("pirs", []) or []:
+        for ind in pir.get("indicators", []) or []:
+            sirs = ind.get("sirs", []) or []
+            machine = [s for s in sirs if s.get("decidable") == "machine"]
+            analyst = [s for s in sirs if s.get("decidable") == "analyst"]
+            reachable = [s for s in machine if s.get("id") in detectable]
+            mode = ind.get("satisfied_by", "any")
+            if not reachable:
+                state = "no_detector"
+            else:
+                hits = [s for s in reachable if s.get("id") in met]
+                if mode == "all":
+                    ok = len(hits) == len(machine) and bool(machine)
+                else:
+                    ok = bool(hits)
+                if not ok:
+                    state = "unsatisfied"
+                elif mode == "all" and analyst:
+                    state = "needs_analyst"
+                else:
+                    state = "satisfied"
+            indicators[ind["id"]] = state
+
+    return {"sirs_met": sorted(met), "sirs_tested": sorted(tested),
+            "indicators": indicators}
+
+
+def detectable_requirements(requirements, scoring):
+    """
+    Every requirement id something COULD satisfy, whatever this article says.
+
+    The union of requirements carrying a `detect:` block and requirements named
+    by any scoring rule. Computed once per run, then handed to
+    `requirement_coverage` so a report can say "nothing matched" and "nothing
+    could" as different things.
+    """
+    out = set()
+    for coll in ("tiers", "multipliers", "floors", "force_surface"):
+        for rule in (scoring.get(coll) or []):
+            out.update(_claimed(rule))
+    for pir in (requirements or {}).get("pirs", []) or []:
+        for ind in pir.get("indicators", []) or []:
+            for sir in ind.get("sirs", []) or []:
+                if sir.get("detect") is not None and sir.get("id"):
+                    out.add(sir["id"])
+    return out
 
 
 def tier_requirement(tier_id, scoring):
