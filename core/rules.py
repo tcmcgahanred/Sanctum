@@ -484,8 +484,34 @@ def eval_detection(detection, groups, matcher, scopes, text_l):
     return walk(_condition(detection["condition"]))
 
 
+def logsource_match(rule_ls, art_ls):
+    """
+    Does the article come from the kind of source this rule needs?
+
+    Both sides declare the same two axes. `any` on either side matches
+    anything, which is how a rule that genuinely reads everything - a MITRE
+    technique identifier turns up wherever it turns up - says so out loud
+    rather than by omission.
+
+    AN UNKNOWN ARTICLE DOES NOT MATCH A SCOPED RULE. If the sensor that
+    collected it is not in the manifest any more, we cannot confirm it came
+    from the right kind of source, and guessing yes is how a rule for a breach
+    registry ends up reading press. The coverage report counts these
+    separately so the number is visible rather than absorbed.
+    """
+    wanted = {a: rule_ls.get(a) for a in ("scope", "kind")} if rule_ls else {}
+    wanted = {a: v for a, v in wanted.items() if v not in (None, "any")}
+    if not wanted:
+        # Declares nothing, or `any` on both axes: it reads everything,
+        # including an article whose sensor is no longer in the manifest.
+        return True
+    if art_ls is None:
+        return False
+    return all(art_ls.get(a) == v for a, v in wanted.items())
+
+
 def requirement_coverage(art, requirements, scoring, force_rules=None,
-                         detectable=None):
+                         detectable=None, sensor_classes=None):
     """
     Which requirements this one article satisfied, and what that leaves.
 
@@ -533,6 +559,10 @@ def requirement_coverage(art, requirements, scoring, force_rules=None,
 
     by_rule = set(satisfied_elements(art, scoring, force_rules))
     detectable = set(detectable if detectable is not None else by_rule)
+    # The kind of source this article came from. `source` holds the sensor's
+    # own URL - core/acolyte.py passes it at both call sites - so this is an
+    # exact lookup, not an inference.
+    art_ls = (sensor_classes or {}).get(str(art.get("source", "")))
 
     met, tested = set(), set()
     for pir in (requirements or {}).get("pirs", []) or []:
@@ -546,8 +576,13 @@ def requirement_coverage(art, requirements, scoring, force_rules=None,
                 # and is still read so nothing has to convert on a flag day.
                 det = sir.get("detection")
                 if det is not None:
-                    tested.add(sid)
                     detectable.add(sid)
+                    # THE LOGSOURCE IS THE FIRST FILTER, before any term is
+                    # matched, exactly as it is in Sigma. A rule that needs a
+                    # breach registry does not get to read press.
+                    if not logsource_match(sir.get("logsource"), art_ls):
+                        continue
+                    tested.add(sid)
                     if eval_detection(det, groups, matcher, scopes, text_l):
                         met.add(sid)
                 elif sir.get("detect") is not None:

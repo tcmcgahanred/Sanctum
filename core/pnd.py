@@ -285,6 +285,7 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
         "base_dir": base_dir,
         "sensors": sensors,
         "sensor_records": records,
+        "sensor_classes": sensor_classes(records),
         "sensors_source": sensors_source,
         "sensors_path": sensors_path,
         "corpus_dir": corpus_dir,
@@ -294,6 +295,30 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
         "staging_out": base_dir / "staging_candidates.md",
     }
     return result
+
+
+def sensor_classes(records):
+    """
+    Map each sensor's URL to the kind of source it is.
+
+    A corpus record stores the sensor's own URL in its `source` field - both
+    call sites in core/acolyte.py pass it - so this is an exact lookup back to
+    the sensor that collected an article, and it works on the whole existing
+    corpus rather than only on what is collected from now on.
+
+    WHY IT EXISTS. A requirement declares the kind of source that could answer
+    it. Until this map existed that declaration was decoration: every detector
+    ran against every article, so the rule for "a breach notification naming a
+    California organization" read general press and matched 153 articles in 30
+    days when no breach registry feed exists at all. In Sigma a rule for Okta
+    logs never runs against Windows events, and the logsource is what stops it.
+    """
+    out = {}
+    for r in records or []:
+        ls = r.get("logsource")
+        if r.get("url") and isinstance(ls, dict):
+            out[r["url"]] = {"scope": ls.get("scope"), "kind": ls.get("kind")}
+    return out
 
 
 def load_requirements(domain_dir, inline):
@@ -367,6 +392,32 @@ def load_requirements(domain_dir, inline):
             # `sirs` is the assembled name, so everything downstream - the
             # coverage tool, vocab_check, the tests - is untouched by the move.
             ind["sirs"] = [rules[r] for r in listed]
+
+    # A BLOCK NOTHING REFERENCES is the mirror of a file nobody lists, and it
+    # is the worse of the two because the rule looks finished. SIR-3.1.1
+    # defined a proximity block and its condition never named it, so it fired
+    # on any article with a vulnerability identifier anywhere and exploitation
+    # language anywhere, unrelated - 235 matches in 30 days. Nothing said so.
+    #
+    # A proximity block reaches its operands by name too, so those count as
+    # references.
+    for rid, rule in sorted(rules.items()):
+        det = rule.get("detection")
+        if not isinstance(det, dict) or "condition" not in det:
+            continue
+        named = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*",
+                               str(det["condition"]))) - {"and", "or", "not"}
+        for blk in det.values():
+            if isinstance(blk, dict) and isinstance(blk.get("proximity"), dict):
+                named.update(str(x) for x in (blk["proximity"].get("a"),
+                                              blk["proximity"].get("b")) if x)
+        dead = sorted((set(det) - {"condition"}) - named)
+        if dead:
+            raise ValueError(
+                f"{req_dir / (rid + '.yaml')}: detection defines {dead}, which "
+                f"the condition never names and no proximity block uses. A "
+                f"block nothing references makes the rule look more careful "
+                f"than it is. Reference it, or delete it.")
 
     orphans = sorted(set(rules) - seen)
     if orphans:

@@ -31,6 +31,8 @@ WHAT IS CHECKED
   orphan          a file nobody lists is refused, naming it
   filename        a rule whose id does not match its filename is refused
   no tree         a directory with no _tree.yaml is refused
+  dead block      a detection block nothing references is refused
+  proximity       an operand of a proximity block counts as a reference
   condition       named blocks plus a condition line, with and / or / not
   bad condition   a condition naming a block that does not exist raises
   keywords        a rule carrying its own terms matches without a group
@@ -175,6 +177,32 @@ def main():
         d6 = build(tmp / "notree", tree=None)
         refuses("a directory with no _tree.yaml is refused",
                 lambda: load_requirements(d6, None), "_tree.yaml")
+
+        # THE MIRROR OF A FILE NOBODY LISTS, and the worse of the two, because
+        # the rule looks finished. SIR-3.1.1 shipped with a proximity block its
+        # condition never named, so it fired on a vulnerability identifier
+        # anywhere plus exploitation language anywhere: 235 matches in 30 days
+        # and nothing said so.
+        dead = RULE_A.replace(
+            "  condition: alpha",
+            "  beta:\n    keywords: [unused]\n    scope: blob\n  condition: alpha")
+        d7 = build(tmp / "deadblock",
+                   rules=(("SIR-9.1.1", dead), ("SIR-9.1.2", RULE_B)))
+        refuses("a detection block nothing references is refused, naming it",
+                lambda: load_requirements(d7, None), "beta")
+
+        # ...but an operand of a proximity block IS referenced, even though the
+        # condition never names it, and must not be refused.
+        prox = RULE_A.replace(
+            "  condition: alpha",
+            "  beta:\n    keywords: [utility]\n    scope: blob\n"
+            "  near:\n    proximity: {a: alpha, b: beta, window: 50, scope: blob}\n"
+            "  condition: near")
+        d8 = build(tmp / "proxok",
+                   rules=(("SIR-9.1.1", prox), ("SIR-9.1.2", RULE_B)))
+        tree8 = load_requirements(d8, None)
+        check("a proximity operand counts as a reference",
+              tree8["pirs"][0]["indicators"][0]["sirs"][0]["id"], "SIR-9.1.1")
 
         print("\nNamed blocks plus a condition line")
         det = {"code": {"pattern": r"\bT\d{4}\b", "scope": "blob"},

@@ -13,6 +13,11 @@ now nothing could say how many of them the collection actually satisfies, so
     ... --sir SIR-5.1.1    show matching titles for one requirement
     ... --corpus DIR       read a corpus copy instead of the live one
 
+A rule's `logsource:` is the FIRST filter, before any term is matched, the
+way it is in Sigma. A rule that needs a breach registry does not read press.
+An article whose sensor is no longer in the manifest cannot be matched by any
+rule that declares a logsource, and the count of those is printed.
+
 WHAT IT REPORTS
 
   Per requirement, over the window:
@@ -94,6 +99,7 @@ def main():
 
     threshold = float(scoring.get("settings", {}).get("surface_min_score", 2.0))
     detectable = detectable_requirements(req, scoring)
+    classes = cfg.get("sensor_classes") or {}
 
     corpus = args.corpus or cfg["corpus_dir"]
     arts = load(corpus, args.days)
@@ -104,11 +110,20 @@ def main():
         print(f"surfaced only: {len(arts)} at or above {threshold}")
     print()
 
+    # How many articles came from a sensor the manifest no longer lists. A
+    # rule with a logsource cannot read those, so the number has to be visible
+    # rather than absorbed into the misses.
+    unknown = sum(1 for a in arts if str(a.get("source", "")) not in classes)
+    print(f"sensor classes: {len(classes)} sensors classified; "
+          f"{unknown} article(s) in this window came from a source the "
+          f"manifest no longer lists\n")
+
     met = {}
     examples = {}
     ind_states = {}
     for art in arts:
-        cov = requirement_coverage(art, req, scoring, detectable=detectable)
+        cov = requirement_coverage(art, req, scoring, detectable=detectable,
+                                   sensor_classes=classes)
         for sid in cov["sirs_met"]:
             met[sid] = met.get(sid, 0) + 1
             if args.sir and sid == args.sir:
@@ -140,10 +155,13 @@ def main():
                 else:
                     verdict, key = "NONE", "NONE"
                 counts[key] += 1
-                how = "detect" if sir.get("detect") is not None else (
+                how = "detect" if sir.get("detection") is not None else (
                     "rule" if sid in detectable else "-")
+                ls = sir.get("logsource") or {}
+                src = (f"{ls.get('scope', '-')}/{ls.get('kind', '-')}"
+                       if ls else "-")
                 print(f"          {sid:<12} {verdict:<12} via {how:<7} "
-                      f"{sir.get('fact', '')[:58]}")
+                      f"{src:<28} {sir.get('fact', '')[:44]}")
         print()
 
     total = sum(counts.values())

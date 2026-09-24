@@ -228,6 +228,56 @@ def main():
     check("a listicle with nothing in it answers nothing under PIR-5",
           [x for x in quiet["sirs_met"] if x.startswith("SIR-5")], [])
 
+    print("\nThe logsource is the FIRST filter, before any term is matched")
+    classes = cfg["sensor_classes"]
+    check("every sensor in the manifest is classified", len(classes), 55)
+    check("...on two axes",
+          sorted({k for v in classes.values() for k in v}), ["kind", "scope"])
+
+    # A corpus record stores the sensor's own URL in `source`, so the lookup
+    # back to the sensor is exact rather than inferred.
+    press = next(u for u, c in classes.items()
+                 if c == {"scope": "national", "kind": "press"})
+    registry = next(u for u, c in classes.items()
+                    if c["kind"] == "breach_registry")
+
+    def sourced(url, title, text=""):
+        a = art(title, text)
+        a["source"] = url
+        return a
+
+    # THE FAILURE THIS FIXES. SIR-1.1.1 is "a breach notification naming a
+    # California organization", its logsource is a regional breach registry,
+    # no such sensor exists, and before this it matched 153 articles of press
+    # coverage in 30 days.
+    breachy = ("Sacramento county says personal information was exposed. The "
+               "breach notification letter names 4,000 records affected by the "
+               "cyberattack, and the attorney general was notified.")
+    live_det2 = detectable_requirements(live, cfg["scoring"])
+
+    def met(a):
+        return requirement_coverage(a, live, cfg["scoring"],
+                                    detectable=live_det2,
+                                    sensor_classes=classes)["sirs_met"]
+
+    check("press coverage of a breach does NOT answer the registry requirement",
+          "SIR-1.1.1" in met(sourced(press, "County breach", breachy)), False)
+    check("...and the national breach registry does not either, being the "
+          "wrong scope",
+          "SIR-1.1.1" in met(sourced(registry, "County breach", breachy)), False)
+    check("...nor does an article whose sensor is no longer in the manifest",
+          "SIR-1.1.1" in met(sourced("https://gone.test/feed", "County breach",
+                                     breachy)), False)
+
+    # A rule declaring `any` on both axes reads everything, which is how a
+    # technique identifier turning up anywhere says so out loud.
+    tcode = sourced(press, "Actor uses T1059.003", "living off the land")
+    check("a rule scoped any/any still matches press",
+          "SIR-5.1.1" in met(tcode), True)
+    gone = sourced("https://gone.test/feed", "Actor uses T1059.003", "x")
+    check("...and still matches an article from a retired sensor",
+          "SIR-5.1.1" in met(gone), True)
+
     print()
     if FAILURES:
         print(f"FAIL — {len(FAILURES)} problem(s)")

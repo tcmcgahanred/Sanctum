@@ -59,7 +59,8 @@ detection:
       window: 200
       scope: blob
       all_occurrences: true
-  condition: cve and exploited
+  condition: cve_near_exploited
+fix: 'FIXED 2026-09-25. The condition read `cve and exploited`, which fired on any article carrying a vulnerability identifier anywhere and exploitation language anywhere, unrelated: 235 matches in 30 days. It now requires them within 200 characters of each other. The proper detector is membership in the CISA catalogue, which is already fetched every twelve hours and wired to nothing; this proximity is a proxy for it.'
 note: 'No dedicated KEV sensor. KEV additions reach the corpus only when an advisory or aggregator
   mentions them, which is the single-aggregator dependence the ICD 203 review flagged. Cheap
   to close: manifest.reference_lists.kev is already fetched and cached. WRITTEN for this requirement
