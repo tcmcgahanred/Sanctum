@@ -2,6 +2,17 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-09-25] SIR-2.2.1 gets its false positives, written from what it actually matched
+
+**Twenty-five of the 124 headlines were read. Three false-positive classes and one counting caveat, all quoted from the real output.** This is the standing rule applied in order: write the detector, measure it, then write its false positives from what turned up. It has caught something every time it has been run.
+
+- **MULTI-STORY ROUNDUPS AND WEEKLY RECAPS, and this one is fixable beyond this rule.** Two of the 25 were digests: *"ThreatsDay: 296K IoT Botnet, 100+ Water Systems Targeted, SharePoint RCE Chain + 27 New Stories"* and *"Weekly Recap: Chinese Spy Proxy, AI Agents Go Off-Task, Router Backdoors and More"*. **The `listicle` list catches `top 5` and `top 10` and catches neither of these.** A digest names five technologies and is about none of them. **`listicle` is an exclusion in 11 of the 12 scoring rules, so widening it is a scoring change and needs its own measurement before it ships — it is NOT bundled here.**
+- **A PROPER NOUN THAT CONTAINS A TECHNOLOGY WORD.** `router` is six characters, so it matches inside longer words rather than on a boundary, and it fired twice on the seized attack platform **QTRouter**. **QTRouter is a tool used BY the adversary, not a class of equipment the audience operates.** This is the padded-term defect class in a new dress, and the standing cure applies: require context, do not delete the term.
+- **A VENDOR SCHEDULING ANNOUNCEMENT.** *"Cisco Advance Notification for Publication of September 2, 2026, Security Advisories"* names the vendor in the headline and carries advisory language in the body, and announces that advisories WILL be published. **No vulnerability, no incident.**
+- **NOT A FALSE POSITIVE, BUT 124 IS NOT 124 EVENTS.** The sample held one SonicWall SMA1000 zero-day story **four times** and one Fire Ant Cisco router story **five times**. **Roughly a third of the sample was two events.** The grouping step folds same-event reports in the staging document; this requirement counts articles, and the difference is worth knowing before anyone calls 4.4 percent loose.
+- **What the rest of the sample was: genuinely on target.** WordPress plugin flaws, SharePoint remote code execution, Exchange servers, SonicWall zero-days, ScreenConnect abuse, compromised Cisco routers. **That is the class of technology the requirement names, which is the thing the rewording was for.**
+- **Verified:** fourteen test files pass, `tools/vocab_check.py` reports 0 errors and 3 warnings, `cti/pnd.yaml` is untouched.
+
 ## [2026-09-25] SIR-2.2.1 is tightened onto the headline, because proximity alone could not carry it
 
 **Corrective, same day, and the measurement is the entry.** The rewording gave `cti/requirements/SIR-2.2.1.yaml` a proximity gate: `lowmat_tech` within 200 characters of `incident_broad`. **Measured on 2,834 articles it returned 542, or 19.1 percent, which is exactly what the ungated word list returned. It was not a gate.** Both lists are large and common — 26 words including VPN, router, firewall and Cisco, beside 43 including breach, ransomware and compromise — so in cyber reporting they sit within 200 characters of each other almost whenever the first appears.

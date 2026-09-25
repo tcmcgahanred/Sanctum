@@ -52,6 +52,27 @@ detection:
       scope: blob
       all_occurrences: true
   condition: technology and technology_near_incident and not listicle
+falsepositives:
+- 'MULTI-STORY ROUNDUPS AND WEEKLY RECAPS. Two of the 25 headlines read on 2026-09-25 were
+  digests rather than reports: "ThreatsDay: 296K IoT Botnet, 100+ Water Systems Targeted,
+  SharePoint RCE Chain + 27 New Stories" and "Weekly Recap: Chinese Spy Proxy, AI Agents Go
+  Off-Task, Router Backdoors and More". The `listicle` list catches `top 5` and `top 10` and
+  does not catch `weekly recap`, `threatsday` or `+ N new stories`. A digest names five technologies
+  and is about none of them.'
+- 'A PROPER NOUN THAT CONTAINS A TECHNOLOGY WORD. `router` is six characters, so it matches
+  inside longer words rather than on a boundary, and it fired twice on the seized attack platform
+  named QTRouter: "DOJ, FBI seize China-linked QScan and QTRouter platforms" and "FBI Seizes
+  China-Linked Hacking Platforms QScan and QTRouter". QTRouter is a tool used BY the adversary,
+  not a class of equipment the audience operates.'
+- A VENDOR SCHEDULING ANNOUNCEMENT. "Cisco Advance Notification for Publication of September
+  2, 2026, Security Advisories" names the vendor in the headline and carries advisory language
+  in the body, but announces that advisories WILL be published. There is no vulnerability
+  and no incident in it.
+- NOT A FALSE POSITIVE BUT IT INFLATES THE COUNT, so read it here before trusting 124 as an
+  event count. The sample of 25 held one SonicWall SMA1000 zero-day story four times and one
+  Fire Ant Cisco router story five times. Roughly a third of that sample was two events. The
+  grouping step folds same-event reports in the staging document; this requirement counts
+  articles.
 note: 'This is the leading-indicator logic, and the rewording restores it. Out-of-state targeting
   matters because the same CLASS of exposure exists here, not because we know a particular
   county owns the box. The old wording asked for an audience inventory across 16 critical
