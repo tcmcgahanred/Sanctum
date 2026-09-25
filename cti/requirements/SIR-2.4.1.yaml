@@ -25,7 +25,7 @@
 id: SIR-2.4.1
 title: Reported targeting of election infrastructure
 status: draft
-modified: '2026-09-24'
+modified: '2026-09-25'
 fact: Reported attacks or targeting of election offices, election systems, or voter registration
   data, any geography.
 logsource:
@@ -36,144 +36,16 @@ sensor:
   status: ACTIVE
 detection:
   election:
-    keywords:
-    - election office
-    - election official
-    - election system
-    - election systems
-    - election infrastructure
-    - registrar of voters
-    - voter registration
-    - voter roll
-    - voter database
-    - polling place
-    - ballot
-    - secretary of state
-    - county clerk
-    - election security
-    - vote tabulation
-    - e-poll book
+    group: election
     scope: blob
   incident:
-    keywords:
-    - breach
-    - ransomware
-    - cyberattack
-    - cyber attack
-    - hacked
-    - hackers
-    - hacker
-    - stolen data
-    - data theft
-    - blackmail
-    - defaced
-    - defacement
-    - data breach
-    - compromise
-    - exfiltrat
-    - extortion
-    - data leak
-    - data stolen
-    - records stolen
-    - security incident
-    - active threat
-    - outage
-    - denial of service
-    - ddos
-    - exploited against
-    - attacks against
-    - attack against
-    - campaign against
-    - targeted
-    - target of
-    - attack on
-    - attacks on
-    - hit by
-    - struck by
-    - victim of
-    - taken offline
-    - forced offline
-    - systems offline
-    - service disruption
-    - state of emergency
-    - disrupted operations
-    - shut down its
-    - knocked offline
+    group: incident_broad
     scope: blob
   cyber:
-    keywords:
-    - cyber
-    - hacks
-    - hacked
-    - hacker
-    - hacking
-    - hack
-    - ransomware
-    - malware
-    - phish
-    - data breach
-    - security breach
-    - breach notification
-    - personal information
-    - social security
-    - patient record
-    - customer record
-    - credit card
-    - credential
-    - password
-    - database
-    - unauthorized access
-    - exfiltrat
-    - encrypted the
-    - threat actor
-    - security incident
-    - vulnerabilit
-    - exploit
-    - cve-
-    - patch
-    - denial of service
-    - ddos
-    - it systems
-    - computer system
-    - network
-    - server
-    - stolen data
-    - data theft
-    - identity theft
-    - information technology
+    group: cyber_context
     scope: blob
   listicle:
-    keywords:
-    - top 5
-    - top 7
-    - top 10
-    - top 12
-    - top 15
-    - top 20
-    - top 25
-    - biggest
-    - ranked
-    - you should know
-    - ultimate guide
-    - buyer's guide
-    - buyers guide
-    - roundup
-    - round-up
-    - best solutions
-    - best software
-    - best tools
-    - best vpn
-    - best antivirus
-    - best firewall
-    - best wireless
-    - best wi-fi
-    - best security
-    - cheat sheet
-    - what is
-    - how to
-    - 'explained:'
-    - a beginner's guide
-    - everything you need to know
+    group: listicle
     scope: title
   election_near_incident:
     proximity:

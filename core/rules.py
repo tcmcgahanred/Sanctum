@@ -457,8 +457,34 @@ def eval_detection(detection, groups, matcher, scopes, text_l):
     # whether they name a group or a `keywords` block in this rule.
     local = dict(groups)
     for name, blk in blocks.items():
-        if isinstance(blk, dict) and "keywords" in blk:
+        if not isinstance(blk, dict):
+            continue
+        if "keywords" in blk:
             local[name] = blk["keywords"] or []
+        elif isinstance(blk.get("group"), str):
+            # A sibling that POINTS AT a named list resolves to that list's
+            # words. Without this, `a:` and `b:` behaved differently depending
+            # on whether the sibling carried its own words or pointed at a
+            # list, and the rules that stopped carrying their own words on
+            # 25 September raised a bare error naming the block.
+            local[name] = groups[blk["group"]]
+
+    for blk in blocks.values():
+        if not (isinstance(blk, dict) and isinstance(blk.get("proximity"), dict)):
+            continue
+        for side in ("a", "b"):
+            nm = blk["proximity"].get(side)
+            if isinstance(nm, str) and nm in blocks and nm not in local:
+                # SILENT WRONG ANSWER, found 2026-09-25. A proximity operand
+                # naming a sibling made of anything but words - a `pattern:`,
+                # say - is not resolvable to positions, and the lookup fell
+                # through to a global list of the same name instead of
+                # failing. SIR-3.1.1 matched on that global list for a day
+                # while appearing to match on its own regular expression.
+                raise ValueError(
+                    f"proximity operand {nm!r} names a block that holds no "
+                    f"words. An operand must be a `keywords:` or `group:` "
+                    f"block, or a named list.")
 
     cache = {}
 

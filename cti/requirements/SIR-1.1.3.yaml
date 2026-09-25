@@ -25,7 +25,7 @@
 id: SIR-1.1.3
 title: Press reporting of an incident at a California organization
 status: stable
-modified: '2026-09-24'
+modified: '2026-09-25'
 fact: Regional or local press reports of incidents at California local government, school,
   utility or tribal entities.
 logsource:
@@ -37,205 +37,19 @@ sensor:
   also: curated CA regional press - PENDING
 detection:
   california:
-    keywords:
-    - california
-    - californian
-    - ' calif '
-    - sacramento
-    - fresno
-    - modesto
-    - stockton
-    - bakersfield
-    - cal oes
-    - cal-csic
-    - ccic
-    - caltrans
-    - 'csu '
-    - 'uc '
-    - calmatters
-    - alpine county
-    - amador county
-    - butte county
-    - calaveras county
-    - colusa county
-    - el dorado county
-    - fresno county
-    - glenn county
-    - inyo county
-    - kern county
-    - kings county
-    - lake county
-    - lassen county
-    - madera county
-    - mariposa county
-    - mendocino county
-    - merced county
-    - modoc county
-    - mono county
-    - nevada county
-    - placer county
-    - plumas county
-    - sacramento county
-    - san joaquin county
-    - shasta county
-    - sierra county
-    - stanislaus county
-    - sutter county
-    - tehama county
-    - trinity county
-    - tulare county
-    - tuolumne county
-    - yolo county
-    - yuba county
+    group: geo
     scope: title
   california_anywhere:
-    keywords:
-    - california
-    - californian
-    - ' calif '
-    - sacramento
-    - fresno
-    - modesto
-    - stockton
-    - bakersfield
-    - cal oes
-    - cal-csic
-    - ccic
-    - caltrans
-    - 'csu '
-    - 'uc '
-    - calmatters
-    - alpine county
-    - amador county
-    - butte county
-    - calaveras county
-    - colusa county
-    - el dorado county
-    - fresno county
-    - glenn county
-    - inyo county
-    - kern county
-    - kings county
-    - lake county
-    - lassen county
-    - madera county
-    - mariposa county
-    - mendocino county
-    - merced county
-    - modoc county
-    - mono county
-    - nevada county
-    - placer county
-    - plumas county
-    - sacramento county
-    - san joaquin county
-    - shasta county
-    - sierra county
-    - stanislaus county
-    - sutter county
-    - tehama county
-    - trinity county
-    - tulare county
-    - tuolumne county
-    - yolo county
-    - yuba county
+    group: geo
     scope: blob
   incident:
-    keywords:
-    - breach
-    - ransomware
-    - cyberattack
-    - cyber attack
-    - hacked
-    - hackers
-    - stolen data
-    - data theft
-    - blackmail
-    - defaced
-    - defacement
-    - data breach
-    - compromise
-    - exfiltrat
-    - extortion
-    - data leak
-    - data stolen
-    - records stolen
-    - security incident
+    group: incident
     scope: blob
   cyber:
-    keywords:
-    - cyber
-    - hacks
-    - hacked
-    - hacker
-    - hacking
-    - hack
-    - ransomware
-    - malware
-    - phish
-    - data breach
-    - security breach
-    - breach notification
-    - personal information
-    - social security
-    - patient record
-    - customer record
-    - credit card
-    - credential
-    - password
-    - database
-    - unauthorized access
-    - exfiltrat
-    - encrypted the
-    - threat actor
-    - security incident
-    - vulnerabilit
-    - exploit
-    - cve-
-    - patch
-    - denial of service
-    - ddos
-    - it systems
-    - computer system
-    - network
-    - server
-    - stolen data
-    - data theft
-    - identity theft
-    - information technology
+    group: cyber_context
     scope: blob
   listicle:
-    keywords:
-    - top 5
-    - top 7
-    - top 10
-    - top 12
-    - top 15
-    - top 20
-    - top 25
-    - biggest
-    - ranked
-    - you should know
-    - ultimate guide
-    - buyer's guide
-    - buyers guide
-    - roundup
-    - round-up
-    - best solutions
-    - best software
-    - best tools
-    - best vpn
-    - best antivirus
-    - best firewall
-    - best wireless
-    - best wi-fi
-    - best security
-    - cheat sheet
-    - what is
-    - how to
-    - 'explained:'
-    - a beginner's guide
-    - everything you need to know
+    group: listicle
     scope: title
   california_near_incident:
     proximity:

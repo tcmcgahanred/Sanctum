@@ -177,7 +177,12 @@ def referenced_groups(cfg):
             for v in o:
                 walk(v)
 
-    for key in ("scoring", "manifest", "production"):
+    # `requirements` was added 2026-09-25 and is the same lesson a third time:
+    # once the rules stopped carrying their own words and pointed at named
+    # lists instead, two lists used only by rules were reported as consumed by
+    # nothing. A checker that looks only where it expects to find things
+    # reports absences that are not there.
+    for key in ("scoring", "manifest", "production", "requirements"):
         walk(cfg.get(key))
     return seen
 

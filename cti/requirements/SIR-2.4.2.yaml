@@ -25,7 +25,7 @@
 id: SIR-2.4.2
 title: An election-sector advisory
 status: draft
-modified: '2026-09-24'
+modified: '2026-09-25'
 fact: Election-sector advisories from CISA or the Elections Infrastructure ISAC.
 logsource:
   scope: national
@@ -36,77 +36,13 @@ sensor:
   also: EI-ISAC - PENDING
 detection:
   election:
-    keywords:
-    - election office
-    - election official
-    - election system
-    - election systems
-    - election infrastructure
-    - registrar of voters
-    - voter registration
-    - voter roll
-    - voter database
-    - polling place
-    - ballot
-    - secretary of state
-    - county clerk
-    - election security
-    - vote tabulation
-    - e-poll book
+    group: election
     scope: blob
   advisory:
-    keywords:
-    - advisory
-    - alert
-    - bulletin
-    - joint advisory
-    - guidance
-    - urges organizations
-    - recommends that organizations
-    - issued an alert
-    - published an advisory
+    group: advisory
     scope: blob
   cyber:
-    keywords:
-    - cyber
-    - hacks
-    - hacked
-    - hacker
-    - hacking
-    - hack
-    - ransomware
-    - malware
-    - phish
-    - data breach
-    - security breach
-    - breach notification
-    - personal information
-    - social security
-    - patient record
-    - customer record
-    - credit card
-    - credential
-    - password
-    - database
-    - unauthorized access
-    - exfiltrat
-    - encrypted the
-    - threat actor
-    - security incident
-    - vulnerabilit
-    - exploit
-    - cve-
-    - patch
-    - denial of service
-    - ddos
-    - it systems
-    - computer system
-    - network
-    - server
-    - stolen data
-    - data theft
-    - identity theft
-    - information technology
+    group: cyber_context
     scope: blob
   condition: election and advisory and cyber
 note: WRITTEN for this requirement and NOT yet measured against the corpus. Run tools/requirement_coverage.py

@@ -25,7 +25,7 @@
 id: SIR-5.2.2
 title: A stated country of origin
 status: draft
-modified: '2026-09-24'
+modified: '2026-09-25'
 fact: A stated country of origin.
 logsource:
   scope: any
@@ -63,46 +63,7 @@ detection:
     - apt
     scope: blob
   cyber:
-    keywords:
-    - cyber
-    - hacks
-    - hacked
-    - hacker
-    - hacking
-    - hack
-    - ransomware
-    - malware
-    - phish
-    - data breach
-    - security breach
-    - breach notification
-    - personal information
-    - social security
-    - patient record
-    - customer record
-    - credit card
-    - credential
-    - password
-    - database
-    - unauthorized access
-    - exfiltrat
-    - encrypted the
-    - threat actor
-    - security incident
-    - vulnerabilit
-    - exploit
-    - cve-
-    - patch
-    - denial of service
-    - ddos
-    - it systems
-    - computer system
-    - network
-    - server
-    - stolen data
-    - data theft
-    - identity theft
-    - information technology
+    group: cyber_context
     scope: blob
   country_near_attribution:
     proximity:

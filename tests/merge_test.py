@@ -176,7 +176,18 @@ manifest:
           ["manifest", "production", "scoring", "vocab"])
     check("...and no requirements block, which would be a second copy",
           "requirements" in raw, False)
-    check("...the vocabulary came with it", len(raw["vocab"]["groups"]), 16)
+    check("...the vocabulary came with it", len(raw["vocab"]["groups"]), 18)
+    # ADDED 2026-09-25. A rule pointing at a named list is the whole point of
+    # that day's change, so a rule going back to carrying its own copy of a
+    # list that already exists should be visible here.
+    check("...and only four word lists are still written out inside a rule",
+          sum(1 for pir in cfg["requirements"]["pirs"]
+              for i in pir["indicators"] for s in i["sirs"]
+              for b in (s.get("detection") or {}).values()
+              if isinstance(b, dict) and isinstance(b.get("keywords"), list)), 4)
+    check("...and the identifier list is named for what it holds, not for CVE",
+          sorted(cfg["scoring"]["groups"]["vuln_id"]),
+          ["apsb2", "cisco-sa-", "cve-", "ghsa-", "vu#", "zdi-"])
     check("...and every sensor survived", len(cfg["sensors"]), 55)
     check("...read from the sensor records, not a fenced block",
           "manifest.sensors" in cfg["sensors_source"], True)

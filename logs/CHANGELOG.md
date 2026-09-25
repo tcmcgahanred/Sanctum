@@ -2,6 +2,29 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-09-25] A rule points at a word list instead of carrying a copy of it
+
+**1,128 duplicated words removed from the rule files, and no scoring changes.** Writing the detections on 24 September copied every word list into every rule that used it. Measured the next morning: the 27 rule files held 1,177 words across 40 lists, but only **16 lists were distinct.** `cyber_context`, 39 words, was in 8 rules. `geo`, 49 words, in 5. `listicle`, 30 words, in 5. **Changing one word in `cyber_context` meant editing nine files and missing one was silent.**
+
+- **The rule the same day's own changelog stated is the rule this broke: inline if used once, point at a named list if used twice or more.** Thirty-six of the forty were used twice or more, or duplicated a list that already existed.
+- **36 blocks now read `group: <name>`; 4 stay written out.** Those four are correct: the breach-notification wording in `cti/requirements/SIR-1.1.1.yaml`, the leak-site wording in `cti/requirements/SIR-1.1.2.yaml`, and the country and attribution wording in `cti/requirements/SIR-5.2.2.yaml`. Each is used by exactly one rule and matches no existing list. **Words still written out inside rule files: 49, down from 1,177.**
+- **Two new word lists, `advisory` (9 words) and `election` (16).** Both were written inline on 24 September and then copied, `advisory` into four rules and `election` into two.
+- **The swap was decided by CONTENT, never by a hand-written mapping.** A block whose words were exactly a named list's words became a pointer to it; everything else was left alone. **Proved by capturing the resolved word set of all 40 blocks before and after and comparing: identical.** A pointer to a list holding the same words cannot score differently.
+- **FIXED: a `proximity:` block could not name a sibling that points at a list.** The resolver understood a sibling carrying its own words and nothing else, so two rules raised a bare error the moment they stopped carrying copies.
+- **FIXED: `tools/vocab_check.py` did not look at the requirements when deciding whether a word list is used by anything**, so `advisory` and `election` were reported as consumed by nothing while six rules used them. **That function has now reported an absence that was not there three times**, and its own comment already said why.
+
+## [2026-09-25] `cve` becomes `vuln_id`, because it never meant a CVE
+
+**It meant "a vulnerability identifier appears here", and CVE is only the most common scheme.** The list held one entry, `cve-`, and feeds one rule: the multiplier that raises a score by 1.5 when exploitation language sits within 200 characters of an identifier or of a technology the audience runs.
+
+- **MEASURED over 30 days and 3,045 articles before anything was changed.** 535 articles carry a CVE number. **Five more schemes appear on articles carrying NO CVE at all: Zero Day Initiative on 124, Cisco on 26, Adobe on 22, GitHub on 5, CERT/CC on 3.** Those 184 articles carried a vulnerability identifier the apparatus did not recognise.
+- **MEASURED AND DELIBERATELY LEFT OUT.** Japan Vulnerability Notes appears 18 times and always beside a CVE, so it would add nothing. Red Hat, Ubuntu and Debian appear once each. EUVD, CNVD, OSV, ICSA, ICSMA and VMSA never appear. **A word that matches nothing is not free: it is a line somebody has to read and decide about later.**
+- **`apsb2` carries a digit on purpose and it expires in 2030.** Terms of four characters or fewer match on word boundaries, so `apsb` fails against `APSB25-01` because there is no boundary between `b` and `2`. The digit makes it five characters and turns the boundary rule off. The list carries a one-year review for exactly this.
+- **ALSO MEASURED, AND THE REASON `cisa_source` WAS NOT WIDENED.** The floor rule it feeds fired **zero** times in 30 days, including across the 69 articles that came from CISA. It only applies to technology outside the audience's stack, and most CISA exploitation advisories name gear that is inside it. **Adding addresses to a rule that never fires buys nothing**, so the one-entry list stands.
+- **SILENT WRONG ANSWER FOUND, and the rename is what exposed it.** `cti/requirements/SIR-3.1.1.yaml` declared a regular expression for a CVE number and named it as a proximity operand. **The operand resolved to the global list named `cve` instead, so the regular expression was never evaluated and the rule matched the substring `cve-`.** It now points at `vuln_id` and says so. **A proximity operand naming a block that holds no words is refused at evaluation rather than falling through to a list of the same name.**
+- **Two incidental findings for the sensor prune.** `cisecurity.org` and `cdt.ca.gov` returned **zero** articles in 30 days, and `nist.gov` returned one.
+- **Verified:** fourteen test files pass, `tools/vocab_check.py` reports 0 errors and the same 5 warnings and 3 accepted findings as before, `tests/domain_check.py` is clean, and `cti/pnd.yaml` parses identical to the previous commit apart from the rename, the widened list and the two added lists.
+
 ## [2026-09-24] Every requirement is machine decidable, and a blocked one says what by
 
 **`decidable:` is deleted.** It carried two values, `machine` and `analyst`, and `analyst` meant no expression would ever answer that requirement. **Measured against all eleven requirements that carried it, that was false in every single case.** Three needed data already sitting on the collection host or already planned. Four needed one declared list. One needed a rule of a different shape. Three needed nothing at all except a detector somebody had not written. **A permanent label was the reason none of them had been built.**

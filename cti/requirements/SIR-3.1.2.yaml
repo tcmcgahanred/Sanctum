@@ -25,7 +25,7 @@
 id: SIR-3.1.2
 title: A vendor advisory confirming exploitation in the wild
 status: stable
-modified: '2026-09-24'
+modified: '2026-09-25'
 fact: Vendor PSIRT advisories confirming in-the-wild exploitation.
 logsource:
   scope: national
@@ -35,88 +35,13 @@ sensor:
   status: ACTIVE
 detection:
   exploited:
-    keywords:
-    - actively exploited
-    - exploited in the wild
-    - in-the-wild
-    - under active exploitation
-    - added to its known exploited
-    - added to the known exploited
-    - kev catalog
-    - cisa kev
-    - exploitation in the wild
-    - weaponized exploit
-    - public proof-of-concept
-    - proof-of-concept exploit
-    - exploit code is available
-    - being exploited
-    - active threat
-    - active exploitation
-    - ongoing exploitation
-    - observed exploitation
-    - actively targeting
+    group: exploit_strong
     scope: blob
   product:
-    keywords:
-    - fortinet
-    - fortigate
-    - sonicwall
-    - mikrotik
-    - routeros
-    - openwrt
-    - sharepoint
-    - exchange server
-    - vpn
-    - rdp
-    - n-able
-    - n-central
-    - kaseya
-    - connectwise
-    - screenconnect
-    - wordpress
-    - plc
-    - programmable logic controller
-    - scada
-    - ics
-    - operational technology
-    - cisco
-    - netgear
-    - tp-link
-    - router
-    - firewall
+    group: lowmat_tech
     scope: blob
   listicle:
-    keywords:
-    - top 5
-    - top 7
-    - top 10
-    - top 12
-    - top 15
-    - top 20
-    - top 25
-    - biggest
-    - ranked
-    - you should know
-    - ultimate guide
-    - buyer's guide
-    - buyers guide
-    - roundup
-    - round-up
-    - best solutions
-    - best software
-    - best tools
-    - best vpn
-    - best antivirus
-    - best firewall
-    - best wireless
-    - best wi-fi
-    - best security
-    - cheat sheet
-    - what is
-    - how to
-    - 'explained:'
-    - a beginner's guide
-    - everything you need to know
+    group: listicle
     scope: title
   product_near_exploited:
     proximity:

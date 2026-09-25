@@ -518,7 +518,7 @@ scoring:
       - any:
         - proximity:
             a: exploit_strong
-            b: cve
+            b: vuln_id
             window: 200
             scope: blob
             all_occurrences: true
@@ -983,8 +983,30 @@ scoring:
     - zero-day
     - 0-day
     - under active exploitation
-    cve:
+    # RENAMED from `cve` and widened 2026-09-25. It never meant "a CVE", it
+    # meant "a vulnerability identifier appears here", and CVE is only the
+    # most common scheme. MEASURED over 30 days and 3,045 articles: 535 carry
+    # a CVE, and these five appear on articles carrying NO CVE - ZDI on 124,
+    # Cisco on 26, Adobe on 22, GitHub on 5, CERT/CC on 3.
+    #
+    # MEASURED AND DELIBERATELY LEFT OUT. Japan Vulnerability Notes appears 18
+    # times and always beside a CVE, so it adds nothing. Red Hat, Ubuntu and
+    # Debian appear once each. EUVD, CNVD, OSV, ICSA, ICSMA and VMSA never
+    # appear at all. A word that matches nothing is not free: it is a line
+    # somebody has to read and decide about later.
+    #
+    # `apsb2` CARRIES A DIGIT ON PURPOSE AND IT EXPIRES. Terms of four
+    # characters or fewer match on word boundaries, and `apsb` therefore fails
+    # against `APSB25-01` because there is no boundary between `b` and `2`.
+    # The digit makes it five characters. It covers APSB20 to APSB29 and stops
+    # working in 2030, which is why this group has a one-year review.
+    vuln_id:
     - cve-
+    - zdi-
+    - cisco-sa-
+    - ghsa-
+    - vu#
+    - apsb2
     ttp:
     - lateral movement
     - living off the land
@@ -1125,6 +1147,37 @@ scoring:
     - municipal
     - school district
     - public utility
+    # ADDED 2026-09-25. Both were written inline inside rule files on 24
+    # September and then copied - `advisory` into four rules, `election` into
+    # two. A list used by more than one rule belongs here, where one edit
+    # changes it everywhere.
+    advisory:
+    - advisory
+    - alert
+    - bulletin
+    - joint advisory
+    - guidance
+    - urges organizations
+    - recommends that organizations
+    - issued an alert
+    - published an advisory
+    election:
+    - election office
+    - election official
+    - election system
+    - election systems
+    - election infrastructure
+    - registrar of voters
+    - voter registration
+    - voter roll
+    - voter database
+    - polling place
+    - ballot
+    - secretary of state
+    - county clerk
+    - election security
+    - vote tabulation
+    - e-poll book
 
 # ------------------------------------------------------------------------------
 #  VOCABULARY - what each word group is FOR
@@ -1142,6 +1195,14 @@ vocab:
   # review_interval_days — fast-moving vocabulary deserves a shorter one.
   review_interval_days: 180
   groups:
+    advisory:
+      reviewed: 2026-09-25
+      serves:
+      - PIR-4
+    election:
+      reviewed: 2026-09-25
+      serves:
+      - PIR-2
     geo:
       reviewed: 2026-08-17
       review_interval_days: 180
@@ -1181,8 +1242,8 @@ vocab:
     supplychain:
       reviewed: 2026-08-17
       role: elevation
-    cve:
-      reviewed: 2026-08-24
+    vuln_id:
+      reviewed: 2026-09-25
       review_interval_days: 365
       role: elevation
     cisa_source:
@@ -1284,7 +1345,7 @@ production:
         any:
         - group: exploit_strong
           scope: blob
-        - group: cve
+        - group: vuln_id
           scope: blob
     - name: CTA TTPs
       when:
