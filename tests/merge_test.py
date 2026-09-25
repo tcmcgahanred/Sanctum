@@ -176,7 +176,7 @@ manifest:
           ["manifest", "production", "scoring", "vocab"])
     check("...and no requirements block, which would be a second copy",
           "requirements" in raw, False)
-    check("...the vocabulary came with it", len(raw["vocab"]["groups"]), 18)
+    check("...the vocabulary came with it", len(raw["vocab"]["groups"]), 20)
     # ADDED 2026-09-25. A rule pointing at a named list is the whole point of
     # that day's change, so a rule going back to carrying its own copy of a
     # list that already exists should be visible here.

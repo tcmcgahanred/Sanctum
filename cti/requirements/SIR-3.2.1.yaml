@@ -23,13 +23,34 @@
 #  beside the rule, not in a changelog nobody reads beside the rule.
 # ------------------------------------------------------------------------------
 id: SIR-3.2.1
-title: The product is commonly deployed by SLTT organizations
-status: blocked
-blocked_by: 'The audience technology profile: a declared list of the products, providers and
-  technologies California SLTT organizations actually run. This fact is not in the reporting
-  and no word list will ever find it, because it is a property of the audience rather than
-  of the article. Declared once, this requirement becomes a set-membership test against that
-  list. Only the audience can write it.'
-modified: '2026-09-24'
-fact: Whether the product is commonly deployed by SLTT organizations (edge appliances, on-prem
-  SharePoint, RMM, routers).
+title: The affected product is of a kind commonly deployed in low-maturity public-sector environments
+status: draft
+modified: '2026-09-25'
+fact: 'The affected product is of a kind commonly deployed in low-maturity public-sector environments:
+  edge appliances, on-premises collaboration servers, remote monitoring and management tools,
+  consumer-grade network equipment. Whether the audience runs it is not asked here.'
+logsource:
+  scope: any
+  kind: any
+detection:
+  product:
+    group: lowmat_tech
+    scope: blob
+  identifier:
+    group: vuln_id
+    scope: blob
+  listicle:
+    group: listicle
+    scope: title
+  product_near_identifier:
+    proximity:
+      a: product
+      b: identifier
+      window: 200
+      scope: blob
+      all_occurrences: true
+  condition: product_near_identifier and not listicle
+note: Gated on the product appearing beside a vulnerability identifier rather than anywhere
+  in the body. The bare word list matched 555 of 2,919 articles in 30 days, 19 percent, which
+  is why it is a gate and never a standalone answer. REWORDED 2026-09-25 and NOT yet measured
+  against the corpus. Run tools/requirement_coverage.py on Ravenor before trusting the count.

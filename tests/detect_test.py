@@ -179,11 +179,16 @@ def main():
     check("cti declares 27 requirements", len(sirs), 27)
     with_det = [s for s in sirs if s.get("detection") is not None]
     blocked = [s for s in sirs if s.get("status") == "blocked"]
-    check("...14 of which carry a detection block", len(with_det), 14)
+    check("...18 of which carry a detection block", len(with_det), 18)
     check("...none is parked as undecidable any more",
           [s["id"] for s in sirs if "decidable" in s], [])
-    check("...9 are blocked on an input that does not exist yet",
-          len(blocked), 9)
+    # Four were reworded on 2026-09-25 from "does the audience own this" to
+    # "what kind of thing is this", which is answerable, so they stopped being
+    # blocked. An audience inventory across 16 critical infrastructure sectors
+    # is not maintainable, and a requirement that depends on one is a
+    # permanent zero wearing a `blocked_by:` line.
+    check("...5 are blocked on an input that does not exist yet",
+          len(blocked), 5)
     check("...every one of those names the input it is waiting for",
           all(str(s.get("blocked_by") or "").strip() for s in blocked), True)
     check("...and none of them pretends to have a detector",

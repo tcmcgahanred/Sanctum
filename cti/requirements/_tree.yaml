@@ -51,7 +51,7 @@ pirs:
     - SIR-2.1.1
     - SIR-2.1.2
   - id: IND-2.2
-    statement: The targeted technology or configuration is present in California SLTT organizations.
+    statement: The targeted technology or configuration is of a kind commonly exposed in low-maturity public-sector environments.
     satisfied_by: all
     requirements:
     - SIR-2.2.1

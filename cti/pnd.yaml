@@ -529,9 +529,12 @@ scoring:
             scope: blob
             all_occurrences: true
   - name: low-maturity SLTT tech
-    serves_sir:
-    - SIR-2.2.1
-    - SIR-3.2.1
+    # CLAIM REMOVED 2026-09-25. This rule matched `lowmat_tech` anywhere in an
+    # article, 555 of 2,919 in 30 days, and declared that it answered "is this
+    # technology common in California SLTT organizations". It answered no such
+    # thing. Both requirements now carry their own detector, gated on
+    # proximity. The multiplier itself is unchanged.
+    serves_sir: []
     factor: 1.5
     when:
       all:
@@ -632,8 +635,8 @@ scoring:
             scope: blob
             all_occurrences: true
   - name: M2 exploited flaw affecting SLTT-relevant technology
-    serves_sir:
-    - SIR-3.2.1
+    # CLAIM REMOVED 2026-09-25, same reason as the multiplier above.
+    serves_sir: []
     when:
       all:
       - not:
@@ -1161,6 +1164,44 @@ scoring:
     - recommends that organizations
     - issued an alert
     - published an advisory
+    # ADDED 2026-09-25 for the reworded PIR-3 and PIR-4 requirements. The
+    # Planning and Direction decision was that a requirement asks what KIND of
+    # thing an item affects, never whether the audience owns it, because an
+    # audience inventory across 16 critical infrastructure sectors is not
+    # maintainable and would be wrong the week after it was written.
+    #
+    # `version_scope` marks reporting that names the affected versions, which
+    # is what lets a reader check their own inventory. The brief states the
+    # products and versions; the reader does the checking.
+    version_scope:
+    - version
+    - versions
+    - prior to
+    - earlier than
+    - affected versions
+    - fixed in
+    - patched in
+    - before version
+    - up to and including
+    - firmware
+    # `out_of_portfolio` is an EXCLUSION list and is only ever used under a
+    # `not`. It names audiences this brief does not serve. NOT the same idea as
+    # `supplychain`, which is a relevance signal: `npm` and `pypi` appear in
+    # both, deliberately, because a poisoned package that reaches a vendor the
+    # audience uses is in scope and a developer-only registry story is not.
+    # That tension is real and unresolved - see the note on SIR-4.1.2.
+    out_of_portfolio:
+    - cmmc
+    - dfars
+    - itar
+    - defense industrial base
+    - defense contractor
+    - cleared defense
+    - nuget
+    - rubygems
+    - packagist
+    - crates.io
+    - maven central
     election:
     - election office
     - election official
@@ -1203,6 +1244,13 @@ vocab:
       reviewed: 2026-09-25
       serves:
       - PIR-2
+    version_scope:
+      reviewed: 2026-09-25
+      serves:
+      - PIR-3
+    out_of_portfolio:
+      reviewed: 2026-09-25
+      role: exclusion
     geo:
       reviewed: 2026-08-17
       review_interval_days: 180

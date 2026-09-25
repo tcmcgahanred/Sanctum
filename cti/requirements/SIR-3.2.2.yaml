@@ -23,15 +23,39 @@
 #  beside the rule, not in a changelog nobody reads beside the rule.
 # ------------------------------------------------------------------------------
 id: SIR-3.2.2
-title: The affected providers or versions reach this audience
-status: blocked
-blocked_by: 'The audience technology profile: a declared list of the products, providers and
-  technologies California SLTT organizations actually run. This fact is not in the reporting
-  and no word list will ever find it, because it is a property of the audience rather than
-  of the article. Declared once, this requirement becomes a set-membership test against that
-  list. Only the audience can write it.'
-modified: '2026-09-24'
-fact: Which providers or versions are affected, and whether the audience uses them.
-standard: Provider-dependent relevance. A webmail or product item is relevant only if it hits
-  providers the audience runs, such as Google Workspace or Microsoft 365. MSP-only software
-  is low-relevance if few organizations here use MSPs.
+title: The reporting names the specific affected products and versions
+status: draft
+modified: '2026-09-25'
+fact: The reporting names the specific affected products and, where stated, the affected versions,
+  so a reader can check their own inventory.
+logsource:
+  scope: any
+  kind: any
+detection:
+  product:
+    group: lowmat_tech
+    scope: blob
+  version:
+    group: version_scope
+    scope: blob
+  listicle:
+    group: listicle
+    scope: title
+  product_near_version:
+    proximity:
+      a: product
+      b: version
+      window: 200
+      scope: blob
+      all_occurrences: true
+  condition: product_near_version and not listicle
+standard: State the affected products and versions plainly, and name the provider where the
+  reporting names one, so a reader can check it against their own inventory. Do NOT assert
+  that the audience uses them - that is the reader's check, and it is why this requirement
+  was split.
+note: 'SPLIT 2026-09-25 by Planning and Direction decision. The old wording asked two questions
+  at once: which products and versions are affected, and whether the audience uses them. The
+  first is in the reporting and is what the brief must state. The second is the READER''S
+  check against their own inventory and is not a collection requirement at all. Only the first
+  half survives here. REWORDED 2026-09-25 and NOT yet measured against the corpus. Run tools/requirement_coverage.py
+  on Ravenor before trusting the count.'

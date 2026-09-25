@@ -23,15 +23,38 @@
 #  beside the rule, not in a changelog nobody reads beside the rule.
 # ------------------------------------------------------------------------------
 id: SIR-2.2.1
-title: The targeted technology is present in California SLTT organizations
-status: blocked
-blocked_by: 'The audience technology profile: a declared list of the products, providers and
-  technologies California SLTT organizations actually run. This fact is not in the reporting
-  and no word list will ever find it, because it is a property of the audience rather than
-  of the article. Declared once, this requirement becomes a set-membership test against that
-  list. Only the audience can write it.'
-modified: '2026-09-24'
-fact: Whether the targeted technology or configuration is common in California SLTT organizations,
-  for example internet-exposed PLCs in small water systems.
-note: This is the leading-indicator logic. Out-of-state targeting matters because the same
-  exposure exists here.
+title: The targeted technology is of a kind commonly exposed in low-maturity public-sector
+  environments
+status: draft
+modified: '2026-09-25'
+fact: 'The targeted technology or configuration is of a kind commonly exposed in low-maturity
+  public-sector environments: internet-exposed industrial controllers, unmanaged edge devices,
+  end-of-life network equipment, on-premises collaboration servers. Whether any particular
+  organization runs it is not asked here and is not knowable from reporting.'
+logsource:
+  scope: any
+  kind: any
+detection:
+  technology:
+    group: lowmat_tech
+    scope: blob
+  incident:
+    group: incident_broad
+    scope: blob
+  listicle:
+    group: listicle
+    scope: title
+  technology_near_incident:
+    proximity:
+      a: technology
+      b: incident
+      window: 200
+      scope: blob
+      all_occurrences: true
+  condition: technology_near_incident and not listicle
+note: This is the leading-indicator logic, and the rewording restores it. Out-of-state targeting
+  matters because the same CLASS of exposure exists here, not because we know a particular
+  county owns the box. The old wording asked for an audience inventory across 16 critical
+  infrastructure sectors, which is not maintainable and would be wrong the week after it was
+  written. REWORDED 2026-09-25 and NOT yet measured against the corpus. Run tools/requirement_coverage.py
+  on Ravenor before trusting the count.
