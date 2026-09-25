@@ -37,9 +37,9 @@ logsource:
 detection:
   technology:
     group: lowmat_tech
-    scope: blob
+    scope: title
   incident:
-    group: incident_broad
+    group: incident
     scope: blob
   listicle:
     group: listicle
@@ -51,10 +51,18 @@ detection:
       window: 200
       scope: blob
       all_occurrences: true
-  condition: technology_near_incident and not listicle
-note: This is the leading-indicator logic, and the rewording restores it. Out-of-state targeting
+  condition: technology and technology_near_incident and not listicle
+note: 'This is the leading-indicator logic, and the rewording restores it. Out-of-state targeting
   matters because the same CLASS of exposure exists here, not because we know a particular
   county owns the box. The old wording asked for an audience inventory across 16 critical
   infrastructure sectors, which is not maintainable and would be wrong the week after it was
-  written. REWORDED 2026-09-25 and NOT yet measured against the corpus. Run tools/requirement_coverage.py
-  on Ravenor before trusting the count.
+  written. TIGHTENED 2026-09-25 after measurement, and the measurement is why this rule reads
+  the way it does. Proximity alone could not carry it: `lowmat_tech` beside `incident_broad`
+  within 200 characters matched 542 of 2,834 articles, 19.1 percent, which is what the bare
+  word list returned and therefore no gate at all. An 80-character window gave 397, the narrow
+  `incident` list gave 444, both together gave 301. Requiring the technology in the HEADLINE
+  is what broke it: 154 alone, and 124 with the narrow proximity as well, which is 4.4 percent
+  and sits inside the normal band for this domain. THE COST IS RECALL, and it is accepted
+  deliberately: an article headlined ''Ransomware hits county'' that names Fortinet only in
+  the body does not match. IND-2.2 rests on this single requirement, so its share of the corpus
+  IS the indicator''s share, and a tenth of everything collected would have meant nothing.'

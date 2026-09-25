@@ -2,6 +2,16 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-09-25] SIR-2.2.1 is tightened onto the headline, because proximity alone could not carry it
+
+**Corrective, same day, and the measurement is the entry.** The rewording gave `cti/requirements/SIR-2.2.1.yaml` a proximity gate: `lowmat_tech` within 200 characters of `incident_broad`. **Measured on 2,834 articles it returned 542, or 19.1 percent, which is exactly what the ungated word list returned. It was not a gate.** Both lists are large and common — 26 words including VPN, router, firewall and Cisco, beside 43 including breach, ransomware and compromise — so in cyber reporting they sit within 200 characters of each other almost whenever the first appears.
+
+- **Six versions were measured before anything was changed, with the shipped one as a control.** The control returned 542, matching the live count exactly, which is what says the probe measured the right thing. **An 80-character window gave 397. The narrow 19-word `incident` list gave 444. Both together gave 301, still 10.6 percent.** **None of the proximity-only variants reached the band every other detector in this domain sits in.**
+- **Requiring the technology in the HEADLINE is what broke it: 154 alone, and 124 with the narrow proximity as well.** 124 is **4.4 percent**, beside `SIR-1.1.3` at 4.9, `SIR-5.2.2` at 5.5 and `SIR-1.1.4` at 3.5. **Shipped: headline plus narrow proximity, which uses both halves of the constraint the Planning and Direction decision set.**
+- **THE COST IS RECALL AND IT IS ACCEPTED DELIBERATELY.** An article headlined "Ransomware hits county" that names Fortinet only in the body no longer matches. **The trade is worth it because IND-2.2 rests on this single requirement, so whatever this number is, that indicator is satisfied by exactly that share of the corpus.** A tenth of everything collected would have meant nothing.
+- **The general lesson, and it is the one worth keeping: a proximity window between two broad lists is not a gate.** It reads like one. It measures like nothing. **The two lists have to differ in size or the match has to move to the subject line.**
+- **Verified:** fourteen test files pass, `tools/vocab_check.py` reports 0 errors and 3 warnings, `tests/domain_check.py` is clean, and `cti/pnd.yaml` is not touched at all.
+
 ## [2026-09-25] A requirement asks what KIND of thing an item affects, never who owns it
 
 **Planning and Direction decision, taken in the briefing chat. Four requirements reworded, none deleted.** `SIR-2.2.1`, `SIR-3.2.1`, `SIR-3.2.2` and `SIR-4.1.2` all asked a version of "is the affected technology something our audience has". **Answering that as written needs a technology inventory for 16 critical infrastructure sectors across California. The owner's judgement, and it is correct: that is an asset management programme, not a word list, and it would be wrong the week after it was written.**
