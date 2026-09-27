@@ -7,7 +7,7 @@ multipliers, and tier-assignment rules come from a domain's P&D config
 (see core/pnd.py). This module only knows how to:
   - match keyword groups against an article (with the same word-boundary
     semantics the CTI pre-filter used), and
-  - evaluate a small rule tree (any / all / not / group / proximity /
+  - evaluate a small rule tree (any / all / not / group / library / proximity /
     pattern / always)
     to assign the single highest qualifying tier, then apply multipliers.
 
@@ -117,6 +117,29 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
             raise KeyError(f"rule references unknown scope '{scope}'")
         return matcher(scopes[scope], groups[g]) is not None
 
+    # LIBRARY. A word list that is DERIVED and maintained outside the domain's
+    # vocabulary, because it is generated and too large to read: the geography
+    # confidence table is 1,653 California place and county names, each with a
+    # bucket saying how much the name can carry on its own. The rule names the
+    # library and the buckets it trusts; core/pnd.py reads the file at load time
+    # and fills `terms`, so the engine still holds no domain knowledge and still
+    # only ever matches a list against a scope.
+    #
+    # NO SILENT FALL-THROUGH. An unresolved atom would match nothing, and a
+    # detector that matches nothing reports its requirement as uncollected
+    # forever with nothing on the page to say why. That defect has happened
+    # once already, on a proximity operand, and cost a day.
+    if "library" in atom:
+        scope = atom.get("scope", "blob")
+        if scope not in scopes:
+            raise KeyError(f"library references unknown scope '{scope}'")
+        if "terms" not in atom:
+            raise ValueError(
+                f"library atom {atom['library']!r} was never resolved. "
+                f"core.pnd.load_domain fills `terms` from the declared file; a "
+                f"config assembled any other way has to do the same.")
+        return matcher(scopes[scope], atom["terms"]) is not None
+
     # KEYWORDS. A literal list of terms, written in the rule rather than named
     # somewhere else. This is what lets a rule be read on its own: you can see
     # what it searches for without opening another file. Same matching as a
@@ -125,7 +148,7 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
     # `group` is still here and still correct for a list used by several rules,
     # and for one too large to write out - the derived place table is 1,672
     # rows. The choice: inline if used once, a named group if used twice or
-    # more, a library pointer if maintained outside this repository.
+    # more, a `library:` pointer if the list is GENERATED rather than typed.
     if "keywords" in atom:
         scope = atom.get("scope", "blob")
         if scope not in scopes:
@@ -219,6 +242,11 @@ def _rule_matched_terms(atom, groups, matcher, scopes, text_l):
         scope = atom.get("scope", "blob")
         hit = matcher(scopes[scope], groups[atom["group"]])
         return f"{atom['group']}:'{hit}'@{scope}"
+    if "library" in atom:
+        scope = atom.get("scope", "blob")
+        hit = matcher(scopes[scope], atom.get("terms") or [])
+        buckets = "".join(atom.get("buckets") or [])
+        return f"{atom['library']}/{buckets}:'{hit}'@{scope}"
     if "pattern" in atom:
         pat = atom["pattern"]
         expr = pat["match"] if isinstance(pat, dict) else pat
@@ -435,9 +463,10 @@ def eval_detection(detection, groups, matcher, scopes, text_l):
     the blocks are named pieces and the condition is a sentence. It is the
     same evaluator underneath; only the writing changes.
 
-    A block is any rule atom: `keywords`, `group`, `pattern`, `proximity`, or
-    a nested `any`/`all`/`not`. A `proximity` block may name OTHER BLOCKS in
-    the same detection as its `a` and `b`, which keeps a rule self-contained.
+    A block is any rule atom: `keywords`, `group`, `library`, `pattern`,
+    `proximity`, or a nested `any`/`all`/`not`. A `proximity` block may name
+    OTHER BLOCKS in the same detection as its `a` and `b`, which keeps a rule
+    self-contained.
 
     A condition naming a block that does not exist RAISES. A silent false
     would report the requirement as unanswered forever with nothing saying why.
@@ -468,6 +497,16 @@ def eval_detection(detection, groups, matcher, scopes, text_l):
             # list, and the rules that stopped carrying their own words on
             # 25 September raised a bare error naming the block.
             local[name] = groups[blk["group"]]
+        elif isinstance(blk.get("library"), str):
+            # A library block is a term list like any other, so it can be a
+            # proximity operand: "a California place name within 120 characters
+            # of an incident word" is the rule the geography table was built
+            # for.
+            if "terms" not in blk:
+                raise ValueError(
+                    f"library atom {blk['library']!r} in block {name!r} was "
+                    f"never resolved. core.pnd.load_domain fills `terms`.")
+            local[name] = blk["terms"]
 
     for blk in blocks.values():
         if not (isinstance(blk, dict) and isinstance(blk.get("proximity"), dict)):

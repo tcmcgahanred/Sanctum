@@ -27,6 +27,8 @@ WHAT IS CHECKED
   detect block       satisfies its requirement without touching any score
   rule claim         still works, and the two paths are a union
   satisfied_by       `all` needs every component, `any` needs one
+  library atom       reads a generated table by bucket, honours scope, and is
+                     refused loudly when unresolved, undeclared or mis-bucketed
   no detector        an indicator nothing can test is NOT reported as a miss
   needs_detector     an `all` indicator with one detector written and one not
                      is neither satisfied nor a miss
@@ -41,7 +43,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from core.pnd import load_domain                                    # noqa: E402
+from core.pnd import load_domain, _expand_libraries                 # noqa: E402
 from core.rules import (_eval_atom, _scopes, detectable_requirements,  # noqa: E402
                         eval_detection, make_matcher,
                         requirement_coverage, score_article)
@@ -171,6 +173,64 @@ def main():
     cov4b = requirement_coverage(art("nothing here"), req2, scoring, detectable=det3)
     check("...and when the written half fails it is an ordinary miss",
           cov4b["indicators"]["IND-8.1"], "unsatisfied")
+
+    print("\nThe library atom reads a generated table, by bucket")
+    lib_a = {"library": "geo_ca", "bucket": "A", "scope": "blob"}
+    lib_bc = {"library": "geo_ca", "bucket": ["B", "C"], "scope": "title"}
+    live_cfg = load_domain(domain="cti")
+    sc = live_cfg["scoring"]
+    # The atoms above are hand-written, so nothing has resolved them. Resolve
+    # them the way load_domain does, through the same function, so the test
+    # exercises the real reader rather than a copy of it.
+    holder = {"libraries": sc.get("libraries"),
+              "tiers": [{"require": lib_a}, {"require": lib_bc}]}
+    _expand_libraries(holder, {}, live_cfg["domain_dir"], "cti")
+    check("bucket A holds 1,085 names", len(lib_a["terms"]), 1085)
+    check("buckets B and C together hold 568", len(lib_bc["terms"]), 568)
+    check("a bucket A name matches on its own",
+          ev(lib_a, art("Breach at Acalanes Ridge", "x")), True)
+    check("a bucket B name is not in bucket A",
+          ev(lib_a, art("Alhambra city hall breached", "x")), False)
+    # MEASURED, and it is the reason the table exists. Of the 49 terms in the
+    # hand-typed `geo` group only five are place names the Gazetteer knows, and
+    # ALL FIVE carry a bucket that says they cannot stand alone: Stockton shares
+    # its name with 11 states, Bakersfield, Modesto and the PLACES called
+    # Sacramento and Fresno with 2 to 3. The hand list matches every one of them
+    # on its own. Sacramento and Fresno are also bucket A as COUNTIES, which is
+    # why they appear in both lists.
+    check("every place name in the hand-typed geo list carries a bucket that "
+          "says it needs corroboration",
+          sorted(set(lib_bc["terms"]) &
+                 {x.strip() for x in sc["groups"]["geo"]}),
+          ["bakersfield", "fresno", "modesto", "sacramento", "stockton"])
+    check("...and is found when the rule asks for B",
+          ev(lib_bc, art("Alhambra city hall breached", "x")), True)
+    check("scope is honoured: a title-scoped library ignores the body",
+          ev(lib_bc, art("plain headline", "alhambra in the body")), False)
+    check("a place name nowhere in California does not match",
+          ev(lib_a, art("Breach in Topeka", "x")), False)
+    # A REFUSAL, NOT A SILENT ZERO. Three ways to get a library atom wrong, and
+    # every one of them would otherwise report its requirement as uncollected
+    # forever with nothing on the page saying why.
+    try:
+        ev({"library": "geo_ca", "bucket": "A"}, art("modesto"))
+        check("an unresolved library atom is refused", "evaluated", "refused")
+    except ValueError as e:
+        check("an unresolved library atom is refused",
+              "never resolved" in str(e), True)
+    for bad, label in (
+            ({"library": "no_such_lib", "bucket": "A"}, "an undeclared library"),
+            ({"library": "geo_ca", "bucket": "Z"}, "a bucket the file lacks"),
+            ({"library": "geo_ca"}, "an atom that names no bucket")):
+        try:
+            _expand_libraries({"libraries": sc.get("libraries"),
+                               "tiers": [{"require": dict(bad)}]}, {},
+                              live_cfg["domain_dir"], "cti")
+            check(f"{label} is refused at load", "loaded", "refused")
+        except ValueError:
+            check(f"{label} is refused at load", True, True)
+    check("declaring a library changes no live rule",
+          [n for n in ("geo_ca",) if n in (sc.get("groups") or {})], [])
 
     print("\nThe live domain still loads and its detectors compile")
     cfg = load_domain(domain="cti")

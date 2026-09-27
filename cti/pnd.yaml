@@ -168,7 +168,6 @@ manifest:
   - url: https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml
     group: 'National: vendor PSIRTs'
     logsource: {scope: national, kind: vendor_psirt}
-    note: MSRC update-guide RSS was dropped 2026-08-25. See the drop list above.
   - url: https://security.paloaltonetworks.com/rss.xml
     group: 'National: vendor PSIRTs'
     logsource: {scope: national, kind: vendor_psirt}
@@ -291,9 +290,8 @@ manifest:
   - url: https://www.microsoft.com/en-us/security/blog/feed/
     group: 'National: vendor telemetry'
     logsource: {scope: national, kind: vendor_research}
-    note: Microsoft Threat Intelligence. Distinct from the MSRC feed above, which is the patch
-      catalogue. Low volume and a real marketing fraction — the weakest of these four and the
-      first to drop at review. The old msrc-blog host is dead.
+    note: Microsoft Threat Intelligence. Low volume and a real marketing fraction — the weakest
+      of these four and the first to drop at review. The old msrc-blog host is dead.
   - url: https://haveibeenpwned.com/feed/breaches/
     group: 'National: breach registry'
     logsource: {scope: national, kind: breach_registry}
@@ -730,6 +728,27 @@ scoring:
   - how to
   - what is
   - hacker
+  # LIBRARIES. A word list that is GENERATED rather than typed, and too large to
+  # write out below. `cti/data/geo_classified.txt` holds 1,653 California place
+  # and county names derived from the US Census Bureau Gazetteer by
+  # `tools/geo_classify.py`, each carrying a confidence bucket:
+  #   A  unique to California                       may match on the name alone
+  #   B  shared with 2-3 other states               needs corroboration nearby
+  #   C  shared with 4+ states, or an ordinary English word    never alone
+  # A rule names the library and the buckets it trusts, and nothing copies the
+  # names, so a regeneration is a regeneration and not a merge.
+  #   file           resolves against the domain directory, the same rule
+  #                  manifest.sensors_file uses, so this is cti/data/...
+  #   delimiter      the column separator in that file
+  #   name_column    which column holds the term, counting from 1
+  #   bucket_column  which column holds the bucket
+  # The file is read only when a rule names the library.
+  libraries:
+    geo_ca:
+      file: data/geo_classified.txt
+      delimiter: '|'
+      name_column: 1
+      bucket_column: 3
   # THE VOCABULARY. Every word the scorer can see lives here; rules reference
   # these names and never a raw string.
   # Matching is case-insensitive substring for terms of 5+ characters, and

@@ -10,7 +10,8 @@ blocks; the surrounding prose is ignored by the engines (it's for humans).
 Expected top-level keys across the yaml blocks:
   manifest:   host/runtime + storage (base_dir, sensors_file, corpus{...},
               collection{...})
-  scoring:    tiers[], multipliers[], groups{}, word_boundary_terms[], settings{}
+  scoring:    tiers[], multipliers[], groups{}, libraries{},
+              word_boundary_terms[], settings{}
   production: report_title, sections[], staging_item_target,
               staging_per_section, distributed_item_target, notes.
               Only report_title is read by any engine; the rest inform the
@@ -186,6 +187,124 @@ def _validate(cfg, domain):
         raise ValueError(f"[{domain}] rules reference undefined groups: {sorted(missing)}")
 
 
+def _library_table(spec, domain_dir, name, domain):
+    """
+    Read one declared library file into {bucket: [term, ...]}.
+
+    A LIBRARY IS A WORD LIST THAT IS DERIVED, NOT TYPED. `cti/data/
+    geo_classified.txt` holds 1,653 California place and county names built
+    from the US Census Bureau Gazetteer, each carrying a confidence bucket.
+    Writing those names into `scoring.groups` would put a generated table into
+    a hand-maintained file and make the next regeneration a merge; copying the
+    ones somebody happened to think of is what produced the 49-term `geo` list
+    that misses 1,604 names and collides with nine other states.
+
+    `file:` resolves against the DOMAIN directory, the same rule
+    `manifest.sensors_file` already uses.
+
+    Read on demand only. A declared library no rule names costs nothing.
+    """
+    rel = str(spec.get("file") or "").strip()
+    if not rel:
+        raise ValueError(
+            f"[{domain}] scoring.libraries.{name} declares no `file:`.")
+    path = Path(rel)
+    if not path.is_absolute():
+        path = Path(domain_dir) / path
+    if not path.exists():
+        raise FileNotFoundError(
+            f"[{domain}] scoring.libraries.{name} names {path}, which does "
+            f"not exist.")
+    delim = spec.get("delimiter", "|")
+    ncol = int(spec.get("name_column", 1)) - 1
+    bcol = int(spec.get("bucket_column", 0)) - 1
+    table = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        cols = line.split(delim)
+        if ncol >= len(cols):
+            continue
+        term = cols[ncol].strip().lower()
+        if not term:
+            continue
+        bucket = cols[bcol].strip() if 0 <= bcol < len(cols) else ""
+        table.setdefault(bucket, []).append(term)
+    if not table:
+        raise ValueError(
+            f"[{domain}] scoring.libraries.{name} read {path} and found no "
+            f"terms. Check `delimiter:` and `name_column:`.")
+    return table
+
+
+def _expand_libraries(scoring, requirements, domain_dir, domain):
+    """
+    Resolve every `library:` atom into the terms it stands for, at load time.
+
+    The atom keeps its own name and buckets and gains `terms`. That is what
+    lets a rule file carry no words while the evaluator stays a matcher over a
+    list: core/rules.py never opens a file, and there is still exactly one copy
+    of the list, in the file that generated it.
+
+    THREE REFUSALS, all of the same class - a detector that fires on nothing
+    reports its requirement as uncollected forever and nothing says why:
+      a library no `scoring.libraries` entry declares
+      an atom that names no bucket
+      a bucket the file does not contain
+    """
+    specs = scoring.get("libraries") or {}
+    cache = {}
+
+    def terms_for(lib, wanted):
+        if lib not in specs:
+            raise ValueError(
+                f"[{domain}] a rule names library {lib!r}, which "
+                f"scoring.libraries does not declare. Declared: "
+                f"{sorted(specs)}.")
+        if lib not in cache:
+            cache[lib] = _library_table(specs[lib], domain_dir, lib, domain)
+        table = cache[lib]
+        missing = [b for b in wanted if b not in table]
+        if missing:
+            raise ValueError(
+                f"[{domain}] library {lib!r} holds no bucket {missing}. It "
+                f"holds {sorted(table)}. A bucket that matches nothing is a "
+                f"detector that never fires.")
+        out = []
+        for b in wanted:
+            out.extend(table[b])
+        return out
+
+    def walk(node):
+        if isinstance(node, list):
+            for x in node:
+                walk(x)
+            return
+        if not isinstance(node, dict):
+            return
+        for v in list(node.values()):
+            walk(v)
+        lib = node.get("library")
+        if not isinstance(lib, str):
+            return
+        raw = node.get("bucket")
+        wanted = [] if raw is None else [
+            str(b) for b in (raw if isinstance(raw, list) else [raw])]
+        if not wanted:
+            raise ValueError(
+                f"[{domain}] a `library:` atom naming {lib!r} declares no "
+                f"`bucket:`. The buckets are the whole point of the table - "
+                f"a name unique to this state may match alone, a name shared "
+                f"with four other states may not.")
+        node["buckets"] = wanted
+        node["terms"] = terms_for(lib, wanted)
+
+    for key in ("tiers", "multipliers", "floors", "force_surface"):
+        walk(scoring.get(key))
+    walk(requirements)
+
+
 def load_domain(domain=None, pnd_path=None, repo_root=None):
     """
     Load and validate a domain's P&D. Returns a dict with the parsed blocks
@@ -294,6 +413,11 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
         "log_path": base_dir / "logs" / "collector.log",
         "staging_out": base_dir / "staging_candidates.md",
     }
+    # Libraries resolve LAST, because a `library:` atom can appear in a scoring
+    # rule or in a requirement's detection block and the requirements are only
+    # assembled on the line above.
+    _expand_libraries(result["scoring"], result["requirements"],
+                      domain_dir, domain)
     return result
 
 
