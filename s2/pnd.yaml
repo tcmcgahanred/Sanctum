@@ -1,34 +1,33 @@
-# S2 — Planning & Direction
-
-*Sanctum · `s2` · the only file the engine reads.*
-
-**BLUF:** This declares what the S2 domain cares about. Nothing here describes
-engine behaviour. The requirements tree lives in `requirements.md`; the
-reasoning behind the word lists lives in `vocab.md`; **every number, term and
-threshold lives here and nowhere else.**
-
-**Reader.** The S2 section of an Army combat aviation brigade. Awareness, not
-decision support — success is *"they were not surprised,"* not *"they acted."*
-The section works strategic-to-operational; battalions handle
-operational-to-tactical, so tactical detail is lower value here. Platforms of
-interest are utility, cargo, and attack rotary wing plus organic unmanned.
-
-**Schema questions resolved 2026-08-18** against `core/rules.py` by test, not by
-reading. Proximity, nesting, and multiplier conjunctions are all supported;
-tiers cannot double-count and multipliers can. Every rule below reflects those
-answers.
-
-**The first runs test the sensors, not the scoring model.** `requirements.md`
-finds one of 43 collectable facts confidently covered and fifteen with none.
-With collection that thin, `force_surface` will rarely fire and 948 terms cannot
-rank an article the sensors never fetched. A quiet surface is a collection
-finding, not a scoring defect.
-
----
-
-## Manifest
-
-```yaml
+# # S2 — Planning & Direction
+#
+# *Sanctum · `s2` · the only file the engine reads.*
+#
+# **BLUF:** This declares what the S2 domain cares about. Nothing here describes
+# engine behaviour. The requirements tree lives in `requirements.md`; the
+# reasoning behind the word lists lives in `vocab.md`; **every number, term and
+# threshold lives here and nowhere else.**
+#
+# **Reader.** The S2 section of an Army combat aviation brigade. Awareness, not
+# decision support — success is *"they were not surprised,"* not *"they acted."*
+# The section works strategic-to-operational; battalions handle
+# operational-to-tactical, so tactical detail is lower value here. Platforms of
+# interest are utility, cargo, and attack rotary wing plus organic unmanned.
+#
+# **Schema questions resolved 2026-08-18** against `core/rules.py` by test, not by
+# reading. Proximity, nesting, and multiplier conjunctions are all supported;
+# tiers cannot double-count and multipliers can. Every rule below reflects those
+# answers.
+#
+# **The first runs test the sensors, not the scoring model.** `requirements.md`
+# finds one of 43 collectable facts confidently covered and fifteen with none.
+# With collection that thin, `force_surface` will rarely fire and 948 terms cannot
+# rank an article the sensors never fetched. A quiet surface is a collection
+# finding, not a scoring defect.
+#
+# ---
+#
+# ## Manifest
+#
 manifest:
   domain: s2
   base_dir: /opt/ravenor-s2            # Linux path — collection runs on the
@@ -49,119 +48,146 @@ manifest:
     rclone_remote: gdrive:ravenor-s2-staging
     filename: "S2_{date}_STAGING.md"
   collection:
-    window_days: 35                    # NOT the 7-day default. The pull is
-                                       # roughly monthly and irregular; at 7,
-                                       # most of the month goes unscored.
+    # SEVEN, matching cti, decided 2026-09-27. The old value was 35 because the
+    # pull was monthly and irregular; the cycle is now weekly with the staging
+    # document read on Wednesday morning, so a 35-day window would re-present
+    # the same items every week. Measured before the change: 33 articles a day
+    # in steady state, so a 7-day window holds roughly 230 and yields about
+    # seven candidates at the current 3.0 percent surface rate.
+    window_days: 7
+    # NO max_publish_age_days, DELIBERATELY. It is the only setting in this
+    # apparatus that DELETES rather than flags, and cti's value of 7 would be
+    # wrong here. Measured 2026-09-27 with tools/lag_check.py: 15 of 18
+    # surfacing items arrive within 6.3 days, but three single items arrive at
+    # 53.8, 151.3 and 194.3 days from china-arms.com, verticalmag.com and
+    # chinapower.csis.org — 17 percent of what surfaces. lag_check warns that a
+    # large p95 is often a feed dating items by INCIDENT rather than
+    # publication, which then gets deleted for the wrong reason. Those three
+    # need reading by hand before any cutoff is set.
     min_title_len: 15
     suffix_separators: [" - ", " | ", " — "]
-```
-
----
-
-## Sensors — collection feed list
-
-**Every URL below is UNVERIFIED against the collector host's egress.** Verify
-before the first run; several defence publishers return 403 to datacentre
-addresses while serving browsers normally.
-
-**Coverage warning.** `requirements.md` Byproduct 2 finds that of 43 collectable
-facts in this domain, one has confident coverage and fifteen have none. This
-sensor set does not answer PIR-2 at all. **Sources are this domain's real
-constraint — vocabulary cannot compensate, because the collector never reads the
-word groups.**
-
-```sensors
-# Verified reachable and confirmed to return XML from the collector host,
-# 2026-08-19. Re-verify from the HOST, never a browser: several defence
-# publishers serve browsers normally and return 403 to datacentre addresses.
-
-# --- trade press ---
-https://www.defensenews.com/arc/outboundfeeds/rss/
-
-# --- imagery-derived / first-look at hardware ---
-https://www.twz.com/feed
-
-# --- adversary primary source ---
-https://www.ecns.cn/rss/rss.xml
-
-# --- adversary systems and air-domain specialist ---
-https://chinese-military-aviation.blogspot.com/feeds/posts/default?alt=rss
-https://www.china-arms.com/feed/
-
-# --- regional strategic analysis ---
-# ASPI posts several times a week on Indo-Pacific security specifically.
-# Nothing else in this list gives regional strategic assessment.
-https://www.aspistrategist.org.au/feed/
-
-# --- China analysis ---
-# Lower volume than ASPI. Chokepoint and maritime coverage should finally give
-# the chokepoint multiplier something to act on.
-https://chinapower.csis.org/feed/
-
-# --- rotary-wing professional press ---
-# Skews civil (HEMS, SAR, offshore). Added to address zero Tier 3 hits across
-# two cycles - not one article in 27 contained a rotary-wing term. Watch
-# whether it is additive or merely loud.
-https://verticalmag.com/feed/
-
-# --- REJECTED, do not re-add without re-testing ---
-# blog.usni.org/feed - 301s to www.usni.org/feed, which returns 403 behind bot
-#   protection. Serves browsers, blocks the collector. Removed 2026-08-19.
-# english.chinamil.com.cn/rss.xml - PLA Daily. TLS certificate does not match
-#   the hostname; http and eng. variants return 404 meta-refresh pages. The
-#   endpoint appears to be gone. THIS WAS THE INTENDED SOURCE FOR THE
-#   DECLARED-INTENT SIGNAL, which remains without a proper feed.
-# china.org.cn/rss/1201719.xml - returns HTML, not a feed.
-# ainonline.com/rss.xml - 404.
-# rotorhub.com/feed - real feed, but overlaps verticalmag heavily and is
-#   explicitly civil and parapublic. Held under 6.1: cannot say what it gives
-#   that verticalmag does not.
-# understandingwar.org - ISW. /feed and /feed without www both return HTML,
-#   /rss.xml returns 403. Content is a good fit; no usable feed found 2026-08-19.
-# iiss.org/rss/ - 403.
-# csis.org/analysis/feed - 404. The chinapower subdomain feed works.
-# rand.org/topics/china.xml - returns the channel title and no items. Empty or
-#   unparseable. Not worth debugging.
-
-# --- UNDER REVIEW, decide after cycle 4 ---
-# ecns.cn - largest single source at ~50 articles in one cycle and contributed
-#   NOTHING above the catch-all floor. It is a general news agency, not a
-#   military organ. Under 6.1 a high-volume non-additive feed should be dropped.
-#   Kept for now only because it is the sole adversary primary source remaining.
-# chinese-military-aviation.blogspot.com - collected ZERO articles in its first
-#   cycle. A specialist blog returning nothing is a sensor failure, not rarity.
-#   Diagnose before the next cycle.
-
-# --- STILL MISSING, see requirements.md Byproduct 1 ---
-# 1. A military rotary-wing professional source. Vertical is civil-leaning and
-#    the military-specific publications are subscription-only.
-# 2. Conflict OSINT loss documentation. The accounts that systematically record
-#    rotary-wing losses publish on social platforms with no feed. This EEI may
-#    need a mechanism other than a sensor.
-# 3. Adversary military primary source, to replace PLA Daily.
-# 4. Host-nation and regional press within the AOR.
-```
-
----
-
-## Scoring
-
-An item takes the weight of the **highest tier it qualifies for** — tiers are
-not additive. Multipliers stack multiplicatively on top. Absent multipliers are
-neutral, never a penalty.
-
-**Design intent, tiers.** Tier rank encodes how *directly* an item hits, not how
-much the reader cares. A high-ranked requirement legitimately sits in a low tier
-— PIR-2 is ranked second and lives in Tier 3 because environmental conditions
-are genuinely less direct than an adversary act. That is not an error; do not
-"fix" it.
-
-**Design intent, Tier 2.** Deliberately platform-anchored rather than
-theatre-anchored: the aviation mission is constant, the theatre is an
-assignment. A system that kills someone else's helicopters today is a system
-that kills ours later. Geography stops mattering below Tier 1.
-
-```yaml
+#
+# ---
+#
+# ## Sensors — collection feed list
+#
+# **Every URL below is UNVERIFIED against the collector host's egress.** Verify
+# before the first run; several defence publishers return 403 to datacentre
+# addresses while serving browsers normally.
+#
+# **Coverage warning.** `requirements.md` Byproduct 2 finds that of 43 collectable
+# facts in this domain, one has confident coverage and fifteen have none. This
+# sensor set does not answer PIR-2 at all. **Sources are this domain's real
+# constraint — vocabulary cannot compensate, because the collector never reads the
+# word groups.**
+#
+  # The sensors block from s2/pnd.md, as RECORDS. Every one now
+  # declares a logsource, so a requirement can name the vantage it
+  # needs. Scope answers whose vantage this is; kind answers what
+  # type of source. Approved 2026-09-27.
+  sensors:
+  # Verified reachable and confirmed to return XML from the collector host,
+  # 2026-08-19. Re-verify from the HOST, never a browser: several defence
+  # publishers serve browsers normally and return 403 to datacentre addresses.
+  # --- trade press ---
+  - url: https://www.defensenews.com/arc/outboundfeeds/rss/
+    group: 'Trade press'
+    logsource: {scope: allied, kind: defence_press}
+  # --- imagery-derived / first-look at hardware ---
+  - url: https://www.twz.com/feed
+    group: 'Imagery-derived / first look at hardware'
+    logsource: {scope: allied, kind: defence_press}
+  # --- adversary primary source ---
+  # DROPPED 2026-09-27, on measurement: https://www.ecns.cn/rss/rss.xml
+  #   932 of 1,576 articles in 41 days, 59 percent of
+  #   the corpus, and ONE cleared the threshold - a
+  #   Japanese cabinet reshuffle. Of its 15 highest
+  #   scoring items, three were on subject. It is a
+  #   general news agency, not a military organ, and
+  #   no section feed exists: /rss/military.xml and
+  #   five other paths return 404. The UNDER REVIEW
+  #   note above called this in August; the numbers
+  #   now say it.
+  # --- adversary systems and air-domain specialist ---
+  - url: https://chinese-military-aviation.blogspot.com/feeds/posts/default?alt=rss
+    group: 'Adversary systems and air-domain specialist'
+    logsource: {scope: allied, kind: blog}
+  - url: https://www.china-arms.com/feed/
+    group: 'Adversary systems and air-domain specialist'
+    logsource: {scope: adversary, kind: industry}
+  # --- regional strategic analysis ---
+  # ASPI posts several times a week on Indo-Pacific security specifically.
+  # Nothing else in this list gives regional strategic assessment.
+  - url: https://www.aspistrategist.org.au/feed/
+    group: 'Regional strategic analysis'
+    logsource: {scope: allied, kind: think_tank}
+  # --- China analysis ---
+  # Lower volume than ASPI. Chokepoint and maritime coverage should finally give
+  # the chokepoint multiplier something to act on.
+  - url: https://chinapower.csis.org/feed/
+    group: 'China analysis'
+    logsource: {scope: allied, kind: think_tank}
+  # --- rotary-wing professional press ---
+  # Skews civil (HEMS, SAR, offshore). Added to address zero Tier 3 hits across
+  # two cycles - not one article in 27 contained a rotary-wing term. Watch
+  # whether it is additive or merely loud.
+  - url: https://verticalmag.com/feed/
+    group: 'Rotary-wing professional press'
+    logsource: {scope: allied, kind: trade_press}
+  # --- REJECTED, do not re-add without re-testing ---
+  # blog.usni.org/feed - 301s to www.usni.org/feed, which returns 403 behind bot
+  # protection. Serves browsers, blocks the collector. Removed 2026-08-19.
+  # english.chinamil.com.cn/rss.xml - PLA Daily. TLS certificate does not match
+  # the hostname; http and eng. variants return 404 meta-refresh pages. The
+  # endpoint appears to be gone. THIS WAS THE INTENDED SOURCE FOR THE
+  # DECLARED-INTENT SIGNAL, which remains without a proper feed.
+  # china.org.cn/rss/1201719.xml - returns HTML, not a feed.
+  # ainonline.com/rss.xml - 404.
+  # rotorhub.com/feed - real feed, but overlaps verticalmag heavily and is
+  # explicitly civil and parapublic. Held under 6.1: cannot say what it gives
+  # that verticalmag does not.
+  # understandingwar.org - ISW. /feed and /feed without www both return HTML,
+  # /rss.xml returns 403. Content is a good fit; no usable feed found 2026-08-19.
+  # iiss.org/rss/ - 403.
+  # csis.org/analysis/feed - 404. The chinapower subdomain feed works.
+  # rand.org/topics/china.xml - returns the channel title and no items. Empty or
+  # unparseable. Not worth debugging.
+  # --- UNDER REVIEW, decide after cycle 4 ---
+  # ecns.cn - largest single source at ~50 articles in one cycle and contributed
+  # NOTHING above the catch-all floor. It is a general news agency, not a
+  # military organ. Under 6.1 a high-volume non-additive feed should be dropped.
+  # Kept for now only because it is the sole adversary primary source remaining.
+  # chinese-military-aviation.blogspot.com - collected ZERO articles in its first
+  # cycle. A specialist blog returning nothing is a sensor failure, not rarity.
+  # Diagnose before the next cycle.
+  # --- STILL MISSING, see requirements.md Byproduct 1 ---
+  # 1. A military rotary-wing professional source. Vertical is civil-leaning and
+  # the military-specific publications are subscription-only.
+  # 2. Conflict OSINT loss documentation. The accounts that systematically record
+  # rotary-wing losses publish on social platforms with no feed. This EEI may
+  # need a mechanism other than a sensor.
+  # 3. Adversary military primary source, to replace PLA Daily.
+  # 4. Host-nation and regional press within the AOR.
+#
+# ---
+#
+# ## Scoring
+#
+# An item takes the weight of the **highest tier it qualifies for** — tiers are
+# not additive. Multipliers stack multiplicatively on top. Absent multipliers are
+# neutral, never a penalty.
+#
+# **Design intent, tiers.** Tier rank encodes how *directly* an item hits, not how
+# much the reader cares. A high-ranked requirement legitimately sits in a low tier
+# — PIR-2 is ranked second and lives in Tier 3 because environmental conditions
+# are genuinely less direct than an adversary act. That is not an error; do not
+# "fix" it.
+#
+# **Design intent, Tier 2.** Deliberately platform-anchored rather than
+# theatre-anchored: the aviation mission is constant, the theatre is an
+# assignment. A system that kills someone else's helicopters today is a system
+# that kills ours later. Geography stops mattering below Tier 1.
+#
 scoring:
   tiers:
     # PROXIMITY CONFIRMED AVAILABLE. Two deliberate choices below.
@@ -393,12 +419,19 @@ scoring:
     empty_title: {score: 0.5, tier: 4, flag: "FLAG: empty title (feed artifact — verify source)"}
     recency:
       enabled: true
-      window_days: 35          # MUST track collection.window_days above, or
+      window_days: 7           # MUST track collection.window_days above, or
                                # most of the corpus is flagged stale on every
                                # run. Flags only; never drops.
-      cutoff_weekday: monday
-      cutoff_time: "05:00"
-      timezone: UTC
+      # THE SAME CYCLE AS cti, decided 2026-09-27. Was monday, 05:00, UTC.
+      # THE TIMER DOES NOT MOVE: ravenor-s2.timer stays at 05:30 Pacific while
+      # ravenor.timer fires at 04:00, because a cti run takes 36 minutes and the
+      # two must not compete for the network. The rule is only that the declared
+      # cutoff sits at or BEFORE the hour the run starts — a 04:00 cutoff
+      # against a 05:30 run is correct. Declaring a time that has not yet passed
+      # walks the window back a whole WEEK, silently.
+      cutoff_weekday: wednesday
+      cutoff_time: "04:00"
+      timezone: America/Los_Angeles
     grouping:
       enabled: true
       min_similarity: 0.55
@@ -1417,16 +1450,14 @@ scoring:
       - "Summer Olympics"
       - "Winter Olympics"
       - "Asian Games"
-```
-
----
-
-## Production
-
-**No item targets.** The review surface is uncapped by design; restraint belongs
-to the vox, applied by a person.
-
-```yaml
+#
+# ---
+#
+# ## Production
+#
+# **No item targets.** The review surface is uncapped by design; restraint belongs
+# to the vox, applied by a person.
+#
 production:
   audience: >
     The S2 section of an Army combat aviation brigade — trained all-source

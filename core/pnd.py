@@ -131,6 +131,20 @@ def extract_config(md_text):
     (_UniqueKeyLoader) and across blocks (_deep_merge). Both were silent before
     2026-09-01 and both had already cost a wrong count.
     """
+    # AN UNTERMINATED FENCE HIDES A WHOLE BLOCK IN SILENCE, and it did. `s2`'s
+    # `production:` block opened at line 1429 of a 1,456-line pnd.md and the
+    # closing ``` was never written, so the regex below never matched it and the
+    # engine read `production: None` for an unknown number of weeks. The
+    # consequence was invisible in the only place it showed: a staging document
+    # with a default title, no sections and no annotations, which reads like a
+    # domain that has not declared them yet. An odd number of fences is the
+    # cheapest possible check and it is the last thing protecting the .md path.
+    fences = sum(1 for l in md_text.splitlines() if l.startswith("```"))
+    if fences % 2:
+        raise ValueError(
+            f"P&D markdown has {fences} fence lines, an odd number, so one "
+            f"block is never closed and everything in it is invisible to the "
+            f"engine. Find the last ``` and add its partner.")
     merged = {}
     blocks = _YAML_BLOCK.findall(md_text)
     if not blocks:
