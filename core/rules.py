@@ -563,8 +563,16 @@ def _condition(expr):
 
 
 def eval_detection(detection, groups, matcher, scopes, text_l):
-    """
+    r"""
     Evaluate a Sigma-shaped detection block.
+
+    THIS DOCSTRING IS RAW, and has to be. It contains the worked example
+    `\bT\d{4}(\.\d{3})?\b`, and from Python 3.12 an invalid escape sequence in
+    a normal string literal is a SyntaxWarning printed on every import. The
+    collection host runs 3.12 or later and had been printing that line on every
+    single run. Measured on 2026-09-27: the file at 069f66b raises exactly one
+    invalid-escape warning and this one raises none. The `r` prefix is the whole
+    fix; nothing about the example or the behaviour changes.
 
     A detection is named blocks plus one `condition:` line naming them:
 
