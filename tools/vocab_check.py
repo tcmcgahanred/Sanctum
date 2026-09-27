@@ -105,9 +105,8 @@ def load_vocab(vocab_path):
     the domain keeps everything in one file.
 
     Two shapes are supported on purpose. `cti` merged its five markdown files
-    into one on 2026-09-01; `s2` is git-ignored, cannot be edited from the repo,
-    and still keeps a separate vocab.md. A fallback serves both without a flag
-    day. Returns {} when neither carries a `vocab:` block — the block is
+    into one on 2026-09-01; `s2` still keeps a separate vocab.md beside its
+    pnd.md. A fallback serves both without a flag day. Returns {} when neither carries a `vocab:` block — the block is
     optional, and the checks that need it simply do not run. A domain is not
     broken for lacking one; it is only unguarded.
     """

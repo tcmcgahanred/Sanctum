@@ -806,10 +806,10 @@ def tier_requirement(tier_id, scoring):
 
     Reads the `serves:` field a tier may declare. **Absent is normal and must
     stay silent** — a domain that has not declared its requirements is not
-    broken, and `s2` is git-ignored so it cannot be edited from the repo at all
-    (running-log.md Blocker 20). A staging document that printed
-    "Requirement met: None" on every candidate of an undeclared domain would be
-    worse than printing nothing.
+    broken, it is younger. `s2` is the standing case: it scores daily and has no
+    requirements tree yet. A staging document that printed "Requirement met:
+    None" on every candidate of such a domain would be worse than printing
+    nothing.
     """
     for t in scoring.get("tiers", []) or []:
         if t.get("id") == tier_id:

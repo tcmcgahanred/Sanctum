@@ -47,10 +47,23 @@ Thumbs.db
 
 
 
-# --- Second domain: kept out of the public repo entirely.
+# --- The second domain is PUBLIC, like every other domain.
+# Owner's decision 2026-09-27: it is all open-source intelligence and none of it
+# is For Official Use Only, so nothing about `s2/` is excluded here. The rules
+# that once kept it out are deleted rather than commented out, because a
+# commented-out rule reads as a rule somebody meant to restore.
+#
+# What still applies to every domain: no credential, no relay or VPN address,
+# and no local Windows path in a tracked file. A .gitignore cannot catch any of
+# those once they are pasted into a file that is already tracked.
+
+# --- The commit hook is a COPY, not a symlink ---
+# .githooks/pre-commit is copied from tests/pre_commit.sh on each machine, so
+# the copy is machine state rather than source. tests/pre_commit.sh is tracked
+# and is the original.
 .githooks/
 
-# Private: never publish
-claude_S2-running-log.md
-deploy-s2.ps1
+# --- Deploy scripts: they carry the author's local paths ---
+# Not a domain rule. These are per-machine helpers that hold absolute Windows
+# paths, which is the one thing that must never reach a tracked file.
 deploy-*.ps1

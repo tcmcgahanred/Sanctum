@@ -2,6 +2,18 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-09-27] The second domain is public, and it turns out it already was
+
+**Owner's decision, after deliberating on it for some time: the second domain is all open-source intelligence and none of it is For Official Use Only, so nothing about `s2/` is excluded from the repository.** Care about what gets published stays with the author, where it belongs.
+
+- **THE `s2/` RULE WAS ALREADY GONE.** `git check-ignore -v` on `s2/`, `s2/requirements/_tree.yaml` and `s2/data/x.txt` returns nothing. **The standing belief that the second domain was git-ignored — recorded in `running-log.md` §5, in `hosts-and-workflow.md` as "`.gitignore:60: s2/`", and in three code comments — has been false for an unknown length of time.** What remained was a comment reading "Second domain: kept out of the public repo entirely" sitting directly above an unrelated `.githooks/` rule. **A heading that survives the rule it described is worse than no comment: it is read as current.**
+- **Two S2-specific lines removed:** `claude_S2-running-log.md` and `deploy-s2.ps1`. **Deleted rather than commented out, because a commented-out rule reads as a rule somebody meant to restore.**
+- **Two rules KEPT, and neither is a domain rule, so both now say what they are.** `.githooks/` is excluded because `.githooks/pre-commit` is a per-machine COPY of the tracked `tests/pre_commit.sh`. `deploy-*.ps1` is excluded because those helpers carry absolute Windows paths, which is the one thing that must never reach a tracked file. **`deploy-s2.ps1` was redundant against it.**
+- **THREE CODE COMMENTS CORRECTED, and each was load-bearing rather than decorative.** `core/rules.py`, `tools/vocab_check.py` and `tests/handover_test.py` each gave "s2 is git-ignored" as the REASON for a behaviour. The behaviours are all still right for a better reason — **a domain without a `serves:` field or a requirements tree is younger, not broken** — and `s2` is the standing example, scoring daily with no tree yet. **A reason that is false is how a correct behaviour gets removed by a future reader.**
+- **One consequence, and it retires a warning I gave the owner an hour earlier: new files under `s2/requirements/` will NOT be swallowed by `.gitignore`.** I said they would. They will appear in `git status` like any other file.
+- **`tools/vocab_check.py --tracked-only` has been checking both domains all along** — every run in this changelog reports "across: cti, s2" — which is the observation that should have exposed this weeks ago.
+- **Verified:** fifteen test files pass, `vocab_check` reports 0 errors and 3 warnings, and `git check-ignore` confirms `s2/` and everything under it is committable while `.githooks/` and `deploy-*.ps1` still are not.
+
 ## [2026-09-26] A candidate sensor is decided by the data, not by comparing hostnames
 
 **Corrective, same day, and the first run of `tools/sensor_candidates.py` is what found it.** Its top candidate was **`thehackernews.com`, 241 articles and 28 of them surfacing** — a publisher Sanctum **has collected directly all along.** The feed is declared as `feeds.feedburner.com/TheHackersNews`, so no comparison of hostnames could ever match it. **Three declared sensors are served from Feedburner.**

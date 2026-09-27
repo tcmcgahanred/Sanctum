@@ -84,9 +84,9 @@ def run():
     check("a tier id that does not exist reports nothing",
           tier_requirement(99, sc), None)
 
-    # The important one. s2 is git-ignored and cannot be edited from the repo,
-    # so a domain WILL run without this field. Printing "Requirement met: None"
-    # on every candidate would be worse than printing nothing at all.
+    # The important one. A domain WILL run without this field - s2 scores daily
+    # and has no requirements tree yet. Printing "Requirement met: None" on
+    # every candidate would be worse than printing nothing at all.
     print("\nAn undeclared domain stays silent — it is not a broken domain")
     bare = scoring(tiers=[{"id": 1, "name": "unnamed", "weight": 8.0,
                            "require": "always"}])
