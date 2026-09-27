@@ -27,9 +27,16 @@ title: An official California advisory naming an affected entity
 status: stable
 modified: '2026-09-26'
 fact: Official California advisories naming an affected California entity.
+# AN OFFICIAL ADVISORY COMES FROM AN OFFICIAL SOURCE, AND THAT IS A LOGSOURCE
+# QUESTION, NOT A WORD QUESTION. `kind: any` admitted all fourteen regional
+# sensors, eleven of which are Google News queries carrying national wire copy.
+# Measured 2026-09-26 on 2,828 articles: the detection matched 105, and exactly
+# ONE came from an official California feed. Sixty-four came from a single
+# Google News query. Roughly half the rest were one law firm's breach
+# notification press releases, which are not advisories and are not California.
 logsource:
   scope: regional
-  kind: any
+  kind: official
 sensor:
   name: Cal OES + CDT + MS-ISAC
   status: ACTIVE
@@ -55,9 +62,34 @@ detection:
   advisory:
     group: advisory
     scope: blob
-  condition: california and incident and advisory
-note: 'Cal-CSIC remains unserved. It publishes, but as PDF or DOCX on an HTML index with no
-  RSS. The collector blocker is gone: declare the index as ''kind: page'' and it is re-read
-  every run. Reaching the advisories themselves still means parsing that index, or the documents
-  behind it. WRITTEN for this requirement and NOT yet measured against the corpus. Run tools/requirement_coverage.py
-  on Ravenor to see what it matches before trusting the count.'
+  # THE CYBER GATE, MISSING UNTIL NOW AND THE STANDING CURE FOR EXACTLY THIS.
+  # `incident_broad` holds `state of emergency` and `outage`, so the one article
+  # this requirement drew from an official California feed in 30 days was
+  # "Governor Newsom proclaims state of emergency to bolster statewide El Nino
+  # preparedness" - a weather proclamation.
+  cyber:
+    group: cyber_context
+    scope: blob
+  condition: cyber and california and incident and advisory
+falsepositives:
+- 'A WEATHER OR DISASTER PROCLAMATION. `incident_broad` holds `state of emergency`, and an
+  El Nino preparedness proclamation from the Governor''s office carries it. Measured on 2026-09-26,
+  that was the ONLY article this requirement drew from an official California feed in 30 days.
+  The cyber gate is what removes it.'
+- 'A LAW FIRM''S BREACH NOTIFICATION PRESS RELEASE. Headlines of the form "KIEWIT CORPORATION
+  DATA BREACH ALERT" match `advisory` on the bare word `alert`, and any national wire release
+  mentioning California once satisfied the geography test. Roughly half of the 105 matches
+  before the logsource was tightened were one firm''s releases, for organisations in Ohio,
+  Kentucky and Texas.'
+note: 'MEASURED 2026-09-26 and the result is an HONEST ZERO. The two sensors that can supply
+  an official California advisory, news.caloes.ca.gov and cdt.ca.gov, published 8 articles
+  between them in 30 days, and not one was a cyber advisory. Tightening the logsource takes
+  this requirement from a reported 96 matches to none, and the 96 were general press. A zero
+  that names a collection gap is worth more than a number that is wrong. THE GAP: Cal-CSIC
+  publishes, but as PDF or DOCX on an HTML index with no RSS. The collector blocker is gone
+  - declare the index as ''kind: page'' and it is re-read every run. Reaching the advisories
+  themselves still means parsing that index, or the documents behind it. NOT CHANGED, and
+  recorded instead: the `advisory` word list carries the bare words `alert`, `bulletin` and
+  `guidance`, and only 3 of the 105 matches carried any of its five real advisory phrases.
+  Narrowing it would touch four requirements and needs its own measurement; with 8 candidate
+  articles in 30 days it would change nothing here.'
