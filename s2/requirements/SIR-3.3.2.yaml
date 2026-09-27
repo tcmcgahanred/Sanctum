@@ -13,10 +13,10 @@
 #           blocked     a machine could decide it, but the input it needs does
 #                       not exist yet. `blocked_by:` names that input.
 #
-#  NO `detection:` BLOCK YET. That is honest rather than unfinished: a detector
-#  that has not met the corpus is a proposal, and cti wrote its eighteen one at
-#  a time, measuring each. The coverage report calls this "no detector", which
-#  is different from "nothing matched".
+#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
+#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
+#  what each one matched before trusting it; this one has not had that pass, so
+#  any coverage number it produces is a number nobody has checked yet.
 # ------------------------------------------------------------------------------
 
 id: SIR-3.3.2
@@ -30,4 +30,26 @@ logsource:
 sensor:
   name: 'Sensor: conflict OSINT — PARTIAL'
   status: 'PARTIAL'
-note: 'Converted from EEI-3.3.b. Scoring: Tier 3 × first-occurrence'
+detection:
+  # A loitering munition or first-person-view drone, an aircraft, and the
+  # aircraft being ON THE GROUND. The third conjunct is what makes this
+  # different from an air-to-air engagement, and it has no group of its own
+  # because only this requirement asks for it - written inline, per the standing
+  # rule that one user means the words live in the rule.
+  uas:
+    any:
+    - {group: threat_uas_loitering, scope: blob}
+    - {group: threat_uas_loitering_generic, scope: blob}
+  aircraft:
+    any:
+    - {group: platform_rotary_wing, scope: blob}
+    - {group: platform_fixed_wing, scope: blob}
+  on_the_ground:
+    any:
+    - keywords: [parked, taxiing, taxied, on the ground, in the open, unsheltered,
+                 dispersal, revetment, hardened aircraft shelter, hangar,
+                 parking apron, ramp space, flight line, hardstand]
+      scope: blob
+    - {group: env_basing, scope: blob}
+  condition: uas and aircraft and on_the_ground
+note: 'Converted from EEI-3.3.b. Scoring: Tier 3 × first-occurrence DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'

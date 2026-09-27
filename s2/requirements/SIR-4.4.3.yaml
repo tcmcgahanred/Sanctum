@@ -13,10 +13,10 @@
 #           blocked     a machine could decide it, but the input it needs does
 #                       not exist yet. `blocked_by:` names that input.
 #
-#  NO `detection:` BLOCK YET. That is honest rather than unfinished: a detector
-#  that has not met the corpus is a proposal, and cti wrote its eighteen one at
-#  a time, measuring each. The coverage report calls this "no detector", which
-#  is different from "nothing matched".
+#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
+#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
+#  what each one matched before trusting it; this one has not had that pass, so
+#  any coverage number it produces is a number nobody has checked yet.
 # ------------------------------------------------------------------------------
 
 id: SIR-4.4.3
@@ -30,4 +30,24 @@ logsource:
 sensor:
   name: 'Sensor: trade press — PARTIAL'
   status: 'PARTIAL'
-note: 'Converted from EEI-4.4.c. Scoring: Tier 2'
+detection:
+  # Counter-unmanned capability AND an unmanned aircraft to defeat. Both halves
+  # are needed: the counter-UAS words alone match a procurement announcement
+  # with no aircraft in it, and the drone words alone match half the corpus.
+  counter_uas:
+    any:
+    - {group: threat_aaa_cuas, scope: blob}
+    - {group: threat_aaa_cuas_generic, scope: blob}
+    - keywords: [counter-unmanned, counter unmanned, anti-drone, drone defence,
+                 drone defense, UAS defeat, drone jammer, net gun, laser
+                 dazzler, high-power microwave]
+      scope: blob
+  unmanned:
+    any:
+    - {group: threat_uas_loitering, scope: blob}
+    - {group: threat_uas_loitering_generic, scope: blob}
+    - keywords: [UAS, UAV, drone, drones, unmanned aircraft, unmanned aerial,
+                 quadcopter, fixed-wing drone, reconnaissance drone]
+      scope: blob
+  condition: counter_uas and unmanned
+note: 'Converted from EEI-4.4.c. Scoring: Tier 2 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'

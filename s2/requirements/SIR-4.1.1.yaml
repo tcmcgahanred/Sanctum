@@ -13,10 +13,10 @@
 #           blocked     a machine could decide it, but the input it needs does
 #                       not exist yet. `blocked_by:` names that input.
 #
-#  NO `detection:` BLOCK YET. That is honest rather than unfinished: a detector
-#  that has not met the corpus is a proposal, and cti wrote its eighteen one at
-#  a time, measuring each. The coverage report calls this "no detector", which
-#  is different from "nothing matched".
+#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
+#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
+#  what each one matched before trusting it; this one has not had that pass, so
+#  any coverage number it produces is a number nobody has checked yet.
 # ------------------------------------------------------------------------------
 
 id: SIR-4.1.1
@@ -30,4 +30,32 @@ logsource:
 sensor:
   name: 'Sensor: trade press + imagery-derived — PARTIAL'
   status: 'PARTIAL'
-note: 'Converted from EEI-4.1.a. Scoring: Tier 2 × first-occurrence'
+detection:
+  # FIELDING LANGUAGE, written inline because no other requirement reads it.
+  # `event_words` carries some of these terms among 62 others including `moved`
+  # and `conducted`, which is too wide to decide a fielding claim on.
+  system:
+    any:
+    - {group: threat_manpads, scope: blob}
+    - {group: threat_sam, scope: blob}
+    - {group: threat_aaa_cuas, scope: blob}
+    - {group: threat_ew, scope: blob}
+    - {group: threat_small_arms, scope: blob}
+    - {group: threat_uas_loitering, scope: blob}
+    - {group: threat_sa_designations, scope: blob}
+    - {group: threat_manpads_generic, scope: blob}
+    - {group: threat_sam_generic, scope: blob}
+    - {group: threat_aaa_cuas_generic, scope: blob}
+    - {group: threat_ew_generic, scope: blob}
+    - {group: threat_small_arms_generic, scope: blob}
+    - {group: threat_uas_loitering_generic, scope: blob}
+  fielding:
+    keywords: [entered service, entering service, enters service, fielded,
+               fielding, began fielding, newly fielded, in service with,
+               operational status, declared operational, initial operating
+               capability, full operational capability, serial production,
+               mass production, commissioned, inducted, accepted into service,
+               delivered to, handed over to]
+    scope: blob
+  condition: system and fielding
+note: 'Converted from EEI-4.1.a. Scoring: Tier 2 × first-occurrence DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'

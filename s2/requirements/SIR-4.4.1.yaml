@@ -13,10 +13,10 @@
 #           blocked     a machine could decide it, but the input it needs does
 #                       not exist yet. `blocked_by:` names that input.
 #
-#  NO `detection:` BLOCK YET. That is honest rather than unfinished: a detector
-#  that has not met the corpus is a proposal, and cti wrote its eighteen one at
-#  a time, measuring each. The coverage report calls this "no detector", which
-#  is different from "nothing matched".
+#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
+#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
+#  what each one matched before trusting it; this one has not had that pass, so
+#  any coverage number it produces is a number nobody has checked yet.
 # ------------------------------------------------------------------------------
 
 id: SIR-4.4.1
@@ -30,4 +30,21 @@ logsource:
 sensor:
   name: 'Sensor: analysis — PARTIAL'
   status: 'PARTIAL'
-note: 'Converted from EEI-4.4.a. Scoring: Tier 2'
+detection:
+  # Integrated air defence is a named concept with its own vocabulary, and the
+  # adversary or the theatre has to be in it, or this matches a NATO programme
+  # note that tells this reader nothing.
+  networking:
+    keywords: [integrated air defence, integrated air defense, IADS,
+               air defence network, air defense network, networked air defence,
+               networked air defense, sensor fusion, data fusion,
+               common operating picture, early warning network, command and
+               control integration, kill chain integration, battle management,
+               layered air defence, layered air defense]
+    scope: blob
+  whose:
+    any:
+    - {group: actor_adversary, scope: blob}
+    - {group: geo_indopacom, scope: blob}
+  condition: networking and whose
+note: 'Converted from EEI-4.4.a. Scoring: Tier 2 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'

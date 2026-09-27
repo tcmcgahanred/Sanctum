@@ -13,10 +13,10 @@
 #           blocked     a machine could decide it, but the input it needs does
 #                       not exist yet. `blocked_by:` names that input.
 #
-#  NO `detection:` BLOCK YET. That is honest rather than unfinished: a detector
-#  that has not met the corpus is a proposal, and cti wrote its eighteen one at
-#  a time, measuring each. The coverage report calls this "no detector", which
-#  is different from "nothing matched".
+#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
+#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
+#  what each one matched before trusting it; this one has not had that pass, so
+#  any coverage number it produces is a number nobody has checked yet.
 # ------------------------------------------------------------------------------
 
 id: SIR-3.2.3
@@ -30,4 +30,18 @@ logsource:
 sensor:
   name: 'Sensor: trade press — PARTIAL'
   status: 'PARTIAL'
-note: 'Converted from EEI-3.2.c. Scoring: Tier 3'
+detection:
+  # Manned-unmanned teaming is a named concept with a settled vocabulary, and it
+  # is only a finding for this domain when it happened in a real war rather than
+  # in a programme announcement - hence the conflict conjunct.
+  teaming:
+    keywords: [manned-unmanned teaming, manned unmanned teaming, MUM-T, MUMT,
+               air launched effects, air-launched effects, launched effects,
+               drone wingman, loyal wingman, teamed with a drone,
+               helicopter-drone team]
+    scope: blob
+  conflict:
+    group: conflict_markers
+    scope: blob
+  condition: teaming and conflict
+note: 'Converted from EEI-3.2.c. Scoring: Tier 3 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'

@@ -13,10 +13,10 @@
 #           blocked     a machine could decide it, but the input it needs does
 #                       not exist yet. `blocked_by:` names that input.
 #
-#  NO `detection:` BLOCK YET. That is honest rather than unfinished: a detector
-#  that has not met the corpus is a proposal, and cti wrote its eighteen one at
-#  a time, measuring each. The coverage report calls this "no detector", which
-#  is different from "nothing matched".
+#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
+#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
+#  what each one matched before trusting it; this one has not had that pass, so
+#  any coverage number it produces is a number nobody has checked yet.
 # ------------------------------------------------------------------------------
 
 id: SIR-4.2.1
@@ -25,9 +25,39 @@ status: draft
 modified: '2026-09-27'
 fact: 'A test or live-fire event with stated range, altitude, or engagement performance.'
 logsource:
-  scope: adversary
+  scope: any
   kind: any
 sensor:
   name: 'Sensor: primary-source + trade press — PARTIAL'
   status: 'PARTIAL'
-note: 'Converted from EEI-4.2.a. Scoring: Tier 2 × first-occurrence'
+detection:
+  # THREE CONJUNCTS AND ONE OF THEM IS A PATTERN, because the fact is not "a
+  # test happened" but "a test happened WITH A STATED FIGURE". A range, an
+  # altitude or an engagement envelope is a number beside a unit, which is an
+  # identifier-shaped thing rather than vocabulary, so it is matched as a
+  # pattern. Case is irrelevant to it: patterns are compiled IGNORECASE.
+  system:
+    any:
+    - {group: threat_manpads, scope: blob}
+    - {group: threat_sam, scope: blob}
+    - {group: threat_aaa_cuas, scope: blob}
+    - {group: threat_ew, scope: blob}
+    - {group: threat_small_arms, scope: blob}
+    - {group: threat_uas_loitering, scope: blob}
+    - {group: threat_sa_designations, scope: blob}
+    - {group: threat_manpads_generic, scope: blob}
+    - {group: threat_sam_generic, scope: blob}
+    - {group: threat_aaa_cuas_generic, scope: blob}
+    - {group: threat_ew_generic, scope: blob}
+    - {group: threat_small_arms_generic, scope: blob}
+    - {group: threat_uas_loitering_generic, scope: blob}
+  test_event:
+    keywords: [test, tested, testing, test-fired, test fired, test launch,
+               live-fire, live fire, firing test, trial, trials, proving
+               ground, flight test, intercept test]
+    scope: blob
+  stated_figure:
+    pattern: \b\d{1,4}(\.\d+)?\s?(km|kilometre|kilometres|kilometer|kilometers|nm|nautical mile|nautical miles|mile|miles|m|metre|metres|meter|meters|ft|feet|mach)\b
+    scope: blob
+  condition: system and test_event and stated_figure
+note: 'Converted from EEI-4.2.a. Scoring: Tier 2 × first-occurrence. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'

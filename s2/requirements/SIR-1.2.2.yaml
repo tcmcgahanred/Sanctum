@@ -25,9 +25,9 @@ status: draft
 modified: '2026-09-27'
 fact: 'Mobilisation, reserve call-up, or conscription change.'
 logsource:
-  scope: adversary
+  scope: any
   kind: any
 sensor:
   name: 'Sensor: primary-source — PARTIAL'
   status: 'PARTIAL'
-note: 'Converted from EEI-1.2.b. Scoring: Tier 1 × escalation'
+note: 'Converted from EEI-1.2.b. Scoring: Tier 1 × escalation. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead.'
