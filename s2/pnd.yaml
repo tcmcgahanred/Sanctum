@@ -66,6 +66,36 @@ manifest:
     # need reading by hand before any cutoff is set.
     min_title_len: 15
     suffix_separators: [" - ", " | ", " — "]
+    # DECLARED 2026-09-27, matching cti. Every value below is already the
+    # engine's own default, checked against core/fetch.py, so this block changes
+    # no behaviour today. It is here because a domain declares how it wants to
+    # be treated and nobody should have to open core/fetch.py to learn what a
+    # run will do.
+    #
+    # impersonate MATTERS MORE HERE THAN IN CTI. Several defence publishers in
+    # the sensor list below serve browsers normally and return 403 to datacentre
+    # addresses, which is why those comments say to verify every URL from the
+    # collector host and never from a browser. `chrome` makes the fetch present
+    # a real browser TLS fingerprint, which was the only thing measured to
+    # recover darkreading.com for cti on 2026-08-25. A user-agent string alone
+    # did not.
+    #
+    # decode_google_news stays true and costs nothing, because this domain
+    # declares no Google News query sensor and the path is never taken. It is
+    # declared rather than dropped so that adding one query feed later is a
+    # one-line change in one place.
+    fetch:
+      user_agent: ''           # empty leaves trafilatura's own default alone
+      timeout: 20              # seconds per request
+      sleep_time: 1.0          # seconds between requests to one host
+      max_redirects: 5
+      min_extracted_size: 80   # characters. A short regional assessment is a
+                               # real article; the word floor in
+                               # production.staging_annotations makes the
+                               # editorial call, not the extractor.
+      impersonate: chrome
+      decode_google_news: true
+      gnews_interval: 1
 #
 # ---
 #
@@ -140,7 +170,8 @@ manifest:
   # english.chinamil.com.cn/rss.xml - PLA Daily. TLS certificate does not match
   # the hostname; http and eng. variants return 404 meta-refresh pages. The
   # endpoint appears to be gone. THIS WAS THE INTENDED SOURCE FOR THE
-  # DECLARED-INTENT SIGNAL, which remains without a proper feed.
+  # DECLARED-INTENT SIGNAL, which remains without a proper feed. NOT BEING
+  # REPLACED - see WESTERN ONLY below.
   # china.org.cn/rss/1201719.xml - returns HTML, not a feed.
   # ainonline.com/rss.xml - 404.
   # rotorhub.com/feed - real feed, but overlaps verticalmag heavily and is
@@ -152,22 +183,31 @@ manifest:
   # csis.org/analysis/feed - 404. The chinapower subdomain feed works.
   # rand.org/topics/china.xml - returns the channel title and no items. Empty or
   # unparseable. Not worth debugging.
-  # --- UNDER REVIEW, decide after cycle 4 ---
-  # ecns.cn - largest single source at ~50 articles in one cycle and contributed
-  # NOTHING above the catch-all floor. It is a general news agency, not a
-  # military organ. Under 6.1 a high-volume non-additive feed should be dropped.
-  # Kept for now only because it is the sole adversary primary source remaining.
-  # chinese-military-aviation.blogspot.com - collected ZERO articles in its first
-  # cycle. A specialist blog returning nothing is a sensor failure, not rarity.
-  # Diagnose before the next cycle.
+  # --- UNDER REVIEW ---
+  # ecns.cn is GONE, dropped above on measurement 2026-09-27. The paragraph that
+  # used to sit here kept it only because it was the last adversary primary
+  # source. That reason is void; see WESTERN ONLY below.
+  # chinese-military-aviation.blogspot.com returned ONE article in 41 days,
+  # measured 2026-09-27, so the first cycle's zero was not a one-off. Prune
+  # candidate, with the caveat that a specialist blog can be low volume and high
+  # value. Read the one article before deciding.
+  # --- WESTERN ONLY, decided by the owner 2026-09-27 ---
+  # ADVERSARY PRIMARY SOURCES ARE NOT BEING PURSUED. A replacement for PLA Daily
+  # is off this list, and no requirement asks for the adversary vantage any
+  # more: the six that did were widened to accept any source on the same day,
+  # and each carries the measurement in its own note - that vantage matched 1 of
+  # the 7 declared sensors. Declared intent, doctrine and mobilisation are
+  # collected from western reporting OF them instead, which is what the trade
+  # press and the two think tanks in this list already do.
+  # china-arms.com STAYS, and keeps its adversary label, which is a fact about
+  # the sensor and not a goal: 21 articles in 41 days, one surfaced.
   # --- STILL MISSING, see requirements/_tree.yaml Byproduct 1 ---
   # 1. A military rotary-wing professional source. Vertical is civil-leaning and
   # the military-specific publications are subscription-only.
   # 2. Conflict OSINT loss documentation. The accounts that systematically record
   # rotary-wing losses publish on social platforms with no feed. This EEI may
   # need a mechanism other than a sensor.
-  # 3. Adversary military primary source, to replace PLA Daily.
-  # 4. Host-nation and regional press within the AOR.
+  # 3. Host-nation and regional press within the AOR.
 #
 # ---
 #
@@ -475,7 +515,12 @@ scoring:
     # tools/vocab_check.py treats that as an error.
 
     geo_indopacom:
-      - "force_surface"
+      # REMOVED 2026-09-27: the first entry in this list was the literal string
+      # "force_surface". It was there before the file became yaml - it is in the
+      # markdown at 74d81c2 - and it matched nothing, because no article
+      # contains that word. What it did do was put the name of a scoring
+      # mechanism into a list of places, where the next reader would have taken
+      # it for one.
       - "China"
       - "PRC"
       - "Taiwan"
@@ -1863,6 +1908,111 @@ production:
     - "ENVIRONMENT & BASING"
     - "LESSONS FROM CURRENT CONFLICTS"
     - "THREATS TO ROTARY WING"
+  # DECLARED 2026-09-27. Two things follow from this block existing: a surfaced
+  # item with too little extracted text to write from is MARKED, and the
+  # compliance report gets its edition-level checks. Before today the key was
+  # absent, the engine read an empty mapping, and the report was produced with
+  # the line "No checklist configured for this domain."
+  #
+  # ADVISORY ONLY, all of it. Nothing here touches a score, a tier, the ordering
+  # or the surface-versus-drop decision.
+  staging_annotations:
+    # A FLOOR ON WRITABILITY, not on quality. Below it there is not enough
+    # extracted text to write an entry FROM, which is also what a consent wall,
+    # a bot challenge and an empty single-page app look like. The item is still
+    # surfaced and still ordered; it is marked so the body gets fetched or the
+    # item dropped, rather than written up from its headline. 40 is cti's value
+    # and there is no reason yet to make this domain differ.
+    min_body_words: 40
+    # FIRST MATCH WINS, so these run most specific first. The value is a
+    # SUGGESTION the analyst confirms or overrides; nothing downstream reads it.
+    # Each `name` must match production.sections above exactly, or the
+    # compliance report shows a section nothing can ever be routed into.
+    #
+    # UNMEASURED, every rule here. It is a proposal until the first Wednesday
+    # document is read against it. Expect the catch-all to carry a large share
+    # in the first cycle, and re-order on what turns up rather than on argument.
+    sections:
+    # A designation is unambiguous - HQ-9 and QW-2 are not ordinary words - so
+    # it takes precedence over conflict language, which is how an article about
+    # a named system used in Ukraine lands under the threat rather than the
+    # lessons section.
+    - name: "THREATS TO ROTARY WING"
+      when:
+        any:
+        - group: threat_manpads
+          scope: blob
+        - group: threat_sam
+          scope: blob
+        - group: threat_aaa_cuas
+          scope: blob
+        - group: threat_ew
+          scope: blob
+        - group: threat_small_arms
+          scope: blob
+        - group: threat_uas_loitering
+          scope: blob
+        - group: threat_sa_designations
+          scope: blob
+    # Active-conflict language next: shot down, downed, loss of an aircraft.
+    - name: "LESSONS FROM CURRENT CONFLICTS"
+      when:
+        group: conflict_markers
+        scope: blob
+    - name: "ENVIRONMENT & BASING"
+      when:
+        group: env_basing
+        scope: blob
+    # The GENERIC threat vocabulary sits below conflict and environment on
+    # purpose. "electronic warfare" and "machine gun fire" appear in conflict
+    # reporting constantly, so routing on them first would empty the lessons
+    # section.
+    - name: "THREATS TO ROTARY WING"
+      when:
+        any:
+        - group: threat_manpads_generic
+          scope: blob
+        - group: threat_sam_generic
+          scope: blob
+        - group: threat_aaa_cuas_generic
+          scope: blob
+        - group: threat_ew_generic
+          scope: blob
+        - group: threat_small_arms_generic
+          scope: blob
+        - group: threat_uas_loitering_generic
+          scope: blob
+    - name: "ADVERSARY POSTURE — INDOPACOM"
+      when:
+        any:
+        - group: declaration_terms
+          scope: blob
+        - group: escalation_terms
+          scope: blob
+        - group: coercive_acts
+          scope: blob
+        - group: event_words
+          scope: blob
+    # The catch-all, and the engine marks anything routed here low confidence,
+    # which is correct: it is where the item landed, not a finding about it.
+    - name: "ADVERSARY POSTURE — INDOPACOM"
+      when: always
+    # THE EDITION-LEVEL CHECKS. Every line below is taken from a standard this
+    # domain has already written down, in README.md under Standing directives
+    # and Cadence, or from the production block above. NOTHING here is a new
+    # content standard: this domain has no policy.md, and inventing section
+    # numbers for one it does not have would be worse than the gap.
+    compliance_checklist:
+    - "Every entry written from the article BODY. An item marked `no body` is fetched or dropped, never written up from its headline."
+    - "One event, one entry: same-event reports folded, and each event placed once."
+    - "Every entry says what the item changes about what the reader should EXPECT, not what they should do. The standard is awareness, not action (README.md, Standing directives, Production)."
+    - "Citations nested per entry, as live links the reader can open."
+    - "Attribution discipline: suspected is not confirmed, and imagery-derived is not confirmed. The state of the evidence is represented as it stands."
+    - "Where a system has a designation, the designation is the anchor and a memorable name is given beside it, never instead of it (README.md, Lessons log, 2026-08-17)."
+    - "All four declared sections present. An empty one says `none this cycle` rather than being omitted, because an omitted section cannot be told from an oversight."
+    - "Three dates kept distinct: the title date, the ICOD in the body, and LTIOV, which is planning doctrine and is never printed (README.md, Cadence)."
+    - "A thin surface is reported as a COLLECTION finding. It is never answered by loosening the scoring model (README.md, Standing directives, Collection)."
+    - "Staging draft carries no handling markings."
   notes: >
     Sections follow the PIR order in requirements/_tree.yaml. Note that section order
     reflects requirement priority while tier weight reflects directness of hit,

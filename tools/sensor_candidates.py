@@ -267,23 +267,42 @@ def run_probe(args):
     host = host_of(args.probe) or args.probe
     print(f"PROBING {host} - status and ITEM COUNT, because a 200 that serves "
           f"a webpage is not a feed. Packet Storm did exactly that:")
-    best = None
-    for p in FEED_PATHS:
-        url = f"https://{host}{p}"
-        status, items, title = "-", 0, ""
-        try:
-            d = feedparser.parse(url)
-            status = str(getattr(d, "status", "-"))
-            items = len(getattr(d, "entries", []) or [])
-            title = str((getattr(d, "feed", {}) or {}).get("title", ""))[:44]
-            if getattr(d, "bozo", 0) and not items:
-                exc = getattr(d, "bozo_exception", None)
-                status = type(exc).__name__ if exc else "malformed"
-        except Exception as e:
-            status = type(e).__name__
-        print(f"  {status:>12}  items={items:<4}  {url}   {title}")
-        if items and best is None:
-            best = (url, items)
+
+    def sweep(h):
+        """Every path on one hostname. Returns the first that served items."""
+        found = None
+        for p in FEED_PATHS:
+            url = f"https://{h}{p}"
+            status, items, title = "-", 0, ""
+            try:
+                d = feedparser.parse(url)
+                status = str(getattr(d, "status", "-"))
+                items = len(getattr(d, "entries", []) or [])
+                title = str((getattr(d, "feed", {}) or {}).get("title", ""))[:44]
+                if getattr(d, "bozo", 0) and not items:
+                    exc = getattr(d, "bozo_exception", None)
+                    status = type(exc).__name__ if exc else "malformed"
+            except Exception as e:
+                status = type(e).__name__
+            print(f"  {status:>12}  items={items:<4}  {url}   {title}")
+            if items and found is None:
+                found = (url, items)
+        return found
+
+    # BOTH HOSTNAMES, bare first and `www.` second, because `host_of` strips
+    # `www.` and plenty of publishers only answer on it: measured 2026-09-27,
+    # 22 of the 44 cti sensors that are not Google News queries carry a `www.`
+    # host, and so do four of the seven in s2. A bare host that has no DNS
+    # record at all comes back as a resolver error on all eleven paths, which
+    # reads like "this publisher has no feed" and is not the same finding.
+    #
+    # The second sweep only runs when the first found nothing, so the usual
+    # cost stays at eleven requests.
+    best = sweep(host)
+    if best is None and not host.startswith("www."):
+        print(f"  nothing on {host}; trying www.{host}, because host_of() "
+              f"strips the prefix and some publishers only answer on it")
+        best = sweep(f"www.{host}")
     print()
     if best:
         print(f"PROBE {host} BEST={best[0]} items={best[1]}")
