@@ -20,7 +20,7 @@ mechanism itself.
 1. Initial vocabulary built — **19 groups, by enumeration, not by the indicator
    method.** `../VOCABULARY.md` §3 marks the indicator method RECOMMENDED, NOT
    VALIDATED, and it remains unvalidated: this domain did not use it. The
-   requirements tree in `requirements.md` was built afterward and independently,
+   requirements tree in `requirements/_tree.yaml` was built afterward and independently,
    so the two have not been reconciled. **Someone should still find out whether
    the indicator method works.**
 
@@ -186,7 +186,7 @@ factors, or lessons from current conflicts.
 **Do not respond by lowering `surface_min_score`.** That manufactures a surface
 out of items correctly judged irrelevant. The count is an output, never a target.
 
-The fix is sensors. See `requirements.md` Byproduct 1.
+The fix is sensors. See `requirements/_tree.yaml` Byproduct 1.
 
 ### Finding 13 — One configured sensor failed silently
 
@@ -221,7 +221,7 @@ The spelled-out form is included instead. If reporting uses the acronym
 predominantly, `env_basing` under-fires and the acronym needs reconsidering under
 the exclusion operator rather than plain inclusion.
 
-### Finding 7 — Coverage tags in requirements.md are estimates
+### Finding 7 — Coverage tags in the requirements tree are estimates
 
 **Severity: low. Unresolved.**
 

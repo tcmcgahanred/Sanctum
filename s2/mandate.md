@@ -100,10 +100,10 @@ body), and LTIOV (planning doctrine only, never printed).
    against a real corpus.
 5. **Assess the chokepoint multiplier.** If it fires on most items it carries no
    information and should be dropped.
-6. **Re-tag sensor coverage in `requirements.md` against what actually arrived.**
+6. **Re-tag sensor coverage in `requirements/_tree.yaml` against what actually arrived.**
    Every tag is currently an estimate. Expect several PARTIALs to resolve to
    ABSENT.
-7. **Work the sensor roadmap** — Byproduct 1 in `requirements.md`. Priority 1 is
+7. **Work the sensor roadmap** — Byproduct 1 in `requirements/_tree.yaml`. Priority 1 is
    aviation professional and doctrinal press: it unlocks the largest uncovered
    block, most of PIR-2 and the analytical half of PIR-3.
 8. **Write a `policy.md`** once the first vox exists and there is something real
@@ -117,7 +117,7 @@ body), and LTIOV (planning doctrine only, never printed).
 
 ### 2026-08-18 — Copying the template leaves stubs that look finished
 
-`requirements.md` sat in the domain folder as an unfilled template while every
+`requirements/_tree.yaml` sat in the domain folder as an unfilled template while every
 other file was complete. Nothing errored. `vocab_check` passed. It was caught by
 eye, days later.
 

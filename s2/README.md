@@ -43,9 +43,9 @@ unscored and the recency gate would mark the remainder stale.
 
 | File | What it holds |
 |---|---|
-| `pnd.md` | Everything the engine reads |
+| `pnd.yaml` | Everything the engine reads |
+| `requirements/` | One requirement, one file, plus `_tree.yaml` holding the PIRs, their indicators and which rules sit under each |
 | `vocab.md` | Why the word lists say what they say |
-| `requirements.md` | KIQ → PIR → SIR → EEI, each mapped to a sensor |
 | `mandate.md` | Standing directives and the lessons log |
 
 See `../DOMAINS.md` for the full contract and for which document owns which
@@ -53,8 +53,8 @@ fact.
 
 ## Read this before judging the output
 
-`requirements.md` decomposes the requirements into 43 collectable facts and
-tags each with sensor coverage. **One is confidently covered. Fifteen have
+`requirements/` decomposes the requirements into 43 collectable facts, one file
+each, and tags every one with sensor coverage. **One is confidently covered. Fifteen have
 none.** The second-ranked requirement — conditions that degrade rotary-wing
 operations — is effectively uncollected.
 
@@ -62,7 +62,7 @@ That is a collection finding, not a scoring defect. Ranking operates only on
 what already arrived, and no vocabulary can surface something the sensors never
 fetched. **Expect the early surfaces to be thin, and read that as a statement
 about the sensor set.** The sensor-build roadmap is Byproduct 1 in
-`requirements.md`.
+`requirements/_tree.yaml`.
 
 ## Adapting it
 

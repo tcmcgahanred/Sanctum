@@ -1,0 +1,33 @@
+# ------------------------------------------------------------------------------
+#  SIR-4.4.3 · Counter-UAS capability that would defeat organic unmanned systems
+#
+#  One requirement, one file. Converted on 2026-09-27 from the decomposition that
+#  was s2/requirements.md, where this was EEI-4.4.c. That file is gone; its analysis
+#  is the comment block at the end of _tree.yaml. The `fact` below is the
+#  original sentence, verbatim.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but its `logsource:` matches no sensor in
+#                       the manifest, so nothing can ever reach it
+#           draft       the wording is proposed, not settled
+#           blocked     a machine could decide it, but the input it needs does
+#                       not exist yet. `blocked_by:` names that input.
+#
+#  NO `detection:` BLOCK YET. That is honest rather than unfinished: a detector
+#  that has not met the corpus is a proposal, and cti wrote its eighteen one at
+#  a time, measuring each. The coverage report calls this "no detector", which
+#  is different from "nothing matched".
+# ------------------------------------------------------------------------------
+
+id: SIR-4.4.3
+title: 'Counter-UAS capability that would defeat organic unmanned systems'
+status: draft
+modified: '2026-09-27'
+fact: 'Counter-UAS capability that would defeat organic unmanned systems.'
+logsource:
+  scope: any
+  kind: any
+sensor:
+  name: 'Sensor: trade press — PARTIAL'
+  status: 'PARTIAL'
+note: 'Converted from EEI-4.4.c. Scoring: Tier 2'

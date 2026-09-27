@@ -3,7 +3,7 @@
 # *Sanctum · `s2` · the only file the engine reads.*
 #
 # **BLUF:** This declares what the S2 domain cares about. Nothing here describes
-# engine behaviour. The requirements tree lives in `requirements.md`; the
+# engine behaviour. The requirements tree lives in `requirements/`; the
 # reasoning behind the word lists lives in `vocab.md`; **every number, term and
 # threshold lives here and nowhere else.**
 #
@@ -18,7 +18,7 @@
 # tiers cannot double-count and multipliers can. Every rule below reflects those
 # answers.
 #
-# **The first runs test the sensors, not the scoring model.** `requirements.md`
+# **The first runs test the sensors, not the scoring model.** `requirements/_tree.yaml`
 # finds one of 43 collectable facts confidently covered and fifteen with none.
 # With collection that thin, `force_surface` will rarely fire and 948 terms cannot
 # rank an article the sensors never fetched. A quiet surface is a collection
@@ -75,7 +75,7 @@ manifest:
 # before the first run; several defence publishers return 403 to datacentre
 # addresses while serving browsers normally.
 #
-# **Coverage warning.** `requirements.md` Byproduct 2 finds that of 43 collectable
+# **Coverage warning.** `requirements/_tree.yaml` Byproduct 2 finds that of 43 collectable
 # facts in this domain, one has confident coverage and fifteen have none. This
 # sensor set does not answer PIR-2 at all. **Sources are this domain's real
 # constraint — vocabulary cannot compensate, because the collector never reads the
@@ -160,7 +160,7 @@ manifest:
   # chinese-military-aviation.blogspot.com - collected ZERO articles in its first
   # cycle. A specialist blog returning nothing is a sensor failure, not rarity.
   # Diagnose before the next cycle.
-  # --- STILL MISSING, see requirements.md Byproduct 1 ---
+  # --- STILL MISSING, see requirements/_tree.yaml Byproduct 1 ---
   # 1. A military rotary-wing professional source. Vertical is civil-leaning and
   # the military-specific publications are subscription-only.
   # 2. Conflict OSINT loss documentation. The accounts that systematically record
@@ -1478,7 +1478,7 @@ production:
     - "LESSONS FROM CURRENT CONFLICTS"
     - "THREATS TO ROTARY WING"
   notes: >
-    Sections follow the PIR order in requirements.md. Note that section order
+    Sections follow the PIR order in requirements/_tree.yaml. Note that section order
     reflects requirement priority while tier weight reflects directness of hit,
     so the section a reader considers most important is not the section that
     will carry the highest-scoring items. That is expected.
