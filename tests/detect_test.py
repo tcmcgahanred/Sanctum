@@ -45,7 +45,7 @@ sys.path.insert(0, str(ROOT))
 
 from core.pnd import load_domain, _expand_libraries                 # noqa: E402
 from core.rules import (_eval_atom, _scopes, detectable_requirements,  # noqa: E402
-                        eval_detection, make_matcher,
+                        eval_detection, library_hit, make_matcher,
                         requirement_coverage, score_article)
 
 FAILURES = []
@@ -209,6 +209,40 @@ def main():
           ev(lib_bc, art("plain headline", "alhambra in the body")), False)
     check("a place name nowhere in California does not match",
           ev(lib_a, art("Breach in Topeka", "x")), False)
+    # WHOLE WORDS, ALWAYS, and every case below is a real corpus false positive
+    # from 2026-09-26. `traver` was the single most common match in 30 days at
+    # 71 articles, all of them the word `traversal`.
+    check("a library name does not match inside a longer word",
+          ev(lib_a, art("Path traversal flaw patched", "x")), False)
+    check("...nor does a four-letter one",
+          ev(lib_a, art("Breach at the water utility", "x")), False)
+    check("...nor `marin` inside `maritime`",
+          ev(lib_a, art("Maritime cybersecurity policy office", "x")), False)
+    check("...nor `novato` inside `renovator`",
+          ev(lib_a, art("Rewiring Democracy on The Renovator", "x")), False)
+    check("a multiword name still matches",
+          ev(lib_a, art("LACMA data breach in Los Angeles", "x")), True)
+    check("punctuation inside a name is a word break, not a mismatch",
+          ev(lib_a, art("Outage hits Arden-Arcade", "x")), True)
+    check("...and the same name written with a space matches too",
+          ev(lib_a, art("Outage hits arden arcade", "x")), True)
+    check("the longest name present is the one reported",
+          library_hit(lib_a, "breach in san bernardino county"),
+          "san bernardino")
+    # A library cannot be a proximity operand, and that is a refusal, not an
+    # omission: proximity searches for its `a` term as a raw substring, which is
+    # what produced the 75.9 percent above.
+    try:
+        eval_detection({"place": dict(lib_a),
+                        "near": {"proximity": {"a": "place", "b": "incident"}},
+                        "condition": "near"},
+                       sc["groups"], make_matcher([]),
+                       _scopes(art("x"))[1], "x")
+        check("a library as a proximity operand is refused",
+              "evaluated", "refused")
+    except ValueError as e:
+        check("a library as a proximity operand is refused",
+              "raw substring" in str(e), True)
     # A REFUSAL, NOT A SILENT ZERO. Three ways to get a library atom wrong, and
     # every one of them would otherwise report its requirement as uncollected
     # forever with nothing on the page saying why.

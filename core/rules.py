@@ -100,6 +100,65 @@ def _compiled(expr):
     return rx
 
 
+_WORDS = re.compile(r"[a-z0-9]+")
+_LIB_INDEX = {}
+
+
+def _norm_words(s):
+    """A string as its lowercase alphanumeric words.
+
+    Punctuation inside a name becomes a word break, so `arden-arcade`,
+    `Arden-Arcade` and `arden arcade` are one name, and the parenthesised
+    alternates the Gazetteer carries - `el paso de robles (paso robles)` - stop
+    being a matching problem.
+    """
+    return _WORDS.findall(str(s).lower())
+
+
+def _library_index(atom):
+    """Build, once per (library, buckets), the word-sequence index to match on.
+
+    Keyed on the library NAME and the buckets the rule asked for, both of which
+    are declared and stable, rather than on the list object, which is rebuilt
+    every time a domain loads.
+    """
+    key = (atom["library"], tuple(atom.get("buckets") or []))
+    idx = _LIB_INDEX.get(key)
+    if idx is None:
+        by_len, starts = {}, set()
+        for t in atom["terms"]:
+            w = _norm_words(t)
+            if not w:
+                continue
+            by_len.setdefault(len(w), set()).add(" ".join(w))
+            starts.add(w[0])
+        idx = (sorted(by_len, reverse=True), by_len, starts)
+        _LIB_INDEX[key] = idx
+    return idx
+
+
+def library_hit(atom, text):
+    """The longest library name present in `text` as whole words, or None.
+
+    Longest first, so `san bernardino` is reported rather than `san`. The
+    first-word set is what keeps this cheap: most tokens in an article start no
+    name at all, and those cost one set lookup.
+    """
+    lens, by_len, starts = _library_index(atom)
+    toks = _norm_words(text)
+    n_toks = len(toks)
+    for i, tok in enumerate(toks):
+        if tok not in starts:
+            continue
+        for n in lens:
+            if i + n > n_toks:
+                continue
+            cand = tok if n == 1 else " ".join(toks[i:i + n])
+            if cand in by_len[n]:
+                return cand
+    return None
+
+
 def _eval_atom(atom, groups, matcher, scopes, text_l):
     # bare string "always"
     if isinstance(atom, str):
@@ -125,6 +184,19 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
     # and fills `terms`, so the engine still holds no domain knowledge and still
     # only ever matches a list against a scope.
     #
+    # A LIBRARY TERM IS A PROPER NOUN AND MATCHES AS WHOLE WORDS, ALWAYS,
+    # whatever its length. This is the one place library matching differs from
+    # `group` matching, and it is not a preference - it was measured on
+    # 2026-09-26 against 2,828 articles. The matcher word-boundaries a term only
+    # when it is 4 characters or fewer, so ordinary substring matching put the
+    # geography table at 2,146 articles, 75.9 percent of the corpus, against 348
+    # for the same list matched as words. The top term was `traver`, a hamlet in
+    # Tulare County, matching inside `traversal` on 71 articles; `marin` matched
+    # inside `maritime`, `novato` inside `renovator`, `nuevo` and `camino` inside
+    # body text. A hand-typed list survives this by padding its short entries
+    # (`geo` carries `'uc '` and `' calif '`). A generated list of 1,085 names
+    # cannot be padded by hand, so the matching has to be right instead.
+    #
     # NO SILENT FALL-THROUGH. An unresolved atom would match nothing, and a
     # detector that matches nothing reports its requirement as uncollected
     # forever with nothing on the page to say why. That defect has happened
@@ -138,7 +210,7 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
                 f"library atom {atom['library']!r} was never resolved. "
                 f"core.pnd.load_domain fills `terms` from the declared file; a "
                 f"config assembled any other way has to do the same.")
-        return matcher(scopes[scope], atom["terms"]) is not None
+        return library_hit(atom, scopes[scope]) is not None
 
     # KEYWORDS. A literal list of terms, written in the rule rather than named
     # somewhere else. This is what lets a rule be read on its own: you can see
@@ -244,7 +316,7 @@ def _rule_matched_terms(atom, groups, matcher, scopes, text_l):
         return f"{atom['group']}:'{hit}'@{scope}"
     if "library" in atom:
         scope = atom.get("scope", "blob")
-        hit = matcher(scopes[scope], atom.get("terms") or [])
+        hit = library_hit(atom, scopes[scope])
         buckets = "".join(atom.get("buckets") or [])
         return f"{atom['library']}/{buckets}:'{hit}'@{scope}"
     if "pattern" in atom:
@@ -497,16 +569,14 @@ def eval_detection(detection, groups, matcher, scopes, text_l):
             # list, and the rules that stopped carrying their own words on
             # 25 September raised a bare error naming the block.
             local[name] = groups[blk["group"]]
-        elif isinstance(blk.get("library"), str):
-            # A library block is a term list like any other, so it can be a
-            # proximity operand: "a California place name within 120 characters
-            # of an incident word" is the rule the geography table was built
-            # for.
-            if "terms" not in blk:
-                raise ValueError(
-                    f"library atom {blk['library']!r} in block {name!r} was "
-                    f"never resolved. core.pnd.load_domain fills `terms`.")
-            local[name] = blk["terms"]
+        # A LIBRARY BLOCK IS DELIBERATELY NOT ADDED HERE, so naming one as a
+        # proximity operand hits the refusal below. `proximity` finds its `a`
+        # term with hay.find(), a raw substring search with no word boundary at
+        # any length - the padding in `geo` exists to fake one. Measured
+        # 2026-09-26 across 2,828 articles: the geography table as a proximity
+        # operand matched 2,146, 75.9 percent, against 348 for the same list
+        # matched as words, because `traver` sits inside `traversal` and `brea`
+        # inside `breach`.
 
     for blk in blocks.values():
         if not (isinstance(blk, dict) and isinstance(blk.get("proximity"), dict)):
@@ -520,10 +590,18 @@ def eval_detection(detection, groups, matcher, scopes, text_l):
                 # through to a global list of the same name instead of
                 # failing. SIR-3.1.1 matched on that global list for a day
                 # while appearing to match on its own regular expression.
+                extra = ""
+                if isinstance(blocks[nm], dict) and blocks[nm].get("library"):
+                    extra = (" A `library:` block is refused here on purpose: "
+                             "proximity matches its `a` term as a raw "
+                             "substring, which put the geography table at 75.9 "
+                             "percent of the corpus against 12.3 percent "
+                             "matched as words. Give the library its own block "
+                             "and combine with `all`.")
                 raise ValueError(
                     f"proximity operand {nm!r} names a block that holds no "
                     f"words. An operand must be a `keywords:` or `group:` "
-                    f"block, or a named list.")
+                    f"block, or a named list.{extra}")
 
     cache = {}
 
