@@ -186,6 +186,43 @@ check("...and the OBSERVED miss is catchable by identifier",
 check("a malformed pattern is survived, not raised",
       keys_in_article(_art, dict(_spec, match_pattern="CVE-[")), set())
 
+# ADDED 2026-09-26. The first version kept the identifier and threw every other
+# field away, so the CISA catalogue's remediation due date sat in the cache on
+# disk and was unreachable. And a list that mixes kinds in one array - the MITRE
+# ATT&CK bundle puts techniques, groups, tools and malware in the same `objects`
+# list - could not be used at all, because taking every `name` took everything.
+import json as _json, tempfile as _tmp
+from core.reflist import _read_entries, _read_cache                # noqa: E402
+_d = Path(_tmp.mkdtemp())
+_kevfile = _d / "kev.json"
+_kevfile.write_text(_json.dumps({"vulnerabilities": [
+    {"cveID": "CVE-2026-1", "dueDate": "2026-10-01", "product": "FortiGate"},
+    {"cveID": "CVE-2026-2", "dueDate": "2026-10-15", "product": "SharePoint"}]}),
+    encoding="utf-8")
+_ks = {"json_path": "vulnerabilities", "key_field": "cveID",
+       "keep_fields": ["dueDate"]}
+check("a kept field is reachable", _read_entries(_kevfile, _ks)["CVE-2026-1"],
+      {"dueDate": "2026-10-01"})
+check("...and the key set is unchanged, so the old caller still works",
+      _read_cache(_kevfile, _ks), {"CVE-2026-1", "CVE-2026-2"})
+check("no keep_fields means no kept fields, never a crash",
+      _read_entries(_kevfile, {"json_path": "vulnerabilities",
+                               "key_field": "cveID"})["CVE-2026-1"], {})
+
+_mixed = _d / "mixed.json"
+_mixed.write_text(_json.dumps({"objects": [
+    {"type": "tool", "name": "Cobalt Strike"},
+    {"type": "attack-pattern", "name": "Phishing"},
+    {"type": "malware", "name": "Emotet"}]}), encoding="utf-8")
+_ms = {"json_path": "objects", "key_field": "name"}
+check("without a filter a mixed list yields everything, which is the problem",
+      sorted(_read_cache(_mixed, _ms)),
+      ["COBALT STRIKE", "EMOTET", "PHISHING"])
+check("`where` keeps only the matching kind",
+      _read_cache(_mixed, dict(_ms, where={"type": "tool"})), {"COBALT STRIKE"})
+check("...and a filter matching nothing yields nothing, never a crash",
+      _read_cache(_mixed, dict(_ms, where={"type": "course-of-action"})), set())
+
 print()
 if FAILS:
     print("RESULT: FAIL — %d check(s)" % len(FAILS))

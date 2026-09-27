@@ -20,26 +20,11 @@
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-#  REQUIREMENTS - moved out of this file on 2026-09-24
+#  SCOPE. The only statement of it in this repository: what cyber threats
+#  endanger California SLTT organizations and the critical infrastructure they
+#  operate or depend on?
 #
-#  The scope of the whole effort, and the only statement of it in this
-#  repository: what cyber threats endanger California SLTT organizations and
-#  the critical infrastructure they operate or depend on?
-#
-#  The tree now lives in `cti/requirements/`, one file per requirement plus
-#  `_tree.yaml` holding the priority intelligence requirements, their
-#  indicators and which rules sit under each. It was moved because written out
-#  in full it would have taken this file past 3,000 lines and six levels of
-#  indentation, and because a rule that carries its own strings can be read
-#  without opening anything else.
-#
-#  `core/pnd.py:load_requirements` assembles the directory into exactly the
-#  structure this block used to hold, so nothing downstream changed. A domain
-#  with no such directory keeps its inline block and behaves as before.
-#
-#  A scoring rule still claims a requirement by naming it in `serves_sir:`
-#  below. That is one of two ways a requirement can be satisfied; the other is
-#  a `detection:` block on the rule itself.
+#  The requirements tree lives in `cti/requirements/`.
 # ------------------------------------------------------------------------------
 
 manifest:
@@ -55,17 +40,23 @@ manifest:
     backend: rclone
     rclone_remote: gdrive:ravenor-corpus
   # EXTERNAL LISTS FETCHED AND CACHED at collection time, keyed by a pattern
-  # found in the article. Available to the annotator; NOT wired into scoring —
-  # nothing here changes a score today.
+  # found in the article. NOT wired into scoring — nothing here changes a score
+  # today.
   #   json_path / key_field  where the identifiers sit in the downloaded JSON
   #   match_pattern          what to look for in an article to key against it
   #   cache_hours            re-download only when the cache is older than this
+  #   keep_fields            other fields to retain per entry, so a rule can
+  #                          read them. Without it only the identifier survives.
+  #   where                  keep only entries whose field equals this value.
+  #                          Needed for any list that mixes kinds in one array.
   reference_lists:
     kev:
       url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
       json_path: vulnerabilities
       key_field: cveID
       match_pattern: CVE-[0-9]{4}-[0-9]{4,7}
+      keep_fields:
+      - dueDate
       cache_hours: 12
   # WHERE THE STAGE 3a DOCUMENT IS WRITTEN. {date} is the run date. This is the
   # handoff to 3b — if the push fails the run still produces the file locally.

@@ -107,24 +107,63 @@ def fetch(name, spec, base_dir, log=None, force=False):
         return set(), f"FETCH FAILED and no cache ({e})"
 
 
-def _read_cache(path, spec):
+def _read_entries(path, spec):
+    """
+    Return {KEY: {field: value}} for every entry that passes `where`.
+
+    TWO THINGS THE FIRST VERSION COULD NOT DO, and both were needed.
+
+    `keep_fields` RETAINS MORE THAN THE IDENTIFIER. The first version took one
+    field and discarded the rest, so the CISA catalogue's remediation due date
+    sat in the cache on disk and was unreachable. A requirement that wants the
+    deadline could not be built, and the file it needed was already there.
+
+    `where` FILTERS BY A FIELD VALUE. A list that mixes kinds in one array -
+    the MITRE ATT&CK bundle puts techniques, groups, tools and malware in the
+    same `objects` list - cannot be used at all without it, because taking
+    every `name` would take the names of everything.
+    """
     try:
         doc = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
-        return set()
+        return {}
     entries = _walk(doc, spec.get("json_path", ""))
     if not isinstance(entries, list):
-        return set()
+        return {}
     field = spec.get("key_field")
-    keys = set()
+    keep = [str(f) for f in (spec.get("keep_fields") or [])]
+    where = spec.get("where") or {}
+    out = {}
     for e in entries:
-        if field and isinstance(e, dict):
-            v = e.get(field)
+        if isinstance(e, dict):
+            if where and any(e.get(k) != v for k, v in where.items()):
+                continue
+            v = e.get(field) if field else e
         else:
+            if where:
+                continue
             v = e
-        if v:
-            keys.add(str(v).strip().upper())
-    return keys
+        if not v:
+            continue
+        key = str(v).strip().upper()
+        out[key] = {f: e.get(f) for f in keep} if (keep and isinstance(e, dict)) else {}
+    return out
+
+
+def _read_cache(path, spec):
+    return set(_read_entries(path, spec))
+
+
+def fields(name, spec, base_dir):
+    """
+    {KEY: {field: value}} from the cache, or {} if there is no cache yet.
+
+    Deliberately does NOT fetch. `fetch` owns the network and the staleness
+    note; this reads what is already on disk, so a caller that wants the extra
+    fields calls `fetch` first and then this.
+    """
+    path = cache_path(base_dir, name)
+    return _read_entries(path, spec) if path.exists() else {}
 
 
 def keys_in_article(art, spec):

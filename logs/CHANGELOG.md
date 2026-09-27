@@ -2,6 +2,23 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-09-26] A reference list can keep more than the identifier, and can filter what it keeps
+
+**Two limits removed from `core/reflist.py`, and both were blocking a requirement.**
+
+- **`keep_fields:` retains other fields per entry.** The first version took `key_field` and discarded everything else, so the CISA remediation due date **sat in the cache on disk and was unreachable.** `kev` now declares `keep_fields: [dueDate]`, which is the input `cti/requirements/SIR-3.3.1.yaml` is blocked on.
+- **`where:` keeps only entries whose field equals a value.** A list that mixes kinds in one array cannot be used without it: **the MITRE ATT&CK bundle puts techniques, groups, tools and malware in the same `objects` list, so taking every `name` takes the names of everything.** This is the prerequisite for declaring the ATT&CK lists that `SIR-5.1.2`, `SIR-5.4.1` and `SIR-5.4.2` are blocked on.
+- **Nothing existing changes.** `_read_cache` still returns a set of identifiers, so `tools/kev_impact.py` is untouched, and a spec with neither new key behaves exactly as before. A new `fields()` reads the cache without fetching.
+- **NOT DONE, deliberately: the ATT&CK lists are not declared.** That needs the real structure of the published bundle confirmed rather than assumed.
+- **Verified:** fourteen test files pass, `tests/fetch_test.py` gained six checks, `tools/vocab_check.py` reports 0 errors and 3 warnings.
+
+## [2026-09-26] The requirements comment in `cti/pnd.yaml` is cut to the one line that matters
+
+**Owner's call.** The block explained that the requirements moved out, why, how the loader reassembles them, and how a scoring rule claims one. **All of that is history and mechanics, and `logs/CHANGELOG.md` already holds it.**
+
+- **Kept: the scope question**, because when `kiq` was removed on 24 September it became the only statement of this effort's scope anywhere in the repository, plus one line saying where the tree lives.
+- **Comment-only change.** No key, value or rule is touched.
+
 ## [2026-09-25] SIR-2.2.1 gets its false positives, written from what it actually matched
 
 **Twenty-five of the 124 headlines were read. Three false-positive classes and one counting caveat, all quoted from the real output.** This is the standing rule applied in order: write the detector, measure it, then write its false positives from what turned up. It has caught something every time it has been run.
