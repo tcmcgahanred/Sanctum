@@ -311,6 +311,22 @@ def main():
         except Exception as e:
             bad.append(f"{s['id']}: {e}")
     check("every detection parses and evaluates", bad, [])
+    # THE NAMED-CITY CASE, and it is a regression guard on a real miss. The
+    # Suisun City cyberattack was reported by five outlets in September 2026 and
+    # `SIR-1.1.3` matched none of them, because `geo` holds 15 non-county terms
+    # and not one is a city outside the five largest. The place table is what
+    # closed it.
+    by_id = {s["id"]: s for s in sirs}
+    suisun = art("Suisun City Hall reopens after last month's cyberattack",
+                 "The city confirmed the ransomware attack and said systems "
+                 "are back online.")
+    _t, sscopes, stext = _scopes(suisun)
+    check("a named California city in a headline answers SIR-1.1.3",
+          eval_detection(by_id["SIR-1.1.3"]["detection"],
+                         cfg["scoring"]["groups"], matcher, sscopes, stext),
+          True)
+    check("...and `geo` alone never held that city",
+          [t for t in cfg["scoring"]["groups"]["geo"] if "suisun" in t], [])
     check("the technique-identifier rule matches a probe that carries one",
           eval_detection(
               [s for s in with_det if s["id"] == "SIR-5.1.1"][0]["detection"],

@@ -25,7 +25,7 @@
 id: SIR-1.1.4
 title: An official California advisory naming an affected entity
 status: stable
-modified: '2026-09-25'
+modified: '2026-09-26'
 fact: Official California advisories naming an affected California entity.
 logsource:
   scope: regional
@@ -35,9 +35,20 @@ sensor:
   status: ACTIVE
   also: Cal-CSIC - PENDING
 detection:
+  # Either list will do. `geo` on the body is the original test and holds the
+  # state name and the California organisations, which is what an official
+  # advisory usually names. The Census place table is read on the TITLE only,
+  # because a place name anywhere in an article includes the publisher's own
+  # furniture - measured 2026-09-26, 236 articles on the body against 28 on the
+  # headline. It is the named-city case `geo` cannot see: `geo` holds no city
+  # names at all.
   california:
-    group: geo
-    scope: blob
+    any:
+    - group: geo
+      scope: blob
+    - library: geo_ca
+      bucket: A
+      scope: title
   incident:
     group: incident_broad
     scope: blob

@@ -25,7 +25,7 @@
 id: SIR-1.1.3
 title: Press reporting of an incident at a California organization
 status: stable
-modified: '2026-09-25'
+modified: '2026-09-26'
 fact: Regional or local press reports of incidents at California local government, school,
   utility or tribal entities.
 logsource:
@@ -36,9 +36,24 @@ sensor:
   status: ACTIVE
   also: curated CA regional press - PENDING
 detection:
-  california:
-    group: geo
-    scope: title
+  # A California NAME IN THE HEADLINE, from either list. `geo` is 49 hand-typed
+  # terms and carries the state name and the California organisations; the
+  # library is 1,085 Census place and county names unique to this state and
+  # carries the cities. Measured 2026-09-26 on 2,828 articles: 28 headlines hold
+  # a bucket A name and `geo` misses 10 of them, five of which are the Suisun
+  # City cyberattack reported by five different outlets. `geo` holds no city
+  # names at all, so that incident was invisible to this requirement.
+  #
+  # TITLE SCOPE, DELIBERATELY. The same list on the body matched 236 articles
+  # and the additions were mostly noise: a place name anywhere in an article
+  # includes the publisher's own furniture.
+  headline_place:
+    any:
+    - group: geo
+      scope: title
+    - library: geo_ca
+      bucket: A
+      scope: title
   california_anywhere:
     group: geo
     scope: blob
@@ -57,16 +72,30 @@ detection:
       b: incident
       window: 120
       scope: blob
-  condition: cyber and ((california and incident) or california_near_incident) and not listicle
+  condition: cyber and ((headline_place and incident) or california_near_incident) and not listicle
 falsepositives:
 - A great white shark breaching off a California beach town. `breach` beside a place name
   is not a cyber incident, which is why the cyber gate is a required conjunct rather than
   a scoring bonus.
+- The PUBLISHER'S OWN NAME in the headline suffix. 'Winona County paid ransomware attackers
+  $128K to restore services - Chippewa Herald' is a Minnesota story matching on Herald, a
+  place in Sacramento County. Collection declares `suffix_separators` and strips them for
+  deduplication only; the stored title keeps the suffix. Measured 2026-09-26.
+- A PERSON'S NAME. Tina Peters matched Peters, a place in Fresno County, on four articles.
+- AN ORDINARY WORD USED AS AN ADJECTIVE. 'Transparency paramount after cyberattacks' matched
+  Paramount, a city in Los Angeles County.
+- AN ACRONYM THAT IS ALSO A PLACE. The CREST accreditation body matched Crest, a place in
+  San Diego County.
 - County names California does not own. Kings is also Brooklyn. Lake is also Illinois, Florida,
   Indiana and Ohio. Trinity is also Texas. Sierra is also New Mexico.
 - Short padded terms matching inside longer words. 'uc ' fired on 190 articles by matching
   inside "product" and "reduce".
 note: 'StateScoop is SLTT trade press, not California regional press. This requirement remains
-  unserved. COPIED from the tier 1 scoring expression, term for term. That expression has
-  been scoring the live corpus since August, so this detector is proven. One deliberate difference:
-  the proximity block states scope blob, where tier 1 takes the default of text.'
+  unserved. The detector began as a copy of the tier 1 scoring expression, term for term,
+  and it is no longer one: the headline test now reads the Census place table as well, which
+  tier 1 does not. THE CONSEQUENCE IS DELIBERATE AND WORTH KNOWING — a Suisun City cyberattack
+  story now ANSWERS this requirement but does not earn tier 1 on geography alone, so it can
+  be answered and still not surface. Wiring the same list into tier 1 is a scoring change
+  and needs its own measurement. Two other deliberate differences from tier 1: the proximity
+  block states scope blob where tier 1 takes the default of text, and the library is scoped
+  to the title where `geo` is also read on the body.'
