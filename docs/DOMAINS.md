@@ -54,10 +54,10 @@ satisfies the machine is one nobody can maintain.
 > the SPLIT shape, which `s2` still uses and which remains a valid choice. What
 > is not a valid choice is the same fact written in two places.
 
-| `vocab.md` | **EXPECTED** | The reasoning behind the word lists — collisions, dropped terms, per-group review dates, known gaps. Never the terms themselves. See `VOCABULARY.md`. |
+| the `vocab:` block | **EXPECTED** | The reasoning behind the word lists — collisions, dropped terms, per-group review dates, known gaps. Never the terms themselves. See `VOCABULARY.md`. Both live domains keep it inside `pnd.yaml`; a separate `vocab.md` is still read and is a valid choice for a new domain. |
 | `README.md` | **EXPECTED** | What this domain is, who it serves, how to run it, how to adapt it. |
-| `requirements.md` | **EXPECTED** | The whole requirements tree — PIR → indicator → SIR — each collectable fact mapped to the sensor that serves it. (`cti` keeps this inside `pnd.yaml`; the older split-markdown shape is still read.) **This is the file that makes a coverage gap visible** — see below. Owns no numbers. |
-| `mandate.md` | **EXPECTED** | Standing operating directives plus the dated lessons log. The continuity mechanism: a fresh session handed this can run the cycle. |
+| `requirements/` | **EXPECTED** | The whole requirements tree — PIR → indicator → SIR — one file per rule plus `_tree.yaml`, each collectable fact mapped to the sensor that serves it. Both live domains use the directory; a `requirements.md` or an inline `requirements:` block is still read. **This is what makes a coverage gap visible** — see below. Owns no numbers. |
+| Operating directives and the lessons log | **EXPECTED SOMEWHERE** | Standing directives, cadence and the dated lessons log. The continuity mechanism: a fresh session handed it can run the cycle. Neither live domain keeps it in a `mandate.md` any more — `cti` splits it between its `README.md` and `logs/CHANGELOG.md`, and `s2` folded the whole thing into its `README.md` on 2026-09-27. |
 | `policy.md` | **EXPECTED** | The product specification — format, structure, locked content standards. CTI's is `vox_policy.md`. A domain can run without one; it just means the vox's standards live in someone's head instead of in git. |
 | `editions/` | **REQUIRED once the domain produces its first vox** | The committed record of what was actually put out, and the only way to answer "what did we say in August?" a year later. |
 | `references/` | **LOCAL ONLY** | Working notes, feed candidate lists. Git-ignored by pattern — these carry host and internal detail. |
@@ -103,8 +103,8 @@ remote that had been public since publication.
 | The whole requirements tree — PIRs, indicators, SIRs, and which sensor serves each | `<domain>/requirements/`, one file per rule plus `_tree.yaml`. An unconverted domain may still use `requirements.md` or a `requirements:` block in `pnd.yaml`; the loader reads either | Reference by name; do not restate the wording |
 | **Tier weights, multiplier factors, group terms, thresholds, force-surface rules** | **`pnd.md`** | **Never restate a number.** Explain design *intent* freely; the values live in config because config is what executes |
 | Product format and content standards | `policy.md` (if the domain has one) | Reference and state that the policy wins; do not reproduce the rules |
-| Vocabulary collisions, dropped terms, review dates | `vocab.md` | — |
-| Operating directives, cadence, lessons | `mandate.md` | — |
+| Vocabulary collisions, dropped terms, review dates | the `vocab:` block in `pnd.yaml`, or a separate `vocab.md` | — |
+| Operating directives, cadence, lessons | `<domain>/README.md`, and `logs/CHANGELOG.md` for the dated history | — |
 | Sensor list | the `sensors` block in `pnd.md` | Reference |
 
 **The test:** if you change a value in `pnd.md`, does any other file now contain

@@ -104,9 +104,10 @@ def load_vocab(vocab_path):
     Parse the `vocab:` block from a domain's vocab.md, OR from its pnd.md when
     the domain keeps everything in one file.
 
-    Two shapes are supported on purpose. `cti` merged its five markdown files
-    into one on 2026-09-01; `s2` still keeps a separate vocab.md beside its
-    pnd.md. A fallback serves both without a flag day. Returns {} when neither carries a `vocab:` block — the block is
+    Two shapes are supported on purpose. Both live domains now carry the block
+    inside their pnd.yaml - `cti` merged its five markdown files on 2026-09-01
+    and `s2` followed on 2026-09-27 - but a separate vocab.md is still a valid
+    layout and a new domain may start that way. The fallback costs nothing. Returns {} when neither carries a `vocab:` block — the block is
     optional, and the checks that need it simply do not run. A domain is not
     broken for lacking one; it is only unguarded.
     """
