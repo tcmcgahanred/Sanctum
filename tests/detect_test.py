@@ -451,6 +451,21 @@ def main():
           "SIR-4.1.2" in s2_met("Japan approves mass production of interceptor "
                                 "drones", "x"), False)
 
+    # s2 TIER 1 IS THE TITLE BRANCH ONLY, from 2026-09-27. The proximity branch
+    # it replaced put 93 of 250 articles in the top tier, 20 of the 81 that come
+    # from sensors still collecting. Measured alternatives are recorded in
+    # s2/pnd.yaml beside the rule. These two checks hold the shape: the tier is
+    # decided in the HEADLINE, and the same words in the body are not tier 1.
+    print("\ns2 tier 1 is decided in the headline")
+    s2sc = s2["scoring"]
+    check("an adversary state name in the headline reaches tier 1",
+          score_article(art("China deploys a new battery to Fiery Cross Reef",
+                            "filler " * 40), s2sc)[1], 1)
+    check("...and the same words in the BODY only do not",
+          score_article(art("Budget hearing covers the Pacific",
+                            "China deployed forces near Taiwan last week. "
+                            + "filler " * 40), s2sc)[1], 4)
+
     print("\nA declared term matches whatever the case it is written in")
     m = make_matcher(["China"])
     check("an upper-case designation matches lower-case text",

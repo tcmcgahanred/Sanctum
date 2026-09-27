@@ -272,17 +272,74 @@ scoring:
     # The rotary-wing lens lives in Tier 3 and in force_surface, where it
     # discriminates. Putting it here too is what made the top requirement
     # unreachable by the top tier.
+    # THE REASSESSMENT THE WATCH NOTE ABOVE ASKED FOR, done 2026-09-27 with
+    # numbers instead of a guess. It over-fired, exactly as suspected, and the
+    # proximity branch is now DELETED. The title branch is the whole tier.
+    #
+    # WHY IT COULD NOT BE SEEN UNTIL NOW. Term matching was case-sensitive until
+    # 2026-09-27, and 144 of this domain's 149 geography terms and 51 of its 52
+    # adversary terms are capitalised, so the branch that over-fires was nearly
+    # unsatisfiable when the watch note was written. The four cycles of zero it
+    # records had two causes, not one.
+    #
+    # MEASURED over the 7 days to 2026-09-27, 250 articles of which 169 are the
+    # dropped ecns.cn sensor and 81 are the western sensors that remain:
+    #
+    #                                     surfaced  surfaced  western tier
+    #                                     of 250    of 81     T1  T2 T3 T4
+    #   both branches, as it stood           108      32       20  10  0 51
+    #   TITLE BRANCH ONLY, this rule          95      27        9  14  0 58
+    #   title branch or event-near-actor
+    #     inside the title                    96      27        9  14  0 58
+    #   either branch plus a rotary-wing
+    #     or threat-vocabulary conjunct       24      20        5  10  0 66
+    #
+    # The third variant differs from this one by ONE article in 250, so its
+    # extra branch buys nothing. THE FOURTH IS REJECTED, and the comment above
+    # already said why: a platform conjunct here is what made the top
+    # requirement unreachable by the top tier. Measured, it also drops "North
+    # Korea Tests New Hwasong-11Ma Hypersonic Missile", "China's Recent J-36
+    # Heavy Stealth Tactical Jet Testing" and "China Appears To Be Building A
+    # Mothership For Large Uncrewed vessels" while KEEPING "China claims 2 golds
+    # at World Climbing" at tier 1. It also stopped three of the four articles
+    # answering SIR-1.3.1 from surfacing at all.
+    #
+    # WHAT THIS TIER NOW ACTUALLY SAYS, in one line: an adversary STATE NAME in
+    # the headline. The two conjuncts collapse to one word, because the comment
+    # above records that a state name deliberately satisfies both the actor and
+    # the geography condition. That is why "China claims 2 golds at World
+    # Climbing Championships" still reaches 8.0, and it is the honest reading of
+    # the rule rather than a defect in the wiring.
+    #
+    # THE NINE THE TITLE BRANCH LEAVES AT TIER 1 WERE READ. Four are the fact -
+    # the Hwasong test, the J-36 testing, the uncrewed mothership, and the F-35
+    # canopy and weapons-bay door loss to China. Five are analysis or allied
+    # policy that merely carries an adversary and a place in one headline, and
+    # the next lever on those is an event word required in the title as well.
+    # That is NOT being changed today, because the 7-day window is two-thirds a
+    # sensor no longer collected: re-measure on 2026-10-07, when the window is
+    # western-only for the first time.
+    #
+    # THE FIVE IT STOPS SURFACING WERE READ TOO. Three are opinion pieces. Two
+    # are arguable - a first uncrewed-submarine torpedo firing, and the US
+    # watching Chinese marine presence off Alaska - and both remain in the drop
+    # list where the analyst reads them.
+    #
+    # A BONUS, and it retires half of a known defect: this deletes one of the
+    # two live users of the event_words-to-actor_adversary proximity, whose
+    # a-side has no word-boundary protection at any length.
+    #
+    # STILL TRUE AND STILL DELIBERATE: this tier is PLATFORM-AGNOSTIC. Its NAME
+    # says "affecting rotary wing" and its condition does not, which is the
+    # design recorded above rather than an oversight - but the name is therefore
+    # misleading and belongs on the wording review.
     - id: 1
       name: "adversary activity or capability change inside INDOPACOM affecting rotary wing"
       weight: 8.0
       require:
-        any:
-          - all:
-              - {group: geo_indopacom, scope: blob}
-              - proximity: {a: event_words, b: actor_adversary, window: 120}
-          - all:
-              - {group: actor_adversary, scope: title}
-              - {group: geo_indopacom, scope: title}
+        all:
+          - {group: actor_adversary, scope: title}
+          - {group: geo_indopacom, scope: title}
 
     # CYCLE 1 FINDING — REWRITTEN 2026-08-19.
     # The previous rule was a bare any: across the threat groups, with no
