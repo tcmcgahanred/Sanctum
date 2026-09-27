@@ -164,6 +164,89 @@ manifest:
   - url: https://verticalmag.com/feed/
     group: 'Rotary-wing professional press'
     logsource: {scope: allied, kind: trade_press}
+  # --- THEATRE QUERIES, added 2026-09-27 ---
+  # WHY THESE EXIST, and it is not only collection volume:
+  # tools/sensor_candidates.py nominates a publisher ONLY when every article it
+  # contributed arrived through a query sensor, on the logic that a publisher a
+  # query keeps dragging in is one worth reading directly. This domain had seven
+  # hand-picked direct feeds and NO query sensor, so `--domain s2` correctly
+  # reported zero candidates: every article it collected already came from a
+  # publisher it reads directly. These queries are what give the finder
+  # something to find, and they widen collection at the same time.
+  #
+  # EVERY STRING IS BUILT FROM THIS DOMAIN'S OWN DECLARED WORD LISTS - the
+  # surface-to-air missile designations from threat_sam, the man-portable ones
+  # from threat_manpads, the airframes from platform_rotary_wing, the places
+  # from geo_indopacom - so a query cannot drift away from what the requirements
+  # ask for.
+  #
+  # MEASURED FROM THE COLLECTOR HOST, 2026-09-27, over a 14-day window, before
+  # any of them was declared. items / distinct publishers / publishers this
+  # domain does not already read:
+  #
+  #   q1 surface-to-air designations      9 / 7 / 7
+  #   q2 man-portable air defence        33 / 29 / 29
+  #   q3 rotary-wing losses              44 / 40 / 39
+  #   q4 loitering munitions              3 / 3 / 3
+  #   q5 PLA aviation                    55 / 43 / 43
+  #   q6 counter-unmanned in theatre     31 / 28 / 28
+  #   q7 airfield construction           21 / 20 / 20
+  #
+  # 196 items and 150 distinct new publishers, which is close to one publisher
+  # per item: a Google News query is DIFFUSE by design, and that is exactly the
+  # signal the finder reads. Among the recurring ones: scmp.com, defence-blog.com,
+  # militarywatchmagazine.com, quwa.org, 19fortyfive.com, taiwannews.com.tw,
+  # aerospaceglobalnews.com, globaltimes.cn. Among the ones that show it also
+  # drags in noise: nypost.com, aol.com, facebook.com, dailywire.com.
+  #
+  # ALL SEVEN ARE DECLARED RATHER THAN THE BEST THREE, on this domain's own
+  # standing directive to prefer a false positive to a miss. THE PRUNE IS A
+  # MEASUREMENT, NOT A GUESS: after a week of collection, run
+  # `tools/sensor_candidates.py --domain s2 --days 7` and
+  # `tools/sensor_health.py --domain s2 --days 7`, and drop the queries that
+  # bought no publisher and no surfacing item. q4 at three items is the first
+  # candidate for that.
+  #
+  # `scope: mixed` IS A NEW VALUE AND IT IS DELIBERATE. An aggregator returns
+  # whatever Google matched, from allied trade press to adversary state media in
+  # the same feed, so claiming either vantage would be false. All 43
+  # requirements currently declare `scope: any` and `kind: any`, so nothing
+  # starves; a future requirement that genuinely needs the allied vantage
+  # correctly will not be satisfied by these.
+  #
+  # `kind: query` IS ALSO NEW HERE, and the finder keys on exactly that value.
+  #
+  # NOTE FOR WHOEVER READS core/rules.py NEXT: `logsource_match` says in its
+  # docstring that `any` on EITHER side matches anything, but the code strips
+  # `any` only from the RULE side and compares the sensor side by equality. A
+  # sensor declaring `scope: any` would therefore NOT satisfy a rule requiring
+  # `scope: allied`. That is why these records name a real value instead.
+  #
+  # `manifest.collection.fetch` already declares `decode_google_news: true`,
+  # which was noted as costing nothing because no query sensor existed. It is
+  # load-bearing from today: every item below arrives as a Google News wrapper
+  # and is resolved one at a time at a one-second interval.
+  - url: https://news.google.com/rss/search?q=%28%22HQ-9%22%20OR%20%22HQ-16%22%20OR%20%22HQ-17%22%20OR%20%22HQ-19%22%29%20%28missile%20OR%20%22air%20defense%22%20OR%20%22air%20defence%22%29%20when%3A14d&hl=en-US&gl=US&ceid=US:en
+    group: 'Theatre queries: surface-to-air designations'
+    logsource: {scope: mixed, kind: query}
+  - url: https://news.google.com/rss/search?q=%28MANPADS%20OR%20%22shoulder-fired%22%20OR%20%22QW-2%22%20OR%20%22FN-6%22%29%20%28helicopter%20OR%20aircraft%29%20when%3A14d&hl=en-US&gl=US&ceid=US:en
+    group: 'Theatre queries: man-portable air defence'
+    logsource: {scope: mixed, kind: query}
+  - url: https://news.google.com/rss/search?q=%28helicopter%20OR%20Mi-8%20OR%20Mi-24%20OR%20Ka-52%29%20%28%22shot%20down%22%20OR%20downed%20OR%20%22combat%20loss%22%29%20when%3A14d&hl=en-US&gl=US&ceid=US:en
+    group: 'Theatre queries: rotary-wing losses'
+    logsource: {scope: mixed, kind: query}
+  - url: https://news.google.com/rss/search?q=%28%22loitering%20munition%22%20OR%20%22FPV%20drone%22%29%20%28helicopter%20OR%20airfield%20OR%20%22parked%20aircraft%22%29%20when%3A14d&hl=en-US&gl=US&ceid=US:en
+    group: 'Theatre queries: loitering munitions against aircraft'
+    logsource: {scope: mixed, kind: query}
+  - url: https://news.google.com/rss/search?q=%28PLA%20OR%20Chinese%29%20%28%22army%20aviation%22%20OR%20helicopter%20OR%20%22Z-20%22%20OR%20%22Z-10%22%29%20when%3A14d&hl=en-US&gl=US&ceid=US:en
+    group: 'Theatre queries: adversary army aviation'
+    logsource: {scope: mixed, kind: query}
+  - url: https://news.google.com/rss/search?q=%28%22counter-UAS%22%20OR%20%22counter-drone%22%29%20%28China%20OR%20Taiwan%20OR%20Japan%20OR%20Philippines%29%20when%3A14d&hl=en-US&gl=US&ceid=US:en
+    group: 'Theatre queries: counter-unmanned in the theatre'
+    logsource: {scope: mixed, kind: query}
+  - url: https://news.google.com/rss/search?q=%28airfield%20OR%20runway%20OR%20%22hardened%20shelter%22%29%20%28China%20OR%20Taiwan%20OR%20Philippines%20OR%20Guam%29%20%28construction%20OR%20expansion%20OR%20hardening%29%20when%3A14d&hl=en-US&gl=US&ceid=US:en
+    group: 'Theatre queries: airfield construction and hardening'
+    logsource: {scope: mixed, kind: query}
   # --- REJECTED, do not re-add without re-testing ---
   # blog.usni.org/feed - 301s to www.usni.org/feed, which returns 403 behind bot
   # protection. Serves browsers, blocks the collector. Removed 2026-08-19.
