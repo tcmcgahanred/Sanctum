@@ -178,10 +178,28 @@ def _validate(cfg, domain):
         if "not" in atom:
             _walk(atom["not"])
 
+    # A TIER STATES `require:`. A MULTIPLIER, A FLOOR AND A FORCE-SURFACE RULE
+    # STATE `when:`. Two names for one idea is a real trap and it cost the second
+    # domain its whole scoring half: `s2`'s single force-surface rule was written
+    # with `require:`, the engine reads `when:`, and `satisfied_elements` raised
+    # KeyError('when') 28 seconds into every run for an unknown number of weeks.
+    # Collection succeeded, the corpus grew, the service exited 1, and the only
+    # visible symptom was a staging document that stopped being rewritten.
+    #
+    # Refused here, by name, because a missing key is not a wording preference.
     for t in sc["tiers"]:
         _walk(t.get("require", "always"))
-    for m in sc["multipliers"]:
-        _walk(m["when"])
+    for key in ("multipliers", "floors", "force_surface"):
+        for r in (sc.get(key) or []):
+            if not isinstance(r, dict) or "when" not in r:
+                nm = (r.get("name") if isinstance(r, dict) else None) or "(unnamed)"
+                extra = (" It declares `require:`, which is a TIER's field."
+                         if isinstance(r, dict) and "require" in r else "")
+                raise ValueError(
+                    f"[{domain}] scoring.{key} rule {nm!r} declares no "
+                    f"`when:`.{extra} A tier states `require:`; a multiplier, a "
+                    f"floor and a force-surface rule state `when:`.")
+            _walk(r["when"])
     missing = refs - groups
     if missing:
         raise ValueError(f"[{domain}] rules reference undefined groups: {sorted(missing)}")

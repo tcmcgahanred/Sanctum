@@ -40,6 +40,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from core.pnd import load_domain                                # noqa: E402
 from core.rules import (score_article, matched_evidence,      # noqa: E402
                         tier_requirement, satisfied_elements)
 
@@ -167,6 +168,30 @@ def run():
           satisfied_elements(both, scoring()), [])
     check("...and declaring elements still moves no score",
           score_article(both, ee)[0], score_article(both, scoring())[0] * 1.5)
+
+    # EVERY TRACKED DOMAIN MUST SCORE WITHOUT RAISING, and this is a regression
+    # guard on a real outage. `s2`'s single force-surface rule was written with
+    # `require:`, which is a TIER's field name; the engine reads `when:`. Every
+    # run collected successfully, then `satisfied_elements` raised
+    # KeyError('when') 28 seconds later and the service exited 1. The corpus kept
+    # growing and the staging document silently stopped being rewritten. The
+    # loader refuses it now; this checks the whole path end to end.
+    print("\nEvery tracked domain scores without raising")
+    probe = art("a probe headline with nothing special in it")
+    for dom in ("cti", "s2"):
+        try:
+            live = load_domain(domain=dom)["scoring"]
+            score_article(probe, live)
+            satisfied_elements(probe, live)
+            ok = True
+        except Exception as e:
+            ok = f"{type(e).__name__}: {e}"
+        check(f"{dom} scores and reports its elements", ok, True)
+        rules = [(k, r) for k in ("multipliers", "floors", "force_surface")
+                 for r in (load_domain(domain=dom)["scoring"].get(k) or [])]
+        check(f"...and every {dom} multiplier, floor and force rule states "
+              f"`when:`",
+              [f"{k}:{r.get('name')}" for k, r in rules if "when" not in r], [])
 
     print()
     if FAILURES:

@@ -2,6 +2,18 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-09-27] One wrong field name cost the second domain its entire scoring half
+
+**`s2` collects daily and has for 41 days. It has not produced a staging document in weeks, and the cause is one word.** A tier states `require:`. A multiplier, a floor and a force-surface rule state `when:`. **`s2`'s single force-surface rule, "threat system engaged an aircraft" at `s2/pnd.md` line 360, was written with `require:`.** `satisfied_elements` in `core/rules.py` reads `f["when"]`, so every run raised `KeyError: 'when'`.
+
+- **THE FAILURE WAS INVISIBLE IN EVERY PLACE SOMEBODY WOULD LOOK.** Collection succeeded and logged `run done — 4 new ... [ok 4]` at 12:32:14 UTC. **The service then exited status 1 at 12:32:42, twenty-eight seconds later, after collection had already finished.** The corpus kept growing one day at a time, `seen.txt` stayed correct, the timer re-armed for the next morning, and the only symptom was a `staging_candidates.md` that quietly stopped being rewritten. **The second-domain staging pull is on demand, roughly monthly, so nobody was looking at the one file that changed.**
+- **FIXED, and the loader now refuses it.** `core/pnd.py` validates `multipliers`, `floors` and `force_surface` for a `when:` key, names the offending rule, and **says outright when the rule declares `require:` instead: "A tier states `require:`; a multiplier, a floor and a force-surface rule state `when:`."** Two names for one idea is a trap, and the cure is a guard rather than a comment.
+- **THE SAME PASS CLOSED A SECOND GAP.** `_validate` walked tiers and multipliers for undefined group references and **did not walk floors or force-surface rules at all.** It does now. A typo in a floor's group name would have matched nothing, silently, and CTI has one floor and three force-surface rules.
+- **A REGRESSION GUARD ON THE WHOLE PATH.** `tests/handover_test.py` now loads every tracked domain, scores a probe article through `score_article` and `satisfied_elements`, and separately asserts that no multiplier, floor or force-surface rule in either domain is missing `when:`. **Four new checks. The domain that broke is the one the test names.**
+- **NOTHING WAS LOST, and that is worth stating plainly.** A corpus record never stores a score — scoring is computed at read time — so there are no unscored entries anywhere. **One good run rebuilds the staging document from scratch.** The only real loss is coverage: anything collected outside `collection.window_days` will never reach a staging document.
+- **A WRONG CALL OF MINE, RECORDED.** `ravenor-s2.service` has `TimeoutStartUSec=infinity` and no drop-in directory, and I told the owner that unbounded hang was what was costing him data. **It was not: the unit fails fast and the timer re-arms.** The missing timeout is still real and still worth fixing, but it was second in line, not first.
+- **Verified:** both domains load, `s2` now scores a probe article to tier 3 without raising, fifteen test files pass, and `tools/vocab_check.py --tracked-only` reports 0 errors and 3 warnings across both domains.
+
 ## [2026-09-27] The second domain is public, and it turns out it already was
 
 **Owner's decision, after deliberating on it for some time: the second domain is all open-source intelligence and none of it is For Official Use Only, so nothing about `s2/` is excluded from the repository.** Care about what gets published stays with the author, where it belongs.

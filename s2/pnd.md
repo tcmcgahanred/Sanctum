@@ -357,7 +357,7 @@ scoring:
   # audit in vocab.md.
   force_surface:
     - name: "threat system engaged an aircraft"
-      require:
+      when:
         all:
           - any:
               # designations
