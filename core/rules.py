@@ -36,19 +36,56 @@ def make_matcher(word_boundary_terms):
     boundaries to avoid substring collisions ('ics' in 'physics'); longer
     distinctive terms use fast substring matching. Terms are stripped, exactly
     as the original did.
+
+    MATCHING IS CASE-INSENSITIVE, AND IT WAS NOT UNTIL 2026-09-27. Every scope
+    handed to this function is lowercased by `_scopes`, and a declared term was
+    compared to it verbatim, so any term carrying a capital letter could never
+    match anything. Measured across the two live domains on 2026-09-27:
+
+        cti   414 group terms, 6 word-boundary terms, 49 inline keywords,
+              and NOT ONE carries a capital letter, so folding case here is
+              the identity transform for that domain and no cti score can
+              move. The scoring fixtures prove it rather than this comment.
+        s2    951 group terms and 518 of them, 54.5 percent, carried a
+              capital letter and were therefore inert. That included ALL 213
+              weapon designations - every entry of threat_manpads, threat_sam,
+              threat_aaa_cuas, threat_ew, threat_small_arms,
+              threat_uas_loitering and threat_sa_designations - 144 of the 149
+              geography terms, 51 of the 52 adversary terms and 31 of the 55
+              rotary-wing terms.
+
+    That is the probable cause of two findings already written down as
+    something else: the s2 sensor comments record "zero Tier 3 hits across two
+    cycles - not one article in 27 contained a rotary-wing term", and s2 has
+    been surfacing 3.0 percent of what it collects against cti's 16.
+
+    THE FIX IS HERE AND NOT IN THE DOMAIN FILE on purpose. Lowercasing 951
+    declared terms would make `hq-9` and `manpads` the written form of a
+    designation that is upper case everywhere a reader will ever meet it, and
+    the next person to add `HQ-19` would reintroduce the fault in silence. An
+    engine that matches text has no business being case-sensitive about it.
+
+    The word-boundary set is folded too. It has to be: s2 declares 15 of its 17
+    boundary terms capitalised (`China`, `Palau`, `Matsu`), so folding the term
+    without folding the set would have taken the boundary protection off them
+    and let `China` match inside a longer word.
     """
-    wb = set(word_boundary_terms or [])
+    wb = {str(w).strip().lower() for w in (word_boundary_terms or [])}
 
     def _hit(text, terms):
         for t in terms:
             t = t.strip()
             if not t:
                 continue
-            if len(t) <= 4 or t in wb:
-                if re.search(r"\b" + re.escape(t) + r"\b", text):
+            # The DECLARED term is what gets returned, because it is what a
+            # reader will search the domain file for; only the comparison is
+            # folded.
+            t_l = t.lower()
+            if len(t_l) <= 4 or t_l in wb:
+                if re.search(r"\b" + re.escape(t_l) + r"\b", text):
                     return t
             else:
-                if t in text:
+                if t_l in text:
                     return t
         return None
 
@@ -261,9 +298,18 @@ def _eval_atom(atom, groups, matcher, scopes, text_l):
         # Stripping them turns 'uc ' into a bare substring matching inside
         # "product" and "reduce", which fired M1 on 190 articles with no AOR
         # content at all. Found on the live corpus, by nothing else.
+        #
+        # CASE IS FOLDED, 2026-09-27, for the reason written out at length in
+        # make_matcher: the haystack is lowercase, so an a-side term carrying a
+        # capital letter could never be found. Lowercasing keeps the padding
+        # intact, and every cti a-side term is already lowercase, so no cti
+        # score can move. It matters here for s2 tier 3, whose a-side is
+        # env_basing and whose b-side, platform_rotary_wing, was 31 of 55 terms
+        # inert.
         for ct in a_terms:
             if not ct:
                 continue
+            ct = ct.lower()
             idx = hay.find(ct)
             seen = 0
             while idx != -1:

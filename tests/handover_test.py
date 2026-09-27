@@ -24,11 +24,18 @@ WHAT IS CHECKED
 ---------------
   serves declared      a tier that declares one reports it, with its own name
   serves absent        a tier that declares none reports nothing, silently —
-                       an undeclared domain is not a broken domain, and s2 is
-                       git-ignored so it cannot be edited from the repo at all
+                       an undeclared domain is younger, not broken, and s2 is
+                       the standing example: it scores daily and declares no
+                       `serves:` field on any tier. The old reason given here
+                       was that s2 was git-ignored, which stopped being true
+                       at some point before 2026-09-27
   multiplier evidence  a fired multiplier names the term that fired it
   floor evidence       the same, for a floor
   evidence is display  none of it moves a score
+  term is matchable    no declared term in either domain is unmatchable, which
+                       is what 518 of s2's 951 terms were until case folding
+  logsource reachable  no requirement declares a vantage no sensor supplies,
+                       unless it is `unsupported` and the zero is the finding
   signature unchanged  score_article still returns exactly three values, because
                        eleven call sites across seven files unpack it
 
@@ -42,7 +49,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.pnd import load_domain                                # noqa: E402
 from core.rules import (score_article, matched_evidence,      # noqa: E402
-                        tier_requirement, satisfied_elements)
+                        tier_requirement, satisfied_elements,
+                        make_matcher, logsource_match)
 
 FAILURES = []
 
@@ -192,6 +200,50 @@ def run():
         check(f"...and every {dom} multiplier, floor and force rule states "
               f"`when:`",
               [f"{k}:{r.get('name')}" for k, r in rules if "when" not in r], [])
+
+    # EVERY DECLARED TERM CAN MATCH SOMETHING. The engine lowercases every scope
+    # it searches and used to compare the declared term to it verbatim, so a
+    # term carrying a capital letter was inert. Measured 2026-09-27: 518 of s2's
+    # 951 terms, 54.5 percent, including all 213 weapon designations. A term
+    # nobody can ever hit is worse than a missing term, because the group reads
+    # as populated and the rule above it reads as active.
+    print("\nEvery declared term can match its own text")
+    for dom in ("cti", "s2"):
+        sc = load_domain(domain=dom)["scoring"]
+        m = make_matcher(sc.get("word_boundary_terms"))
+        # TWO PROBES, and either one counts. A term is word-boundaried when it
+        # is four characters or fewer, and `\b` needs a word character on the
+        # far side, so a term ENDING IN PUNCTUATION cannot match itself standing
+        # alone: cti declares `cve-`, `zdi-` and `vu#`, which are meant to be
+        # followed by digits and match "CVE-2026-1234" correctly. The padded
+        # probe serves an ordinary term, the digit probe serves those.
+        def matchable(t):
+            low = t.lower()
+            return (m(f" {low} ", [t]) is not None
+                    or m(f" {low}1 ", [t]) is not None)
+
+        dead = [f"{g}:{t}" for g, terms in sc["groups"].items()
+                for t in terms if t.strip() and not matchable(t)]
+        check(f"no {dom} group term is unmatchable", dead[:6], [])
+
+    # A LOGSOURCE NO SENSOR SUPPLIES IS A SILENT KILL, found on cti 2026-09-24
+    # when four requirements were narrowed until they matched almost no sensor
+    # and their detectors quietly returned nothing. `unsupported` is the one
+    # legitimate case: cti's SIR-1.1.1 and SIR-1.1.2 declare vantages the
+    # manifest genuinely cannot supply, and their zero is the finding.
+    print("\nEvery requirement can be reached by at least one sensor")
+    for dom in ("cti", "s2"):
+        cfg = load_domain(domain=dom)
+        classes = (cfg.get("sensor_classes") or {}).values()
+        starved = [r["id"]
+                   for p in (cfg.get("requirements") or {}).get("pirs", [])
+                   for i in p.get("indicators", [])
+                   for r in i.get("sirs", [])
+                   if r.get("status") != "unsupported"
+                   and not any(logsource_match(r.get("logsource") or {}, v)
+                               for v in classes)]
+        check(f"no {dom} requirement declares a logsource no sensor matches",
+              starved, [])
 
     print()
     if FAILURES:

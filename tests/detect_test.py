@@ -397,6 +397,26 @@ def main():
     check("...and still matches an article from a retired sensor",
           "SIR-5.1.1" in met(gone), True)
 
+    # MATCHING IS CASE-INSENSITIVE, 2026-09-27. Every scope is lowercased before
+    # it is searched, and a declared term used to be compared to it verbatim, so
+    # 518 of s2's 951 terms - every weapon designation it declares - could never
+    # match anything. The regression guard for the whole class of fault lives in
+    # tests/handover_test.py, which asserts no declared term is unmatchable in
+    # either domain; these four checks hold the behaviour itself.
+    print("\nA declared term matches whatever the case it is written in")
+    m = make_matcher(["China"])
+    check("an upper-case designation matches lower-case text",
+          m("the hq-9 battery moved", ["HQ-9"]), "HQ-9")
+    check("...and a long one does too, by substring",
+          m("a manpads engagement", ["MANPADS"]), "MANPADS")
+    check("the term is returned AS DECLARED, so it can be found in the file",
+          m("uh-60 down", ["UH-60"]), "UH-60")
+    # The boundary set has to be folded with the term or this protection is
+    # silently lost: s2 declares 15 of its 17 boundary terms capitalised.
+    check("a capitalised word-boundary term keeps its boundary",
+          [m("china said", ["China"]), m("chinatown fire", ["China"])],
+          ["China", None])
+
     print()
     if FAILURES:
         print(f"FAIL — {len(FAILURES)} problem(s)")
