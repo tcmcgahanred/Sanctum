@@ -59,7 +59,23 @@ A corpus record keeps `url` as collected and `final_url` only when resolution
 CHANGED it. A probe that read `url` alone found 52 of 57 hits on
 `news.google.com` and learned nothing about publishers. This tool prefers
 `final_url` and falls back to `url`, and it PRINTS how many records were still
-unresolved, because that number is the ceiling on what it can see.
+unresolved, because that number is the ceiling on what it can see. **Measured on
+the live corpus: 3 of 2,828. Wrapper resolution works; that probe read the wrong
+field.**
+
+A DECLARED SENSOR'S HOST IS NOT THE PUBLISHER'S HOST, and the first run proved
+it. The top "candidate" was `thehackernews.com` with 241 articles, which
+Sanctum HAS collected directly all along — the feed is declared as
+`feeds.feedburner.com/TheHackersNews`, so no host comparison could match it.
+Three declared sensors are served from Feedburner.
+
+**So the test for a candidate is the DATA, not the sensor list: a publisher is a
+candidate only when every one of its articles arrived through a query sensor.**
+One article from a non-query sensor proves a direct feed already exists, whatever
+host serves it. The sensor-host comparison is kept as a second filter, and
+publishers that pass it but are reached directly anyway are printed in their own
+short section rather than hidden, because that list is the map of which feeds are
+served from somewhere other than the publisher.
 
 CHANGES NOTHING. No writes, no corpus, no seen.txt.
 
@@ -186,12 +202,20 @@ def run_list(args, cfg):
                                              -kv[1]["answered"],
                                              -kv[1]["articles"], kv[0]))
 
-    cands = [(h, s) for h, s in stats.items()
-             if h not in declared and s["articles"] >= args.min_articles]
+    # A publisher is a candidate only when EVERY article of its arrived through
+    # a query sensor. One article from a direct feed proves a direct feed
+    # exists, whatever host serves it - see the Feedburner note above.
+    big = [(h, s) for h, s in stats.items()
+           if s["articles"] >= args.min_articles]
+    cands = [(h, s) for h, s in big
+             if h not in declared and s["viaquery"] == s["articles"]]
+    indirect_but_named = [(h, s) for h, s in big
+                          if h not in declared
+                          and s["viaquery"] < s["articles"]]
     already = [(h, s) for h, s in stats.items() if h in declared]
 
-    print(f"CANDIDATES - publishers in the corpus that are NOT declared "
-          f"sensors, ranked by how many of their articles would surface at "
+    print(f"CANDIDATES - publishers reached ONLY through a query sensor, "
+          f"ranked by how many of their articles would surface at "
           f"{threshold}:")
     print(f"  {'surfaced':>8}  {'answered':>8}  {'articles':>8}  "
           f"{'viaquery':>8}  publisher")
@@ -201,6 +225,16 @@ def run_list(args, cfg):
               f"{s['articles']:>8}  {s['viaquery']:>8}  {h}")
     if not shown:
         print("  (none)")
+
+    if indirect_but_named:
+        print()
+        print("ALREADY REACHED DIRECTLY, though no declared sensor carries "
+              "their host - the feed is served from somewhere else:")
+        print(f"  {'surfaced':>8}  {'answered':>8}  {'articles':>8}  "
+              f"{'viaquery':>8}  publisher")
+        for h, s in rank(indirect_but_named)[:args.top]:
+            print(f"  {s['surfaced']:>8}  {s['answered']:>8}  "
+                  f"{s['articles']:>8}  {s['viaquery']:>8}  {h}")
 
     if args.declared:
         print()
@@ -215,8 +249,9 @@ def run_list(args, cfg):
     would = sum(s["surfaced"] for _h, s in cands)
     print("CANDIDATES arts=" + str(len(arts))
           + " publishers=" + str(len(stats))
-          + " undeclared=" + str(len(cands))
+          + " query_only=" + str(len(cands))
           + " their_surfacing_articles=" + str(would)
+          + " reached_directly_off_host=" + str(len(indirect_but_named))
           + " unresolved_wrappers=" + str(unresolved)
           + " threshold=" + str(threshold))
 
