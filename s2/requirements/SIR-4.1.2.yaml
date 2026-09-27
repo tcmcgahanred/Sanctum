@@ -13,10 +13,10 @@
 #           blocked     a machine could decide it, but the input it needs does
 #                       not exist yet. `blocked_by:` names that input.
 #
-#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
-#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
-#  what each one matched before trusting it; this one has not had that pass, so
-#  any coverage number it produces is a number nobody has checked yet.
+#  THE `detection:` BLOCK BELOW HAS MET THE CORPUS, on 2026-09-27, and was
+#  REBUILT on what it matched: the first version took 105 articles of 1,576 and
+#  thirteen of them were read, of which NOT ONE was the fact. This version
+#  reports a MEASURED ZERO over 45 days, which is the honest state.
 # ------------------------------------------------------------------------------
 
 id: SIR-4.1.2
@@ -31,31 +31,78 @@ sensor:
   name: 'Sensor: imagery-derived + primary-source — PARTIAL'
   status: 'PARTIAL'
 detection:
-  # A named system plus FIRST-OCCURRENCE language, which the domain already
-  # declares as a group and already uses as a scoring multiplier. The parade and
-  # display words sit inline beside it: a parade is the specific venue this
-  # requirement names, and no other requirement reads them.
+  # MEASURED AND REBUILT 2026-09-27. The first version of this detector matched
+  # 105 articles of 1,576, THIRTEEN of them were read, and NOT ONE was the
+  # fact. Three causes, every one in the rule rather than in the corpus:
+  #
+  #   1. the `system` half accepted the six GENERIC threat lists, so
+  #      `interceptor drone` and `counter-UAS` in a western programme story
+  #      counted as a counter-air system;
+  #   2. `first_occurrence` is the wrong group for this fact. It carries
+  #      `entered service`, `commissioned`, `serial production`,
+  #      `mass production`, `first flight` and `prototype`, which is
+  #      SERVICE-ENTRY language and belongs to SIR-4.1.1;
+  #   3. two of the inline display words were too generic - `exhibition`
+  #      matched a motorcycle trade show and `showcased` a science expo.
+  #
+  # Four candidates measured over the same 1,576 articles:
+  #
+  #   designation lists + the appearance list, both on the body      14
+  #   all thirteen threat lists + appearance in the title             6
+  #   designation lists on the body + appearance in the title         1
+  #   DESIGNATION AND APPEARANCE BOTH IN THE TITLE, this rule         0
+  #
+  # The single match of the third candidate was read and was a false positive:
+  # a sea-drone strike whose headline ends "for the first time" with a
+  # designation mentioned in the body. That is the whole argument for reading
+  # the designation in the TITLE - a first-appearance story names the system in
+  # its headline, and a designation in the body belongs to somebody else's
+  # story.
+  #
+  # A MEASURED ZERO IS THE HONEST STATE HERE, exactly as it was for cti's
+  # SIR-1.1.4 on 2026-09-26 when a reported 96 became none: this domain's seven
+  # western sensors did not report an adversary counter-air system appearing for
+  # the first time in 45 days. A zero that names a collection gap is worth more
+  # than 105 articles that answer nothing.
+  #
+  # THE RECALL COST, accepted: "China unveils a new long-range interceptor at
+  # parade" carries no designation and is missed. The cure for that is a
+  # designation list that keeps up with new systems, not a looser scope.
   system:
     any:
-    - {group: threat_manpads, scope: blob}
-    - {group: threat_sam, scope: blob}
-    - {group: threat_aaa_cuas, scope: blob}
-    - {group: threat_ew, scope: blob}
-    - {group: threat_small_arms, scope: blob}
-    - {group: threat_uas_loitering, scope: blob}
-    - {group: threat_sa_designations, scope: blob}
-    - {group: threat_manpads_generic, scope: blob}
-    - {group: threat_sam_generic, scope: blob}
-    - {group: threat_aaa_cuas_generic, scope: blob}
-    - {group: threat_ew_generic, scope: blob}
-    - {group: threat_small_arms_generic, scope: blob}
-    - {group: threat_uas_loitering_generic, scope: blob}
-  first_or_display:
-    any:
-    - {group: first_occurrence, scope: blob}
-    - keywords: [parade, military parade, on display, put on display, exhibition,
-                 air show, airshow, defence exhibition, defense exhibition,
-                 static display, showcased]
-      scope: blob
-  condition: system and first_or_display
-note: 'Converted from EEI-4.1.b. Scoring: Tier 2 × first-occurrence. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+    - {group: threat_manpads, scope: title}
+    - {group: threat_sam, scope: title}
+    - {group: threat_aaa_cuas, scope: title}
+    - {group: threat_ew, scope: title}
+    - {group: threat_small_arms, scope: title}
+    - {group: threat_uas_loitering, scope: title}
+    - {group: threat_sa_designations, scope: title}
+  # APPEARANCE ONLY. Every service-entry term is deliberately absent, because
+  # that fact is SIR-4.1.1 and one article answering both requirements through
+  # one word list is how two requirements stop being two.
+  appearance:
+    keywords: [for the first time, first-ever, first ever, previously unseen,
+               not previously observed, newly identified, unveiled, unveiling,
+               revealed, debut, debuted, made its first appearance, first public,
+               first seen, seen for the first time, parade, paraded,
+               military parade, on display, static display, air show, airshow,
+               defence exhibition, defense exhibition]
+    scope: title
+  condition: system and appearance
+falsepositives:
+- SERVICE ENTRY IS NOT A FIRST APPEARANCE. 'Japan approves mass production of 3D-printed
+  interceptor drones' and 'Lockheed to build 4 more Vectis drones, 2027 first flight remains'
+  are fielding milestones. They belong to SIR-4.1.1 if anywhere, and the words that carried
+  them are now absent from this rule.
+- A WESTERN PROGRAMME MILESTONE WITH NO COUNTER-AIR SYSTEM IN IT. 'Competing Bradley Fighting
+  Vehicle Replacement Prototypes Delivered', 'American Rheinmetall delivers its first
+  prototype', 'US Navy's next-generation fighter decision to be unveiled soon', 'Blackbeard
+  Hypersonic Missile Seen Flying On F/A-18 Super Hornet'.
+- A FIRST-EVER EVENT THAT IS NOT A SYSTEM APPEARING. 'Operational F-15EXs Drop Live Bombs For
+  The First Time', 'First-Ever Kill Of A Drone Boat By Another Drone Boat Claimed', 'Ukrainian
+  Sea Drones Strike Russian Black Sea Resort Town For The First Time'. The last one is the
+  reason the designation is read in the title rather than the body.
+- A TRADE SHOW THAT IS NOT A DEFENCE ONE. '2026 China International Motorcycle Trade
+  Exhibition opens' matched the inline word `exhibition`, and 'Sci-tech innovations and
+  regional specialties showcased' matched `showcased`. Both words are removed.
+note: 'Converted from EEI-4.1.b. Scoring: Tier 2 × first-occurrence. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. MEASURED AND REBUILT 2026-09-27: 105 articles of 1,576 were matched, thirteen were read, none was the fact, and the rebuilt rule reports a measured zero over 45 days. That is the honest state, not an unfinished one.'

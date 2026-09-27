@@ -13,10 +13,10 @@
 #           blocked     a machine could decide it, but the input it needs does
 #                       not exist yet. `blocked_by:` names that input.
 #
-#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
-#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
-#  what each one matched before trusting it; this one has not had that pass, so
-#  any coverage number it produces is a number nobody has checked yet.
+#  THE `detection:` BLOCK BELOW HAS MET THE CORPUS, on 2026-09-27, and was
+#  tightened on what it matched: 277 articles of 1,576 down to 19, after 37 of
+#  them were read one by one. The `falsepositives:` list is written from that
+#  reading. One class survives the tightening and is named there.
 # ------------------------------------------------------------------------------
 
 id: SIR-1.3.1
@@ -31,16 +31,45 @@ sensor:
   name: 'Sensor: adversary primary-source — PARTIAL'
   status: 'PARTIAL'
 detection:
-  # DECLARED INTENT plus whose intent it is. This is the shape the scoring model
-  # already uses for this fact - the note below records it as "any tier times
-  # declared intent" - so the detector reads the same two groups.
+  # BOTH HALVES IN THE TITLE, and that is a MEASURED decision, not a preference.
+  # Measured 2026-09-27 over 1,576 articles with the shipped rule as the control:
   #
-  # `declaration_terms` carries the spokesman and ministry phrasings as well as
-  # the warning verbs, which is why a second conjunct on the actor is enough to
-  # keep a western think-tank piece about somebody else out.
+  #   both halves on the body, the rule this replaces   277 articles, 17.6%
+  #   actor in the title, declaration anywhere          131
+  #   declaration in the title, actor anywhere           28
+  #   BOTH IN THE TITLE, this rule                       19
+  #
+  # 37 of the 277 fell inside one week and every one was read. About five were
+  # the fact, and all five carried both halves in the title.
+  #
+  # THE FREE HALF WAS THE DECLARATION, which is the opposite of what was
+  # predicted before the measurement. `declaration_terms` carries
+  # `spokesperson`, `spokesman`, `defence ministry said` and `state media
+  # reported`, which is ordinary furniture in the body of defence reporting, so
+  # the body scope made that conjunct almost free. The adversary half is less
+  # free than it looks, because it is proper nouns and 15 of this domain's 17
+  # word-boundary terms are in that family.
+  #
+  # The nine articles separating this rule from the next-widest candidate were
+  # read as well: EIGHT were false positives and ONE was the fact. A rule that
+  # buys one real answer for eight wrong ones is the wider rule, not the better.
+  #
+  # THE RECALL COST IS KNOWN AND ACCEPTED. The one it gives up is "Xi warns
+  # against war in Middle East and Gulf region", because `actor_adversary` holds
+  # `Xi Jinping` and not bare `Xi`, so that headline carries no actor term at
+  # all. Adding bare `Xi` is a SCORING change, since tiers 1 and 2 read that
+  # group, and `Xi` collides with the Roman numeral XI and with a common
+  # surname. Measure it before touching it.
+  #
+  # A COLLECTION FINDING UNDER THE RULE, and the bigger of the two: 16 of the 19
+  # matches are `ecns.cn`, which was dropped from collection the same day. Only
+  # THREE non-`ecns.cn` articles in 45 days answer this requirement, so the
+  # western sensor set will answer it about once a fortnight at best. That is
+  # the cost of the western-only decision appearing as a number. DO NOT LOOSEN
+  # THIS RULE TO HIDE IT.
   declaration:
     group: declaration_terms
-    scope: blob
+    scope: title
   # THE ADJECTIVE IS MISSING FROM THE GROUP, found while testing this detector
   # on 2026-09-27. `actor_adversary` declares 52 terms and every one is a noun:
   # China, PRC, Beijing, PLA, Russian Federation, Korean People's Army. It holds
@@ -53,11 +82,31 @@ detection:
   # purpose: `actor_adversary` is read by tier 1 and tier 2, so adding four
   # terms to it is a SCORING change and has to be measured against the corpus
   # first. A detector moves no score, so it can be correct today while that
-  # measurement waits. Recorded as a finding in logs/CHANGELOG.md.
+  # measurement waits.
   actor:
     any:
-    - {group: actor_adversary, scope: blob}
+    - {group: actor_adversary, scope: title}
     - keywords: [Chinese, Russian, North Korean, Iranian]
-      scope: blob
+      scope: title
   condition: declaration and actor
-note: 'Converted from EEI-1.3.a. Scoring: any tier × declared intent. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+falsepositives:
+- THE DECLARER IS NOT THE ADVERSARY, and the title scoping does NOT fix this class.
+  'Report - CIA warned Europe of Russian drone attack from vessels' and 'Trump Threatens
+  Canadian Jets At The Center Of Army Aerial Surveillance'. A warning verb beside an
+  adversary name does not mean the adversary is the one speaking, and separating speaker
+  from subject needs word order, which this rule language does not express.
+- A COMPANY OR A DOMESTIC BODY RATHER THAN A MINISTRY, A SPOKESMAN OR A LEADER. 'DJI vows
+  continued legal action after a US court order' is a manufacturer. 'Top anti-graft body
+  vows more concrete measures' is a real state body making a real declaration, about
+  corruption, which satisfies the words of this requirement and not its point.
+- AN OPINION OR ANALYSIS HEADLINE BUILT ON A WARNING WORD. 'War-warning assessment in
+  Australia's most dangerous times', 'The devastation of NSA Bahrain is a national security
+  warning', 'Fix Defence communications with a uniformed spokesperson'. All three carry the
+  declaration word in the title, so they survive the tightening.
+- FIXED BY THE TITLE SCOPING, recorded so it is not reintroduced by a future widening - a
+  spokesperson quoted in the body of an unrelated story ('Shahed-136 Clone Found By Florida
+  Fisherman, Eglin AFB Admits It Lost'), and state-wire copy carrying no statement of intent
+  ('China's BDS installed on over 12 million commercial vehicles', 'Satellite-based farming
+  demo cuts inputs, boosts rice yields', 'China-Central Asia meteorological cooperation forum
+  opens in Urumqi').
+note: 'Converted from EEI-1.3.a. Scoring: any tier × declared intent. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. MEASURED AND TIGHTENED 2026-09-27: 277 articles of 1,576 down to 19, both halves now read in the title, with the reading and the false positives written into the detection block below. 16 of the 19 are ecns.cn, which is no longer collected, so only three non-ecns.cn articles in 45 days answer this requirement.'

@@ -403,6 +403,54 @@ def main():
     # match anything. The regression guard for the whole class of fault lives in
     # tests/handover_test.py, which asserts no declared term is unmatchable in
     # either domain; these four checks hold the behaviour itself.
+    # THE TWO s2 DETECTORS THAT WERE TIGHTENED ON A READ, 2026-09-27. Both were
+    # measured against 1,576 articles and then rewritten from what they matched:
+    # SIR-1.3.1 went from 277 articles to 19 by reading both halves in the
+    # title, and SIR-4.1.2 from 105 articles - none of which was the fact - to a
+    # measured zero. Each case below is a real headline class from that reading,
+    # so a future widening cannot quietly undo the decision.
+    print("\nThe two tightened s2 detectors hold their measured shape")
+    s2 = load_domain(domain="s2")
+    s2_det = detectable_requirements(s2["requirements"], s2["scoring"])
+
+    def s2_met(title, body):
+        a = art(title, body)
+        a["source"] = "https://www.twz.com/feed"
+        return requirement_coverage(a, s2["requirements"], s2["scoring"],
+                                    detectable=s2_det,
+                                    sensor_classes=s2["sensor_classes"]
+                                    )["sirs_met"]
+
+    check("a ministry statement in the headline answers SIR-1.3.1",
+          "SIR-1.3.1" in s2_met("China urges Japan to stop rearming: spokesperson",
+                                "A ministry spokesperson warned Tokyo."), True)
+    # The adjective is the gap `actor_adversary` still has; the detector carries
+    # the four adjectives inline until adding them to the group is measured.
+    check("...and so does the ADJECTIVE form, which the group lacks",
+          "SIR-1.3.1" in s2_met("Chinese defence ministry warned Taipei", "x"),
+          True)
+    # The class that made it 277: a spokesperson quoted in the body of a story
+    # that is about something else entirely.
+    check("a spokesperson in the BODY of an unrelated story does not",
+          "SIR-1.3.1" in s2_met("Shahed-136 clone found by a Florida fisherman",
+                                "A spokesperson said it was lost. China denies "
+                                "any involvement."), False)
+    check("a designation unveiled in the headline answers SIR-4.1.2",
+          "SIR-4.1.2" in s2_met("HQ-19 unveiled for the first time at a parade",
+                                "Beijing showed the interceptor."), True)
+    # The class that made it 105 with nothing real in it: first-ever language
+    # about something that is not a counter-air system appearing, with a
+    # designation sitting incidentally in the body.
+    check("...but a first-ever event with the designation only in the body "
+          "does not",
+          "SIR-4.1.2" in s2_met("Sea drones strike a Russian resort for the "
+                                "first time",
+                                "An S-400 battery nearby did not engage."),
+          False)
+    check("...and service entry is not a first appearance",
+          "SIR-4.1.2" in s2_met("Japan approves mass production of interceptor "
+                                "drones", "x"), False)
+
     print("\nA declared term matches whatever the case it is written in")
     m = make_matcher(["China"])
     check("an upper-case designation matches lower-case text",
