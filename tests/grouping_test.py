@@ -115,7 +115,7 @@ for head, members in sorted(groups.items()):
     if head >= N_REAL:
         continue                     # background filler; not part of the assertion set
     for m in members:
-        print(f"  {'HEAD' if m == head else '  ↳ '} [{scored[m][0]:>5}] {scored[m][3]['title'][:66]}")
+        print(f"  {'HEAD' if m == head else '  -> '} [{scored[m][0]:>5}] {scored[m][3]['title'][:66]}")
     print()
 
 member_of = {}

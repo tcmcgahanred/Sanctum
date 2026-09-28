@@ -24,12 +24,13 @@ person reads start to finish, and **`CHANGELOG.md`** for why a value is what it
 is. A comment in `pnd.yaml` says only what breaks if you change the line it sits
 on.
 
-**A domain may still ship `pnd.md`** — `s2` does. The loader prefers `pnd.yaml`
-and falls back, so a domain converts when it is ready and not before.
+**A domain may still ship `pnd.md`.** The loader prefers `pnd.yaml` and falls
+back, so a new domain can start in markdown and convert when it is ready. Both
+live domains use `pnd.yaml`.
 
 ## How P&D drives the cycle
 
-`pnd.md` is laid out by stage, and each stage owns its config block:
+`pnd.yaml` is laid out by stage, and each stage owns its config block:
 
 | Stage | Banner in `pnd.yaml` | The block it owns |
 |---|---|---|
@@ -44,11 +45,11 @@ the `sensors` block.
 
 ## Tuning it for another AOR
 
-This example is tuned for a California SLTT AOR (the `geo` keyword group is California geography). To adapt it to a different region, swap the `geo` group and the AOR-specific sensors in `pnd.md` — the engine and the rest of the doctrine are unchanged.
+This example is tuned for a California SLTT AOR (the `geo` keyword group is California geography). To adapt it to a different region, swap the `geo` group and the AOR-specific sensors in `pnd.yaml` — the engine and the rest of the doctrine are unchanged.
 
 ## Deliverable naming
 
-Two documents, two names, never interchangeable (`pnd.md` §3b.2, the vox policy, §3):
+Two documents, two names, never interchangeable (`pnd.yaml` §3b.2, the vox policy, §3):
 
 | | Made by | Reader-facing title | Filename |
 |---|---|---|---|

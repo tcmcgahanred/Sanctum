@@ -2,11 +2,10 @@
 
 *Sanctum · domain-agnostic*
 
-**BLUF:** The engine requires exactly **one** file from a domain: `<domain>/pnd.md`.
-Everything else is doctrine and work product, and until now nothing said what
-those should be. This file is that contract. It also fixes the more damaging
-gap — **which document owns which fact**, so the same number does not live in two
-places and go stale in one of them.
+**BLUF:** The engine requires exactly **one** file from a domain:
+`<domain>/pnd.yaml`. Everything else is doctrine and work product. This file is
+that contract, and it also says **which document owns which fact**, so the same
+number does not live in two places and go stale in one of them.
 
 ---
 
@@ -28,10 +27,12 @@ in the code; it was that nothing told a human what to build.**
 One file.
 
 ```
-<domain>/pnd.md
+<domain>/pnd.yaml
 ```
 
-`../core/pnd.py` reads it, validates it, and resolves every runtime path from it.
+`../core/pnd.py` reads it, validates it, and resolves every runtime path from
+it. A domain may still be written as `pnd.md` with fenced `yaml` blocks, which
+the loader falls back to and deep-merges; both live domains use `pnd.yaml`.
 Nothing in `../core/` opens any other file in a domain folder. That is the whole
 machine contract, and it is deliberately that small — see tenet 2.
 
@@ -44,25 +45,16 @@ satisfies the machine is one nobody can maintain.
 
 | File | Status | What it is |
 |---|---|---|
-| `pnd.md` | **REQUIRED** | Planning & Direction. Manifest, sensors, scoring model, production block. The only file the engine reads. |
-> **One file or several — the engine does not care.** Added 2026-09-01, when
-> `cti` merged its five markdown files into one `pnd.md` laid out by
-> intelligence-cycle stage. The loader reads every fenced `yaml` block in
-> `pnd.md` and deep-merges them, so `manifest:` may legitimately appear twice;
-> `tools/vocab_check.py` looks for the `vocab:` block and the requirements tree
-> in the split files first and falls back to `pnd.md`. The table below describes
-> the SPLIT shape, which `s2` still uses and which remains a valid choice. What
-> is not a valid choice is the same fact written in two places.
-
+| `pnd.yaml` | **REQUIRED** | Planning & Direction. Manifest, sensors, scoring model, production block. The only file the engine reads. |
 | the `vocab:` block | **EXPECTED** | The reasoning behind the word lists — collisions, dropped terms, per-group review dates, known gaps. Never the terms themselves. See `VOCABULARY.md`. Both live domains keep it inside `pnd.yaml`; a separate `vocab.md` is still read and is a valid choice for a new domain. |
 | `README.md` | **EXPECTED** | What this domain is, who it serves, how to run it, how to adapt it. |
 | `requirements/` | **EXPECTED** | The whole requirements tree — PIR → indicator → SIR — one file per rule plus `_tree.yaml`, each collectable fact mapped to the sensor that serves it. Both live domains use the directory; a `requirements.md` or an inline `requirements:` block is still read. **This is what makes a coverage gap visible** — see below. Owns no numbers. |
-| Operating directives and the lessons log | **EXPECTED SOMEWHERE** | Standing directives, cadence and the dated lessons log. The continuity mechanism: a fresh session handed it can run the cycle. Neither live domain keeps it in a `mandate.md` any more — `cti` splits it between its `README.md` and `logs/CHANGELOG.md`, and `s2` folded the whole thing into its `README.md` on 2026-09-27. |
+| Operating directives and the lessons log | **EXPECTED SOMEWHERE** | Standing directives, cadence and the dated lessons log. The continuity mechanism: a fresh session handed it can run the cycle. Neither live domain uses a `mandate.md`: `cti` splits it between its `README.md` and `logs/CHANGELOG.md`, and `s2` keeps the whole thing in its `README.md`. |
 | `policy.md` | **EXPECTED** | The product specification — format, structure, locked content standards. CTI's is `vox_policy.md`. A domain can run without one; it just means the vox's standards live in someone's head instead of in git. |
 | `editions/` | **REQUIRED once the domain produces its first vox** | The committed record of what was actually put out, and the only way to answer "what did we say in August?" a year later. |
 | `references/` | **LOCAL ONLY** | Working notes, feed candidate lists. Git-ignored by pattern — these carry host and internal detail. |
 
-**A domain with only `pnd.md` runs.** It is not wrong, it is just undocumented,
+**A domain with only `pnd.yaml` runs.** It is not wrong, it is just undocumented,
 and the first person to inherit it — including you in six months — pays for that.
 
 **Every domain ends at a vox.** That is tenet 9 and it is not a per-domain
@@ -101,61 +93,34 @@ remote that had been public since publication.
 | Fact | Owner | Everyone else |
 |---|---|---|
 | The whole requirements tree — PIRs, indicators, SIRs, and which sensor serves each | `<domain>/requirements/`, one file per rule plus `_tree.yaml`. An unconverted domain may still use `requirements.md` or a `requirements:` block in `pnd.yaml`; the loader reads either | Reference by name; do not restate the wording |
-| **Tier weights, multiplier factors, group terms, thresholds, force-surface rules** | **`pnd.md`** | **Never restate a number.** Explain design *intent* freely; the values live in config because config is what executes |
+| **Tier weights, multiplier factors, group terms, thresholds, force-surface rules** | **`pnd.yaml`** | **Never restate a number.** Explain design *intent* freely; the values live in config because config is what executes |
 | Product format and content standards | `policy.md` (if the domain has one) | Reference and state that the policy wins; do not reproduce the rules |
 | Vocabulary collisions, dropped terms, review dates | the `vocab:` block in `pnd.yaml`, or a separate `vocab.md` | — |
 | Operating directives, cadence, lessons | `<domain>/README.md`, and `logs/CHANGELOG.md` for the dated history | — |
-| Sensor list | the `sensors` block in `pnd.md` | Reference |
+| Sensor list | the `sensors` block in `pnd.yaml` | Reference |
 
-**The test:** if you change a value in `pnd.md`, does any other file now contain
-a lie? If yes, that other file was restating instead of referencing.
+**The test:** if you change a value in `pnd.yaml`, does any other file now
+contain a lie? If yes, that other file was restating instead of referencing.
 
-### Violations found and closed — 2026-08-17
-
-Applying the rule to CTI found three, all of them centred on one file:
-
-1. **The Codex restated the scoring numbers.** The tier weights (8/4/2/1) and
-   multiplier factors (1.5/1.5/1.3/1.3) lived in both `codex.md` and `pnd.md` —
-   the same eight values in two places, so tuning the config silently made the
-   Codex wrong. The oldest and worst of the three.
-2. **The Codex and `mandate.md` both reproduced `vox_policy.md` §7.** Introduced
-   the same day by the doctrine reconciliation, and recorded here rather than
-   quietly left.
-3. **The Codex's cut doctrine overlapped the policy's no-cap rule.** Same origin.
-
-**Resolution: `codex.md` was retired.** Its requirements layers merged into
-`requirements.md`, which now owns the whole tree; its scoring rationale —
-convergence-wins, the worked examples, tiers-not-additive, round-up-on-
-uncertainty, why-there-is-no-handicap, the mandatory drop list — moved into
-`pnd.md`, beside the values it explains, where tuning a number and leaving the
-reasoning stale is no longer possible; its content standards were already owned
-by `vox_policy.md`, so `mandate.md`'s copy was thinned to a pointer.
-
-Every block was inventoried before deletion and five would otherwise have been
-lost: round-up-on-uncertainty, the no-handicap argument, tiers-not-additive, the
-four worked examples, and the mandatory drop list. **Retiring a document means
-rehoming its contents first, not deleting and hoping.**
-
-*The suspected overlap was not the real one.* `codex.md` versus
-`decomposition.md` looked like the duplication and was clean — the tell was that
-the two needed a written rule to stay out of each other's way, which is what
-pointed at the split being wrong rather than the content.
+**Retiring a document means rehoming its contents first, not deleting and
+hoping.** That rule was bought in August, when `codex.md` was retired and five
+blocks would otherwise have been lost. The account of it is in
+`../logs/CHANGELOG.md` under 2026-08-17; it is not repeated here.
 
 ---
 
 ## Creating a new domain
 
-1. **Copy `cti/` to `<domain>/` and empty it out.** There is no starter
-   template: one was kept until 2026-09-01 and removed because it lagged the
-   working domain and would have taught a stranger the wrong shape. Copy the
-   domain that actually runs. Folders whose name begins with `_` are not
-   domains and are skipped by tooling.
-2. **Write the requirements tree first** - PIR, then indicator, then SIR -
-   in the domain's `pnd.yaml`. There is no survey document any more.
-   Do not write word lists first — see `VOCABULARY.md` §3, and note that the
-   method there is marked unvalidated.
-3. **Give every group a `reviewed:` date in `vocab.md`** as you create it. A date
-   added later is a guess.
+1. **Copy a domain that actually runs and empty it out.** There is no starter
+   template; one would lag the working domain and teach a stranger the wrong
+   shape. Folders whose name begins with `_` are not domains and are skipped by
+   tooling.
+2. **Write the requirements tree first** - PIR, then indicator, then SIR - in
+   `<domain>/requirements/`, one file per rule plus `_tree.yaml`. Do not write
+   word lists first — see `VOCABULARY.md` §3, and note that the method there is
+   marked unvalidated.
+3. **Give every group a `reviewed:` date in the `vocab:` block** as you create
+   it. A date added later is a guess.
 4. **Check it before running it:**
    ```
    python3 tools/vocab_check.py <domain>

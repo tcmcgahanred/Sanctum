@@ -3,9 +3,9 @@
 #
 # Runs the full cycle for one domain: collect -> score.
 # The engines are domain-agnostic; everything specific comes from
-# <domain>/pnd.md. Usage:
+# <domain>/pnd.yaml. Usage:
 #     ./run.sh cti          # collect + score the CTI domain
-#     ./run.sh <domain>     # (any domain with its own pnd.md)
+#     ./run.sh <domain>     # (any domain with its own pnd.yaml)
 #
 # Run from the repo root (this script cd's there). Python must have the deps
 # in requirements.txt. The corpus push (rclone) is handled inside Acolyte,

@@ -111,7 +111,7 @@ manifest:
 # constraint — vocabulary cannot compensate, because the collector never reads the
 # word groups.**
 #
-  # The sensors block from s2/pnd.md, as RECORDS. Every one now
+  # One RECORD per sensor. Every one now
   # declares a logsource, so a requirement can name the vantage it
   # needs. Scope answers whose vantage this is; kind answers what
   # type of source. Approved 2026-09-27.
@@ -1639,13 +1639,9 @@ scoring:
 # ==============================================================================
 #  VOCABULARY REVIEW METADATA
 #
-#  Folded in from s2/vocab.md on 2026-09-27, which is deleted. cti did the
-#  same on 2026-09-02: the reasoning behind a word list belongs beside the
-#  list, not in a second file that gets updated in only one of the two.
-#  tools/vocab_check.py reads this block from pnd.yaml or from a separate
-#  vocab.md, so the move needed no flag day.
-#
-#  The prose that was in that file is below the block, verbatim.
+#  The reasoning behind a word list belongs beside the list. The prose that
+#  supports this block - collisions, dropped terms, known gaps, the numbered
+#  findings the README points at - follows it.
 # ==============================================================================
 vocab:
   review_interval_days: 180
@@ -1719,30 +1715,30 @@ vocab:
   accepted: []
 
 # ==============================================================================
-#  FROM s2/vocab.md, VERBATIM. That file is deleted; this is where its
-#  reasoning lives now — collisions, dropped terms, known gaps.
+#  THE REASONING: collisions, dropped terms, known gaps, and the numbered
+#  findings that other documents cite by number.
 # ==============================================================================
 # # S2 — Vocabulary decisions
 #
-# *Sanctum · `s2` · the reasoning behind the word lists in `pnd.md`.*
+# *Sanctum · `s2` · the reasoning behind the word lists above.*
 #
 # **Version:** v3 — 2026-08-19. Threat groups split into designation and generic
 # halves after cycle 1; see Finding 10. Version v2 — 2026-08-18. Findings 1–4 closed against `core/rules.py` by
 # test; Findings 8 and 9 opened in their place, recording limits of the proximity
 # mechanism itself.
 #
-# > **This file never repeats the term lists.** `pnd.md` is the single source of
+# > **The reasoning never repeats the term lists.** `scoring.groups` above is the single source of
 # > truth for terms. This records *decisions about* terms — what was dropped and
 # > why, what collides, when each group was last reviewed. Two copies of the same
 # > words drift within a month, and the copy nobody runs is the one that gets
-# > edited. See `../VOCABULARY.md`.
+# > edited. See `../docs/VOCABULARY.md`.
 #
 # ---
 #
 # ## v1 changelog
 #
 # 1. Initial vocabulary built — **19 groups, by enumeration, not by the indicator
-#    method.** `../VOCABULARY.md` §3 marks the indicator method RECOMMENDED, NOT
+#    method.** `../docs/VOCABULARY.md` §3 marks the indicator method RECOMMENDED, NOT
 #    VALIDATED, and it remains unvalidated: this domain did not use it. The
 #    requirements tree in `requirements/_tree.yaml` was built afterward and independently,
 #    so the two have not been reconciled. **Someone should still find out whether
@@ -1957,7 +1953,7 @@ vocab:
 #
 # ## Collision table
 #
-# Checked against the classes in `../VOCABULARY.md` §1. The triage rule: **drop a
+# Checked against the classes in `../docs/VOCABULARY.md` §1. The triage rule: **drop a
 # noisy term only when an exact synonym exists.** Where none does, keep it, accept
 # the noise, and note it here so the next reader knows it was a decision.
 #
@@ -2000,15 +1996,15 @@ vocab:
 #
 # **Note on `dropped:`.** Left empty deliberately. Every term listed in the
 # collision table above was excluded during initial construction and was never
-# live in `pnd.md`. `dropped:` records terms removed *after* they were in service,
-# which is the drift this two-file split exists to catch. Populate it on the first
-# removal, not retroactively.
+# live in `scoring.groups`. `dropped:` records terms removed *after* they were in
+# service, which is the drift this record exists to catch. Populate it on the
+# first removal, not retroactively.
 #
 # ---
 #
 # ## Verification status
 #
-# **Not validated until tested against live output** (`../VOCABULARY.md` §7):
+# **Not validated until tested against live output** (`../docs/VOCABULARY.md` §7):
 #
 # - [ ] `tools/vocab_check.py s2` passes
 # - [ ] Known-good items score where expected

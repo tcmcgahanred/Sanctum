@@ -30,7 +30,6 @@
 manifest:
   domain: cti
   base_dir: /opt/ravenor
-  sensors_file: references/sensors.txt
   # WHERE COLLECTED ARTICLES LIVE, permanently. Nothing in Sanctum prunes the
   # corpus; scoring re-reads it, so a rule change can be re-run over history.
   #   backend: local   -> base_dir/corpus/<date>/
@@ -737,8 +736,8 @@ scoring:
   #   C  shared with 4+ states, or an ordinary English word    never alone
   # A rule names the library and the buckets it trusts, and nothing copies the
   # names, so a regeneration is a regeneration and not a merge.
-  #   file           resolves against the domain directory, the same rule
-  #                  manifest.sensors_file uses, so this is cti/data/...
+  #   file           a relative path resolves against the domain directory,
+  #                  so this is cti/data/...
   #   delimiter      the column separator in that file
   #   name_column    which column holds the term, counting from 1
   #   bucket_column  which column holds the bucket

@@ -2,13 +2,11 @@
 """
 Scoring regression test.
 
-WHAT THIS USED TO BE. Until 2026-08-24 it compared the engine against
-`tests/old_arbites.py`, the original hardcoded CTI scorer, to prove the port
-changed nothing. That job finished long ago, and the scoring work of 2026-08-24
-deliberately changed the model, so the comparison could only report the change
-we asked for. Re-baselined rather than deleted: the fuzz corpus is worth keeping.
+THE NAME IS HISTORICAL. This compared the engine against a predecessor scorer
+until 2026-08-24; that job finished and the predecessor is gone. It was
+re-baselined rather than deleted because the fuzz corpus is worth keeping.
 
-WHAT IT IS NOW. Three checks, in order of how much they matter:
+Three checks, in order of how much they matter:
 
   1. REQUIREMENTS - the named items from the P&D work orders. False positives
      must fall below the surface threshold AND out of every force-surface rule;

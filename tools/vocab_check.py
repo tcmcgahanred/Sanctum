@@ -22,18 +22,18 @@ WHAT IT CHECKS
                            a term is present when it is not              [ERROR]
   empty group              declared but has no terms; any rule referencing it
                            silently never fires                          [ERROR]
-  dropped term still live  recorded as DROPPED in vocab.md but still in pnd.md —
-                           the exact drift the two-file split prevents   [ERROR]
+  dropped term still live  recorded as DROPPED in the `vocab:` block but still
+                           in a group — the exact drift the split prevents [ERROR]
   redundant boundary term  <=4 chars, where the matcher already applies word
                            boundaries automatically                       [WARN]
   stale group              review date older than the configured interval [WARN]
   unattributed group       no `serves:` and no `role:` — a keyword added here
                            cannot be traced to an intelligence requirement [WARN]
   group consumed by no     declared, holds terms, and no rule anywhere reads
-  rule                     it. NOTED instead when vocab.md says it is
+  rule                     it. NOTED instead when the `vocab:` block says it is
                            deliberate and says why                        [WARN]
 
-The first two need no vocab.md. The rest do.
+The first two need no `vocab:` block. The rest do.
 
 WHY BOUNDARY ENTRIES GO DEAD
 ----------------------------
@@ -47,7 +47,7 @@ USAGE
     tools/vocab_check.py                 # every domain in the repo
     tools/vocab_check.py --tracked-only  # only domains git tracks (the commit gate)
     tools/vocab_check.py cti             # one domain
-    tools/vocab_check.py --pnd path/to/pnd.md
+    tools/vocab_check.py --pnd path/to/pnd.yaml
     tools/vocab_check.py --today 2026-12-01   # for testing staleness
 
 A gitignored domain — a second effort kept out of the public repo, a stub that
@@ -101,15 +101,16 @@ class Finding:
 
 def load_vocab(vocab_path):
     """
-    Parse the `vocab:` block from a domain's vocab.md, OR from its pnd.md when
-    the domain keeps everything in one file.
+    Parse the `vocab:` block from a domain's `pnd.yaml`, or from a separate
+    `vocab.md` when the domain keeps the reasoning in its own file.
 
-    Two shapes are supported on purpose. Both live domains now carry the block
-    inside their pnd.yaml - `cti` merged its five markdown files on 2026-09-01
-    and `s2` followed on 2026-09-27 - but a separate vocab.md is still a valid
-    layout and a new domain may start that way. The fallback costs nothing. Returns {} when neither carries a `vocab:` block — the block is
-    optional, and the checks that need it simply do not run. A domain is not
-    broken for lacking one; it is only unguarded.
+    Two shapes are supported on purpose. Both live domains carry the block
+    inside their `pnd.yaml`; a separate `vocab.md` is still read, and a new
+    domain may start that way. The fallback costs nothing.
+
+    Returns {} when neither carries a `vocab:` block — the block is optional,
+    and the checks that need it simply do not run. A domain is not broken for
+    lacking one; it is only unguarded.
     """
     if not vocab_path.exists():
         for name in ("pnd.yaml", "pnd.md"):
@@ -260,9 +261,9 @@ def check_domain(domain, cfg, vocab, today):
         if term and term in live:
             findings.append(Finding(
                 ERROR, domain, "dropped term still live", repr(rec.get("term")),
-                f"recorded as dropped in vocab.md but still present in pnd.md "
+                f"recorded as dropped in the `vocab:` block but still present "
                 f"(group: {', '.join(sorted(set(live[term])))}). "
-                f"Remove it from pnd.md, or remove the dropped record."))
+                f"in a group. Remove the term, or remove the dropped record."))
 
     gmeta = vocab.get("groups") or {}
 
@@ -305,7 +306,7 @@ def check_domain(domain, cfg, vocab, today):
             elif not serves and not role:
                 findings.append(Finding(
                     WARN, domain, "unattributed group", gname,
-                    "no `serves:` and no `role:` in vocab.md. Someone adding a "
+                    "no `serves:` and no `role:` in the `vocab:` block. Someone adding a "
                     "keyword here cannot tell which intelligence requirement "
                     "they are feeding."))
             elif role and role not in ROLES:
@@ -316,7 +317,7 @@ def check_domain(domain, cfg, vocab, today):
     # --- groups no rule consumes ---------------------------------------
     # A group nobody reads is invisible: it keeps its terms, keeps its review
     # date, and contributes nothing. `kev` has been in exactly this state since
-    # 2026-08-24 — deliberately, recorded in vocab.md, retained because a group
+    # 2026-08-24 — deliberately, recorded in the `vocab:` block, retained because a group
     # that turns out to be two groups gets split rather than half-deleted. That
     # is a fine reason and the point of this check is not to argue with it. The
     # point is that the reason must be WRITTEN, not remembered.
@@ -346,7 +347,7 @@ def check_domain(domain, cfg, vocab, today):
                 f"{len(groups[gname] or [])} term(s), referenced by no tier, "
                 f"multiplier, floor, force-surface or production rule. Either "
                 f"wire it in, or declare `role: unused` with `unused_because:` "
-                f"in vocab.md so the next reader knows it is deliberate."))
+                f"in the `vocab:` block so the next reader knows it is deliberate."))
 
     # --- declared elements must exist in the requirements tree ---------
     # `serves_eei` is a join, and a join to a typo is worse than no join: the
@@ -446,7 +447,7 @@ def check_domain(domain, cfg, vocab, today):
             if gmeta:  # only nag once the domain has started recording dates
                 findings.append(Finding(
                     WARN, domain, "no review date", gname,
-                    "no `reviewed:` date in vocab.md — staleness cannot be "
+                    "no `reviewed:` date in the `vocab:` block — staleness cannot be "
                     "assessed for this group"))
             continue
         age = (today - reviewed).days
@@ -528,7 +529,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Check a Sanctum domain's vocabulary for silent decay.")
     ap.add_argument("domain", nargs="?", help="domain name (default: all in repo)")
-    ap.add_argument("--pnd", help="explicit path to a pnd.md (overrides domain)")
+    ap.add_argument("--pnd", help="explicit path to a pnd.yaml (overrides domain)")
     ap.add_argument("--today", help="YYYY-MM-DD, for testing staleness")
     ap.add_argument("--tracked-only", action="store_true",
                     help="skip domains git does not track (used by the commit gate)")
@@ -580,7 +581,7 @@ def main(argv=None):
         return 1 if failed else 0
 
     for group_name, bucket in (("ERRORS", errors), ("WARNINGS", warns),
-                               ("ACCEPTED — recorded in vocab.md, still true", noted)):
+                               ("ACCEPTED — recorded in the `vocab:` block, still true", noted)):
         if bucket:
             print(f"\n{group_name}")
             for f in bucket:

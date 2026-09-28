@@ -38,6 +38,10 @@ WHAT IS CHECKED
                        unless it is `unsupported` and the zero is the finding
   signature unchanged  score_article still returns exactly three values, because
                        eleven call sites across seven files unpack it
+  console encodable    no file under tests/ or tools/ holds a character the
+                       authoring laptop's cp1252 console cannot encode, because
+                       printing one raises UnicodeEncodeError and the script
+                       exits non-zero - which reads as a failed test
 
     tests/handover_test.py        # exit 0 = the handover holds
 """
@@ -244,6 +248,27 @@ def run():
                                for v in classes)]
         check(f"no {dom} requirement declares a logsource no sensor matches",
               starved, [])
+
+    # EVERY FILE UNDER tests/ AND tools/ RUNS ON THE AUTHORING LAPTOP, whose
+    # console is cp1252. A printed character outside that set raises
+    # UnicodeEncodeError and the script exits non-zero, which reads as a failed
+    # test rather than a failed print. Measured 2026-09-27: `tests/
+    # grouping_test.py` printed U+21B3 and did exactly that on the laptop while
+    # passing on the collector host. `core/` is deliberately NOT checked - its
+    # non-ASCII is staging-document furniture written to a UTF-8 file and never
+    # printed.
+    repo = Path(__file__).resolve().parent.parent
+    unprintable = []
+    for f in sorted(list(repo.glob("tests/*.py")) + list(repo.glob("tools/*.py"))):
+        for ch in set(f.read_text(encoding="utf-8")):
+            if ord(ch) < 128:
+                continue
+            try:
+                ch.encode("cp1252")
+            except UnicodeEncodeError:
+                unprintable.append(f"{f.name}:U+{ord(ch):04X}")
+    check("no file under tests/ or tools/ holds a character the authoring "
+          "console cannot encode", sorted(set(unprintable)), [])
 
     print()
     if FAILURES:

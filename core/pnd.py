@@ -2,10 +2,14 @@
 """
 Loads a domain's Planning & Direction (P&D) config.
 
-A domain lives in <repo>/<domain>/ and its P&D is a single Markdown file,
-<domain>/pnd.md, that reads like a document but carries the machine-readable
-config inside fenced ```yaml blocks. This loader extracts and merges those
-blocks; the surrounding prose is ignored by the engines (it's for humans).
+A domain lives in <repo>/<domain>/ and its P&D is <domain>/pnd.yaml, plain YAML
+with the reasoning in comments. Both live domains ship that shape.
+
+The loader also still reads <domain>/pnd.md, a Markdown file that reads like a
+document but carries the same machine-readable config inside fenced ```yaml
+blocks, merging every block into one dict and ignoring the surrounding prose.
+Nothing ships that shape today; it is kept so a new domain can start as a
+document and convert without a flag day.
 
 Expected top-level keys across the yaml blocks:
   manifest:   host/runtime + storage (base_dir, sensors_file, corpus{...},
@@ -41,7 +45,7 @@ _SENSORS_BLOCK = re.compile(r"```sensors\s*\n(.*?)```", re.DOTALL)
 
 
 def extract_sensors(md_text):
-    """Extract the feed list from a fenced ```sensors block in a pnd.md.
+    """Extract the feed list from a fenced ```sensors block in a `pnd.md`.
 
     One URL per line; blank lines and '#' comments ignored. Returns None if
     no sensors block is present (so the loader can fall back to a file).
@@ -62,7 +66,7 @@ class _UniqueKeyLoader(yaml.SafeLoader):
     """SafeLoader that REFUSES a mapping with a repeated key.
 
     PyYAML's default is to take the last one silently. That is how `incident:`
-    came to appear twice in cti/vocab.md: sixteen entries were written, fifteen
+    came to appear twice in the CTI word lists: sixteen entries were written, fifteen
     parsed, and nothing anywhere said so. A config file whose contents disagree
     with what it looks like is worse than a config file that fails to load.
     """
@@ -125,7 +129,7 @@ def parse_pnd(text, is_yaml):
 
 
 def extract_config(md_text):
-    """Extract + merge every fenced yaml block from a pnd.md into one dict.
+    """Extract + merge every fenced yaml block from a `pnd.md` into one dict.
 
     Duplicate keys are refused in both places they can hide: inside one block
     (_UniqueKeyLoader) and across blocks (_deep_merge). Both were silent before
@@ -231,8 +235,8 @@ def _library_table(spec, domain_dir, name, domain):
     ones somebody happened to think of is what produced the 49-term `geo` list
     that misses 1,604 names and collides with nine other states.
 
-    `file:` resolves against the DOMAIN directory, the same rule
-    `manifest.sensors_file` already uses.
+    `file:` resolves against the DOMAIN directory when it is relative, and is
+    used as given when it is absolute.
 
     Read on demand only. A declared library no rule names costs nothing.
     """
@@ -387,7 +391,7 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
     #   2. a fenced ```sensors block - one URL per line (pnd.md).
     #   3. the external sensors_file named by the manifest.
     # `sensors` is a flat list of URLs in every case, so a domain can move
-    # between shapes without the engine noticing. s2 still uses shape 2.
+    # between shapes without the engine noticing. Both live domains use shape 1.
     #
     # `sensor_records` carries the SAME sources in the same order as dicts, so a
     # record can say something the collector acts on - `kind: page` and `title:`

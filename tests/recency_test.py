@@ -11,7 +11,7 @@ settings = {"recency": {"enabled": True, "window_days": 7,
                         "cutoff_weekday": "monday", "cutoff_time": "09:00",
                         "timezone": "America/Los_Angeles"}}
 
-# Fixed 'now' = Wed 2026-08-12 12:00 UTC → cutoff = Mon 2026-08-10 09:00 LA.
+# Fixed 'now' = Wed 2026-08-12 12:00 UTC -> cutoff = Mon 2026-08-10 09:00 LA.
 now = datetime(2026, 8, 12, 12, 0, tzinfo=timezone.utc)
 window_start, cutoff = compute_cycle_window(now, settings)
 print("window_start:", window_start.isoformat(), "  cutoff:", cutoff.isoformat())

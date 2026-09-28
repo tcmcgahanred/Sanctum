@@ -57,7 +57,7 @@ USAGE
     core/lexicanum.py <domain> --group ransom --group supplychain --by month
     core/lexicanum.py <domain> --term "emotet" --term "qakbot"
     core/lexicanum.py <domain> --all-groups --counts --by week
-    core/lexicanum.py --pnd /path/to/pnd.md --group sector --since 2026-01-01
+    core/lexicanum.py --pnd /path/to/pnd.yaml --group sector --since 2026-01-01
     core/lexicanum.py <domain> --all-groups --counts -o trend.md
 
 EXIT CODES

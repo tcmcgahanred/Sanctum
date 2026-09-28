@@ -3,7 +3,7 @@
 """
 Arbites — pre-filter / scorer. Domain-agnostic: the scoring model (tiers,
 keyword groups, multipliers, tier-assignment rules) comes entirely from a
-domain's P&D (<domain>/pnd.md -> scoring). Run it as:
+domain's P&D (<domain>/pnd.yaml -> scoring). Run it as:
 
     python -m core.arbites --domain cti
 
@@ -484,7 +484,7 @@ def force_surface_match(art, force_rules, groups, matcher):
 def main():
     ap = argparse.ArgumentParser(description="Sanctum Arbites — domain-agnostic scorer")
     ap.add_argument("--domain", help="domain name (folder under repo, e.g. cti)")
-    ap.add_argument("--pnd", help="explicit path to a pnd.md (overrides --domain)")
+    ap.add_argument("--pnd", help="explicit path to a pnd.yaml or pnd.md (overrides --domain)")
     ap.add_argument("--out", help="output path (default: <base_dir>/staging_candidates.md)")
     ap.add_argument("--no-push", action="store_true", help="skip the staging push")
     args = ap.parse_args()

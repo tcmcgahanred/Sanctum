@@ -46,7 +46,7 @@ unscored and the recency gate would mark the remainder stale.
 | `pnd.yaml` | Everything the engine reads, including the `vocab:` block that records why the word lists say what they say |
 | `requirements/` | One requirement, one file, plus `_tree.yaml` holding the PIRs, their indicators and which rules sit under each |
 
-See `../DOMAINS.md` for the full contract and for which document owns which
+See `../docs/DOMAINS.md` for the full contract and for which document owns which
 fact.
 
 ## Read this before judging the output

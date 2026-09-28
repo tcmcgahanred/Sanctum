@@ -5,8 +5,8 @@
 **BLUF:** A domain's vocabulary is the only thing standing between a real event
 and the drop list. This file is the method for building it, the decision rules
 for resolving collisions, and the checks that stop it decaying. It holds no
-domain knowledge — each domain's terms live in its `pnd.md`, and each domain's
-*reasoning* lives in its `vocab.md`.
+domain knowledge — each domain's terms live in its `pnd.yaml`, and each
+domain's *reasoning* lives in the `vocab:` block beside them.
 
 **AUTHORITY:** §1 and §2 were extracted from a completed domain build in another
 session and are validated by use. §3 is a recommendation that **has never been
@@ -175,8 +175,8 @@ does instead:
 
 - States plainly, at the point of decision, that regrouping is cheap and
   retroactive — so nobody over-engineers a taxonomy up front out of fear
-- Asks the domain to record in `vocab.md` **when** a group was split or merged,
-  so a later reader can interpret a discontinuity in a trend line
+- Asks the domain to record in its `vocab:` block **when** a group was split or
+  merged, so a later reader can interpret a discontinuity in a trend line
 
 **One condition, and it is absolute.** This property holds *only while the corpus
 is retained*. Retroactive analysis is a direct dividend of permanent retention. A
@@ -196,10 +196,10 @@ a precaution. `../tools/vocab_check.py` runs these checks against any domain:
 | **Orphaned boundary term** | A `word_boundary_terms` entry equal to no live term. The entry is dead and implies a term is present when it is not. |
 | **Redundant boundary term** | An entry of four characters or fewer. The matcher already applies boundaries at that length, so the entry adds nothing. |
 | **Empty group** | A declared group with no terms. It matches nothing, and any rule referencing it silently never fires. |
-| **Dropped term still live** | A term recorded as DROPPED in the domain's `vocab.md` but still present in `pnd.md`. This is the drift the two-file split exists to prevent. |
+| **Dropped term still live** | A term recorded as DROPPED in the domain's `vocab:` block but still present in its `groups:`. A decision recorded in one place and ignored in the other. |
 | **Stale group** | A group whose recorded review date is older than the domain's configured interval. |
 
-The first three run with no `vocab.md` at all. The last two need one.
+The first three run with no `vocab:` block at all. The last two need one.
 
 **Group staleness** deserves its own note. Two decay patterns are both silent:
 calendar-anchored groups, whose dates simply pass; and fast-moving-technology
@@ -213,20 +213,22 @@ defence.
 
 ## 6. What each domain declares
 
-Two files, and the split matters.
+Two things, and the split matters more than where they sit.
 
-**`<domain>/pnd.md`** — the terms. Single source of truth. The engine reads this
-and nothing else.
+**`scoring.groups` in `<domain>/pnd.yaml`** — the terms. Single source of truth.
+The engine reads this and nothing else.
 
-**`<domain>/vocab.md`** — the *reasoning*. Version history, the collision table,
+**The `vocab:` block** — the *reasoning*. Version history, the collision table,
 dropped terms and why, per-group review dates, known gaps, verification status.
+Both live domains keep it in `pnd.yaml`; a separate `vocab.md` is still read and
+remains a valid choice.
 
-> **`vocab.md` never repeats the term lists.** Two copies of the same words drift
-> within a month, and the copy nobody runs is the one that gets edited. It records
-> decisions *about* terms — which is exactly what a diff of `pnd.md` cannot tell
-> you a year later.
+> **The reasoning never repeats the term lists.** Two copies of the same words
+> drift within a month, and the copy nobody runs is the one that gets edited. It
+> records decisions *about* terms — which is exactly what a diff of the terms
+> cannot tell you a year later.
 
-Per-group metadata lives in a fenced `yaml` block in `vocab.md`:
+Per-group metadata:
 
 ```yaml
 vocab:

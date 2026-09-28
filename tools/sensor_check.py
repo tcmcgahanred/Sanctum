@@ -42,7 +42,7 @@ was admitted.
 USAGE
     tools/sensor_check.py cti
     tools/sensor_check.py cti --timeout 30
-    tools/sensor_check.py --pnd path/to/pnd.md
+    tools/sensor_check.py --pnd path/to/pnd.yaml
     tools/sensor_check.py cti --only-problems
 
 EXIT CODES
@@ -151,7 +151,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Fetch every sensor a domain declares and report what came back.")
     ap.add_argument("domain", nargs="?", help="domain name")
-    ap.add_argument("--pnd", help="explicit path to a pnd.md")
+    ap.add_argument("--pnd", help="explicit path to a pnd.yaml")
     ap.add_argument("--timeout", type=int, default=20,
                     help="socket timeout in seconds (default 20)")
     ap.add_argument("--only-problems", action="store_true",

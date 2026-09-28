@@ -3,7 +3,7 @@
 """
 Acolyte — OSINT feed collector. Domain-agnostic: all specifics (which feeds,
 where the corpus lives, the collection window) come from a domain's P&D
-(<domain>/pnd.md -> manifest). Run it as:
+(<domain>/pnd.yaml -> manifest). Run it as:
 
     python -m core.acolyte --domain cti
 
@@ -311,7 +311,7 @@ def process_page(url, seen, run_dir, ctx, log, record=None):
 def main():
     ap = argparse.ArgumentParser(description="Sanctum Acolyte — domain-agnostic collector")
     ap.add_argument("--domain", help="domain name (folder under repo, e.g. cti)")
-    ap.add_argument("--pnd", help="explicit path to a pnd.md (overrides --domain)")
+    ap.add_argument("--pnd", help="explicit path to a pnd.yaml or pnd.md (overrides --domain)")
     ap.add_argument("--no-push", action="store_true", help="skip the corpus push")
     args = ap.parse_args()
 
@@ -351,7 +351,7 @@ def main():
 
     seen = _load_set(cfg["seen_path"])
     seen_titles = _load_titleset(cfg["seen_titles_path"])
-    urls = cfg["sensors"]                       # from pnd.md inline block (or file fallback)
+    urls = cfg["sensors"]                       # from manifest.sensors (or a fallback shape)
     # Same sources, same order, as records. A domain that declares nothing gets
     # {"url": u} per source and behaves exactly as before.
     records = cfg.get("sensor_records") or [{"url": u} for u in urls]

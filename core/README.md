@@ -2,7 +2,8 @@
 
 *The only code in Sanctum. None of it knows anything about any subject.*
 
-Everything here is driven by one file per subject: `<subject>/pnd.md`. The engines
+Everything here is driven by one file per subject: `<subject>/pnd.yaml`, or
+`pnd.md` for a subject that has not converted. The engines
 read it, do the work, and hold no memory of what the subject was. That is the
 whole design, and `tests/domain_check.py` enforces it rather than trusting anyone
 to remember.
@@ -33,7 +34,7 @@ Searching everything ever collected, rather than just the current window:
 core/lexicanum.py cti --group ransom --by week
 core/lexicanum.py cti --all-groups --counts --by month
 core/lexicanum.py cti --term "emotet"                       # ad-hoc, not in the config
-core/lexicanum.py --pnd /path/to/pnd.md --group platform --since 2026-01-01
+core/lexicanum.py --pnd /path/to/pnd.yaml --group platform --since 2026-01-01
 ```
 
 **Matches are recomputed on demand, never stored.** A stored index can only
