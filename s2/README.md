@@ -75,11 +75,6 @@ The engine and the shared doctrine never change.
 
 # Mandate — the S2 cycle
 
-*Folded in from `s2/mandate.md` on 2026-09-27, verbatim, when that file
-was deleted. The cti domain keeps this kind of material in its README and
-in `logs/CHANGELOG.md` rather than in a file of its own, and a fact kept
-in two documents gets updated in one of them.*
-
 
 *Sanctum · `s2` · standing planning & direction record.*
 
@@ -158,8 +153,8 @@ body), and LTIOV (planning doctrine only, never printed).
 #### Production
 
 - This domain has **no `policy.md` yet.** Content standards are unwritten. Until
-  one exists, the audience and relevance-clause guidance in `pnd.md` production
-  block is the operative standard — see Pending Direction.
+  one exists, the audience and relevance-clause guidance in the `production:` block of
+  `s2/pnd.yaml` is the operative standard — see Pending Direction.
 - **Say what an item changes about what the reader should expect**, not what they
   should do. The standard is awareness, not action.
 
@@ -196,15 +191,14 @@ body), and LTIOV (planning doctrine only, never printed).
 
 *(dated, newest first — this is the memory of the cycle)*
 
-#### 2026-08-18 — Copying the template leaves stubs that look finished
+#### 2026-08-18 — A file that parses can still be empty of content
 
 `requirements/_tree.yaml` sat in the domain folder as an unfilled template while every
 other file was complete. Nothing errored. `vocab_check` passed. It was caught by
 eye, days later.
 
-**Lesson:** after copying `_template/` into a domain, sweep the whole folder for
-placeholder markers before treating any file as done. A file that exists, parses,
-and passes checks can still be empty of content.
+**Lesson:** when a domain is built by copying another, sweep the whole folder for
+placeholder markers before treating any file as done.
 
 #### 2026-08-18 — Designing around a schema you have not tested costs real work
 

@@ -17,6 +17,34 @@
 #  one, and every file must be listed here. The loader refuses either way
 #  round, because a rule nothing runs and a listing with no rule both look
 #  exactly like a working tree.
+#
+#  HOW TO WRITE ONE OF THE RULE FILES BESIDE THIS ONE
+#
+#  Copy the closest existing rule rather than starting from a skeleton; the one
+#  you copy is live and tested. Each file carries only its own identifier and
+#  title in its header, because this legend used to be repeated in every one of
+#  them and a legend in seventy places is a legend nobody can correct.
+#
+#  status   stable      finished, and something collects for it
+#           unsupported finished, but its `logsource:` matches no sensor in the
+#                       manifest, so nothing can ever reach it
+#           draft       the wording is proposed, not settled
+#           blocked     a machine could decide it, but the input it needs does
+#                       not exist yet. `blocked_by:` names that input.
+#
+#  When more than one fits, the precedence is blocked, then unsupported, then
+#  draft, then stable.
+#
+#  EVERY requirement is machine decidable. There is no value that parks one
+#  permanently. A requirement with no `detection:` block is either a detector
+#  nobody has written or a named missing input, and both are meant to be worked
+#  off rather than excused. The coverage report says which, and "no detector" is
+#  a build gap rather than a quiet week.
+#
+#  `detection:` is named blocks above and one `condition:` line below. A
+#  `falsepositives:` list is written from what the detector actually matched,
+#  never from argument. A detector that has not met the corpus is a proposal,
+#  and its file says so.
 # ==============================================================================
 pirs:
 - id: PIR-1

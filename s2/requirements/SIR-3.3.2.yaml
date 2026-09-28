@@ -1,22 +1,8 @@
 # ------------------------------------------------------------------------------
 #  SIR-3.3.2 · Loitering munition or FPV employment against parked or taxiing aircraft
 #
-#  One requirement, one file. Converted on 2026-09-27 from the decomposition that
-#  was s2/requirements.md, where this was EEI-3.3.b. That file is gone; its analysis
-#  is the comment block at the end of _tree.yaml. The `fact` below is the
-#  original sentence, verbatim.
-#
-#  status   stable      finished, and something collects for it
-#           unsupported finished, but its `logsource:` matches no sensor in
-#                       the manifest, so nothing can ever reach it
-#           draft       the wording is proposed, not settled
-#           blocked     a machine could decide it, but the input it needs does
-#                       not exist yet. `blocked_by:` names that input.
-#
-#  THE `detection:` BLOCK BELOW IS A PROPOSAL, written 2026-09-27, and it has
-#  NOT MET THE CORPUS. cti wrote its eighteen detectors one at a time and read
-#  what each one matched before trusting it; this one has not had that pass, so
-#  any coverage number it produces is a number nobody has checked yet.
+#  `status:`, its precedence, and how to write one of these live once in
+#  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------
 
 id: SIR-3.3.2
@@ -27,9 +13,6 @@ fact: 'Loitering munition or FPV employment against parked or taxiing aircraft.'
 logsource:
   scope: any
   kind: any
-sensor:
-  name: 'Sensor: conflict OSINT — PARTIAL'
-  status: 'PARTIAL'
 detection:
   # A loitering munition or first-person-view drone, an aircraft, and the
   # aircraft being ON THE GROUND. The third conjunct is what makes this
@@ -52,4 +35,4 @@ detection:
       scope: blob
     - {group: env_basing, scope: blob}
   condition: uas and aircraft and on_the_ground
-note: 'Converted from EEI-3.3.b. Scoring: Tier 3 × first-occurrence DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+note: 'Scoring: Tier 3 × first-occurrence DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'

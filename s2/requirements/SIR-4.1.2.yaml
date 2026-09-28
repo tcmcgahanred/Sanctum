@@ -1,22 +1,8 @@
 # ------------------------------------------------------------------------------
 #  SIR-4.1.2 · First public appearance, unveiling, or parade display of a counter-air system
 #
-#  One requirement, one file. Converted on 2026-09-27 from the decomposition that
-#  was s2/requirements.md, where this was EEI-4.1.b. That file is gone; its analysis
-#  is the comment block at the end of _tree.yaml. The `fact` below is the
-#  original sentence, verbatim.
-#
-#  status   stable      finished, and something collects for it
-#           unsupported finished, but its `logsource:` matches no sensor in
-#                       the manifest, so nothing can ever reach it
-#           draft       the wording is proposed, not settled
-#           blocked     a machine could decide it, but the input it needs does
-#                       not exist yet. `blocked_by:` names that input.
-#
-#  THE `detection:` BLOCK BELOW HAS MET THE CORPUS, on 2026-09-27, and was
-#  REBUILT on what it matched: the first version took 105 articles of 1,576 and
-#  thirteen of them were read, of which NOT ONE was the fact. This version
-#  reports a MEASURED ZERO over 45 days, which is the honest state.
+#  `status:`, its precedence, and how to write one of these live once in
+#  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------
 
 id: SIR-4.1.2
@@ -27,9 +13,6 @@ fact: 'First public appearance, unveiling, or parade display of a counter-air sy
 logsource:
   scope: any
   kind: any
-sensor:
-  name: 'Sensor: imagery-derived + primary-source — PARTIAL'
-  status: 'PARTIAL'
 detection:
   # MEASURED AND REBUILT 2026-09-27. The first version of this detector matched
   # 105 articles of 1,576, THIRTEEN of them were read, and NOT ONE was the
@@ -105,4 +88,4 @@ falsepositives:
 - A TRADE SHOW THAT IS NOT A DEFENCE ONE. '2026 China International Motorcycle Trade
   Exhibition opens' matched the inline word `exhibition`, and 'Sci-tech innovations and
   regional specialties showcased' matched `showcased`. Both words are removed.
-note: 'Converted from EEI-4.1.b. Scoring: Tier 2 × first-occurrence. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. MEASURED AND REBUILT 2026-09-27: 105 articles of 1,576 were matched, thirteen were read, none was the fact, and the rebuilt rule reports a measured zero over 45 days. That is the honest state, not an unfinished one.'
+note: 'Scoring: Tier 2 × first-occurrence. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. MEASURED AND REBUILT 2026-09-27: 105 articles of 1,576 were matched, thirteen were read, none was the fact, and the rebuilt rule reports a measured zero over 45 days. That is the honest state, not an unfinished one.'

@@ -1,7 +1,7 @@
 # CTI — Changelog
 
 *Dated history for the CTI domain. Nothing here is operative. The operative rules
-live in [`pnd.md`](pnd.md); what survived this history lives in the tenets at the
+live in [`pnd.yaml`](pnd.yaml); what survived this history lives in the tenets at the
 top of that file. This exists so a decision can be traced, not so it has to be
 re-read before acting.*
 
@@ -9,13 +9,13 @@ re-read before acting.*
 
 ## Vocabulary decisions
 
-*Sanctum · CTI domain · the reasoning behind the word lists in `pnd.md`.*
+*Sanctum · CTI domain · the reasoning behind the word lists in `pnd.yaml`.*
 
 **Version:** v1 — first pass. Established 2026-08-17 when the vocabulary method
 (`../docs/VOCABULARY.md`) was written down and `tools/vocab_check.py` was run against
 this domain for the first time.
 
-> **This file never repeats the term lists.** `pnd.md` is the single source of
+> **This file never repeats the term lists.** `pnd.yaml` is the single source of
 > truth for terms. This file records *decisions about* terms — what was dropped
 > and why, what collides, what is missing, when each group was last reviewed.
 > Two copies of the same words drift within a month.

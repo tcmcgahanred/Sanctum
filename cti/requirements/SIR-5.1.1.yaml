@@ -1,27 +1,10 @@
 # ------------------------------------------------------------------------------
 #  SIR-5.1.1 · A MITRE ATT&CK technique identifier in the reporting
 #
-#  One requirement, one file. Copy the closest existing rule rather than
-#  starting from a skeleton; the one you copy is live and tested.
-#
-#  status   stable      finished, and something collects for it
-#           unsupported finished, but its `logsource:` matches no sensor in
-#                       the manifest, so nothing can ever reach it
-#           draft       the wording is proposed, not settled
-#           blocked     a machine could decide it, but the input it needs does
-#                       not exist yet. `blocked_by:` names that input.
-#
-#  When more than one fits, the precedence is blocked, then unsupported, then
-#  draft, then stable.
-#
-#  EVERY requirement is machine decidable. There is no value that parks one
-#  permanently. A requirement with no `detection:` block is either a detector
-#  nobody has written or a named missing input, and both are meant to be
-#  worked off rather than excused.
-#
-#  `falsepositives:` records what WILL match and should not. Write it here,
-#  beside the rule, not in a changelog nobody reads beside the rule.
+#  `status:`, its precedence, and how to write one of these live once in
+#  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------
+
 id: SIR-5.1.1
 title: A MITRE ATT&CK technique identifier in the reporting
 status: draft

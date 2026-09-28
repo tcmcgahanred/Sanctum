@@ -1,22 +1,8 @@
 # ------------------------------------------------------------------------------
 #  SIR-1.2.3 · A snap or no-notice exercise, or an exercise conducted outside its normal season
 #
-#  One requirement, one file. Converted on 2026-09-27 from the decomposition that
-#  was s2/requirements.md, where this was EEI-1.2.c. That file is gone; its analysis
-#  is the comment block at the end of _tree.yaml. The `fact` below is the
-#  original sentence, verbatim.
-#
-#  status   stable      finished, and something collects for it
-#           unsupported finished, but its `logsource:` matches no sensor in
-#                       the manifest, so nothing can ever reach it
-#           draft       the wording is proposed, not settled
-#           blocked     a machine could decide it, but the input it needs does
-#                       not exist yet. `blocked_by:` names that input.
-#
-#  NO `detection:` BLOCK YET. That is honest rather than unfinished: a detector
-#  that has not met the corpus is a proposal, and cti wrote its eighteen one at
-#  a time, measuring each. The coverage report calls this "no detector", which
-#  is different from "nothing matched".
+#  `status:`, its precedence, and how to write one of these live once in
+#  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------
 
 id: SIR-1.2.3
@@ -28,7 +14,4 @@ blocked_by: 'A sensor that reports this fact. Byproduct 1, now the comment block
 logsource:
   scope: any
   kind: any
-sensor:
-  name: 'Sensor: — ABSENT'
-  status: 'ABSENT'
-note: 'Converted from EEI-1.2.c. Scoring: Tier 1 × escalation × fixed-date window'
+note: 'Scoring: Tier 1 × escalation × fixed-date window'
