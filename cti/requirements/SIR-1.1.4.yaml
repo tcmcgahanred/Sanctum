@@ -13,7 +13,7 @@ fact: Official California advisories naming an affected California entity.
 # AN OFFICIAL ADVISORY COMES FROM AN OFFICIAL SOURCE, AND THAT IS A LOGSOURCE
 # QUESTION, NOT A WORD QUESTION. `kind: any` admitted all fourteen regional
 # sensors, eleven of which are Google News queries carrying national wire copy.
-# Measured 2026-09-26 on 2,828 articles: the detection matched 105, and exactly
+# Measured 2026-09-26 on 2,828 articles in a 30-DAY WINDOW: the detection matched 105, and exactly
 # ONE came from an official California feed. Sixty-four came from a single
 # Google News query. Roughly half the rest were one law firm's breach
 # notification press releases, which are not advisories and are not California.

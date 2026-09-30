@@ -22,14 +22,16 @@ detection:
   # A California NAME IN THE HEADLINE, from either list. `geo` is 49 hand-typed
   # terms and carries the state name and the California organisations; the
   # library is 1,085 Census place and county names unique to this state and
-  # carries the cities. Measured 2026-09-26 on 2,828 articles: 28 headlines hold
-  # a bucket A name and `geo` misses 10 of them, five of which are the Suisun
-  # City cyberattack reported by five different outlets. `geo` holds no city
-  # names at all, so that incident was invisible to this requirement.
+  # carries the cities. Measured 2026-09-26 on 2,828 articles IN A 30-DAY
+  # WINDOW: 28 headlines hold a bucket A name and `geo` misses 10 of them, five
+  # of which are the Suisun City cyberattack reported by five different
+  # outlets. `geo` holds no city names at all, so that incident was invisible
+  # to this requirement. RE-MEASURED 2026-09-30 over the same window: the
+  # headline figure is again exactly 28.
   #
-  # TITLE SCOPE, DELIBERATELY. The same list on the body matched 236 articles
-  # and the additions were mostly noise: a place name anywhere in an article
-  # includes the publisher's own furniture.
+  # TITLE SCOPE, DELIBERATELY. The same list on the body matched 236 articles,
+  # 248 on re-measurement, and the additions were mostly noise: a place name
+  # anywhere in an article includes the publisher's own furniture.
   headline_place:
     any:
     - group: geo
