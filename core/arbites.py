@@ -487,6 +487,23 @@ def main():
     ap.add_argument("--pnd", help="explicit path to a pnd.yaml or pnd.md (overrides --domain)")
     ap.add_argument("--out", help="output path (default: <base_dir>/staging_candidates.md)")
     ap.add_argument("--no-push", action="store_true", help="skip the staging push")
+    # TWO OVERRIDES, BOTH DEFAULTING TO THE DECLARED VALUE, so a second pass
+    # over the SAME corpus and the SAME config can cover a different period and
+    # land under a different name. Added 2026-09-30 for the daily differential.
+    #
+    # The alternative was a second domain config carrying window_days: 1. It was
+    # rejected: `tools/vocab_check.py` globs `*/pnd.yaml` and
+    # `tests/domain_check.py` matches the exact filenames `pnd.py`, `pnd.md` and
+    # `pnd.yaml`, so a file named anything else would be checked by NEITHER
+    # gate. A second config nobody checks is how two clones came to run
+    # different sensor sets. One config, two invocations.
+    ap.add_argument("--window-days", type=int, default=None,
+                    help="override manifest.collection.window_days for this "
+                         "run only; the corpus and every rule are unchanged")
+    ap.add_argument("--staging-name", default=None,
+                    help="override manifest.staging.filename for this run "
+                         "only, e.g. 'WCTI_{date}_DAILY.md'. Without it a "
+                         "second pass would overwrite the first on the remote")
     args = ap.parse_args()
 
     cfg = load_domain(domain=args.domain, pnd_path=args.pnd)
@@ -496,6 +513,10 @@ def main():
 
     window_days = int(cfg["manifest"].get("collection", {}).get("window_days",
                       settings.get("window_days", 7)))
+    if args.window_days is not None:
+        if args.window_days < 1:
+            raise SystemExit("--window-days must be at least 1")
+        window_days = args.window_days
     # SURFACE-VS-DROP — a score threshold, never a count.
     #
     # This used to be `surface_n: 55` — the top 55 by rank surfaced, the rest
@@ -510,6 +531,14 @@ def main():
     min_score = settings.get("surface_min_score")
     min_score = float(min_score) if min_score is not None else None
     out_path = Path(args.out) if args.out else cfg["staging_out"]
+    if args.staging_name:
+        # Copied rather than mutated in place: the loaded config is shared with
+        # everything downstream, and a run-only override must not look like a
+        # declared value to anything that reads it later.
+        man = dict(cfg["manifest"])
+        man["staging"] = dict(man.get("staging") or {},
+                              filename=args.staging_name)
+        cfg["manifest"] = man
     report_title = production.get("report_title", f"{cfg['domain'].upper()} — Pre-Filtered Candidate Queue")
 
     # Recency gate (Codex Layer 4) — flag stale-by-publish-date, never drop.

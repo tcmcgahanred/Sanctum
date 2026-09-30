@@ -40,7 +40,7 @@ import subprocess
 import sys
 import tempfile
 import shutil
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from email.utils import format_datetime
 from pathlib import Path
 
@@ -78,17 +78,42 @@ def build_corpus(base, items):
         }), encoding="utf-8")
 
 
-def run_arbites(base, pnd):
+def run_arbites(base, pnd, *extra, expect_fail=False):
     out = base / "STAGING.md"
     r = subprocess.run(
         [sys.executable, "-m", "core.arbites", "--pnd", str(pnd),
-         "--no-push", "--out", str(out)],
+         "--no-push", "--out", str(out)] + list(extra),
         cwd=str(ROOT), capture_output=True, text=True,
         env={**__import__("os").environ, "SANCTUM_BASE": str(base)})
+    if expect_fail:
+        return r.returncode, (r.stdout + r.stderr)
     if r.returncode != 0:
         print(r.stdout[-1500:]); print(r.stderr[-1500:])
         raise SystemExit("arbites failed to run — see output above")
     return out.read_text(encoding="utf-8")
+
+
+def build_corpus_aged(base, items):
+    """items: (title, body, days_published_ago, hours_collected_ago)
+
+    build_corpus above collects everything two hours ago, which is the normal
+    case. The window override needs items COLLECTED at different ages, because
+    `load_window` gathers by collection date and not by publication date.
+    """
+    now = datetime.now(timezone.utc)
+    for i, (title, body, pub_ago, coll_ago) in enumerate(items):
+        collected = now - timedelta(hours=coll_ago)
+        published = now - timedelta(days=pub_ago)
+        day = (base / "corpus" / collected.strftime("%Y-%m-%d"))
+        day.mkdir(parents=True, exist_ok=True)
+        (day / f"{i:03d}.json").write_text(json.dumps({
+            "title": title, "text": body,
+            "url": f"https://example.test/aged/{i}",
+            "source": "https://example.test/feed",
+            "collected": collected.isoformat(),
+            "published": format_datetime(published),
+            "fetch_status": "ok", "body_source": "trafilatura",
+        }), encoding="utf-8")
 
 
 # Two items that WILL score: California plus an incident word plus cyber
@@ -162,6 +187,53 @@ def main():
         check("...saying plainly that the gate is off", "recency gate OFF" in text2)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+        # ---- the window override, for the daily differential -------------
+        #
+        # Added 2026-09-30. `--window-days` exists so ONE config can serve a
+        # seven-day product and a one-day personal read over the SAME corpus.
+        # The alternative, a second config file, would have been checked by
+        # neither the vocabulary gate nor the domain gate, because both match
+        # exact filenames.
+        print("\nThe window can be overridden for one run, and says so")
+        aged = tmp / "aged"
+        build_corpus_aged(aged, [
+            ("California county reports ransomware attack on court systems",
+             "A California county said a ransomware attack disrupted its court "
+             "systems this week. Incident response is engaged on the breach.",
+             1, 2),
+            ("California city discloses data breach affecting residents",
+             "A California city disclosed a data breach involving a ransomware "
+             "incident this week, affecting resident records.", 1, 3),
+            ("California school district reports a ransomware incident",
+             "A California school district reported a ransomware attack and "
+             "data breach affecting its systems, per the district.", 2, 72),
+            ("California utility discloses a cyberattack on billing",
+             "A California utility disclosed a cyberattack and data breach "
+             "affecting its billing systems, the utility said.", 2, 96),
+        ])
+        wide = run_arbites(aged, ROOT / "cti" / "pnd.yaml")
+        check("the declared seven-day window sees all four",
+              "window 7d · 4 articles scored" in wide)
+        narrow = run_arbites(aged, ROOT / "cti" / "pnd.yaml",
+                             "--window-days", "1")
+        check("a one-day override sees only the two collected today",
+              "window 1d · 2 articles scored" in narrow)
+        check("...and the document states the overridden window, not 7d",
+              "window 7d" not in narrow)
+        rc, msg = run_arbites(aged, ROOT / "cti" / "pnd.yaml",
+                              "--window-days", "0", expect_fail=True)
+        check("a window of zero is refused rather than scoring nothing",
+              rc != 0 and "at least 1" in msg)
+
+        # The remote name must be overridable too, or a second pass would
+        # copy over the first on the remote under the same dated filename.
+        from core.arbites import staging_target
+        man = {"staging": {"backend": "rclone", "rclone_remote": "gdrive:s",
+                           "filename": "WCTI_{date}_DAILY.md"}}
+        check("a second pass can land under its own dated name",
+              staging_target(man, date(2026, 9, 30))[1]
+              == "WCTI_20260930_DAILY.md")
 
     print()
     if FAILURES:
