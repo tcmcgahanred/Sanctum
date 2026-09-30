@@ -349,7 +349,7 @@ def main():
 
     print("\nThe logsource is the FIRST filter, before any term is matched")
     classes = cfg["sensor_classes"]
-    check("every sensor in the manifest is classified", len(classes), 55)
+    check("every sensor in the manifest is classified", len(classes), 57)
     check("...on two axes",
           sorted({k for v in classes.values() for k in v}), ["kind", "scope"])
 

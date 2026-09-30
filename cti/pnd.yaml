@@ -261,6 +261,31 @@ manifest:
   - url: https://industrialcyber.co/feed/
     group: 'National: news / research'
     logsource: {scope: national, kind: press}
+  - url: https://www.hipaajournal.com/feed/
+    group: 'National: news / research'
+    logsource: {scope: national, kind: press}
+    note: 'ONE-CYCLE TRIAL, added 2026-09-29 by Planning and Direction decision. Both this
+      and cyberscoop.com below are on trial, not permanent. RE-MEASURE ON OR AFTER 2026-10-07,
+      after seven days of direct collection: tools/sensor_health.py --domain cti --days 7 and
+      tools/sensor_candidates.py --domain cti --days 7. Prune either feed that buys no publisher
+      and no answering item. THE SURFACING COUNT ALONE DOES NOT DECIDE: zerodayinitiative.com
+      contributes 138 articles with 0 surfacing and 138 answering a requirement, so READ THE
+      ANSWERED COLUMN. Basis for the trial: both were nominated by tools/sensor_candidates.py
+      on 2026-09-26 from traffic already in the corpus, and this one contributed 13 articles
+      in 30 days with 7 surfacing. That is what separates them from malwarebytes.com, declined
+      2026-08-26 on measurement: a mechanically excellent feed whose 20 items all scored between
+      1.00 and 1.50 against a 2.00 threshold, so none would have surfaced. HIPAA Journal (Health
+      Insurance Portability and Accountability Act) reports healthcare breach notifications.
+      THE www. FORM IS REQUIRED: probed from the collector host 2026-09-30, the bare host
+      returned no items on any of eleven feed paths and this address served 10.'
+  - url: https://cyberscoop.com/feed/
+    group: 'National: news / research'
+    logsource: {scope: national, kind: press}
+    note: 'ONE-CYCLE TRIAL, added 2026-09-29 by the same Planning and Direction decision as
+      www.hipaajournal.com above, which carries the full record and the re-measure instruction.
+      Nominated by tools/sensor_candidates.py on 2026-09-26; NO ARTICLE COUNT WAS RECORDED for
+      it, unlike hipaajournal.com, so its trial rests on the nomination alone. Probed from the
+      collector host 2026-09-30: this address served 10 items, no prefix needed.'
   - url: https://www.huntress.com/blog/rss.xml
     group: 'National: vendor telemetry'
     logsource: {scope: national, kind: vendor_research}

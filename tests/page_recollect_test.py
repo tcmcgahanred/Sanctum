@@ -235,9 +235,9 @@ def main():
         # ---- the real domain still loads ----------------------------------
         print("\nThe live domain is unaffected")
         cfg = load_domain(domain="cti")
-        check("cti still resolves 55 sensors", len(cfg["sensors"]), 55)
+        check("cti still resolves 57 sensors", len(cfg["sensors"]), 57)
         check("...and now carries a record for each",
-              len(cfg["sensor_records"]), 55)
+              len(cfg["sensor_records"]), 57)
         check("...with every url preserved, in order",
               [r["url"] for r in cfg["sensor_records"]], cfg["sensors"])
         check("...and none of them is declared a page yet",

@@ -30,7 +30,7 @@ WHAT IS CHECKED
   pnd.yaml             a domain may ship one yaml document instead, and the
                        same duplicate-key guard applies to it
   the real domain      cti loads from pnd.yaml, carries its vocabulary and its
-                       requirements tree, and still has 55 sensors — the
+                       requirements tree, and still has 57 sensors — the
                        conversion moved text, never values
 
     tests/merge_test.py        # exit 0 = one file per domain is safe
@@ -188,7 +188,7 @@ manifest:
     check("...and the identifier list is named for what it holds, not for CVE",
           sorted(cfg["scoring"]["groups"]["vuln_id"]),
           ["apsb2", "cisco-sa-", "cve-", "ghsa-", "vu#", "zdi-"])
-    check("...and every sensor survived", len(cfg["sensors"]), 55)
+    check("...and every sensor survived", len(cfg["sensors"]), 57)
     check("...read from the sensor records, not a fenced block",
           "manifest.sensors" in cfg["sensors_source"], True)
     # The tree is PIR -> indicator -> SIR as of 2026-09-24. The SIR is the
