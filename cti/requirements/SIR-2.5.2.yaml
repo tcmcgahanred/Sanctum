@@ -1,0 +1,81 @@
+# ------------------------------------------------------------------------------
+#  SIR-2.5.2 · The affected system is public safety or criminal justice technology
+#
+#  `status:`, its precedence, and how to write one of these live once in
+#  requirements/_tree.yaml.
+# ------------------------------------------------------------------------------
+
+id: SIR-2.5.2
+title: The affected system is public safety or criminal justice technology
+status: draft
+modified: '2026-09-30'
+fact: 'A breach, exposure, exploited vulnerability or outage affects a kind of technology
+  used by law enforcement, dispatch or corrections: computer-aided dispatch, records management,
+  license plate readers, body cameras, emergency notification, jail management or inmate
+  communications, or a vendor whose business is that technology. Whether any particular
+  agency runs it is not asked here.'
+logsource:
+  scope: any
+  kind: any
+detection:
+  # A PROPOSAL. This detector has not met the corpus. Measure it with
+  # tools/requirement_coverage.py --domain cti --sir SIR-2.5.2 over two
+  # windows and read the matched headlines before changing status.
+  #
+  # The vendor names are a CLASS, public safety technology vendors that serve
+  # agencies nationally. They are not an inventory of one customer.
+  technology:
+    keywords:
+    - computer-aided dispatch
+    - dispatch system
+    - records management system
+    - license plate reader
+    - alpr
+    - body camera
+    - body-worn camera
+    - bodycam
+    - emergency notification
+    - ng911
+    - next generation 911
+    - jail management
+    - inmate phone
+    - inmate tablet
+    - prison tablet
+    - video visitation
+    - mark43
+    - flock safety
+    - axon
+    - evidence.com
+    - motorola solutions
+    - centralsquare
+    - tyler technologies
+    - versaterm
+    - carbyne
+    - rapidsos
+    - codered
+    - crisis24
+    - securus
+    - viapath
+    - global tel
+    - pay tel
+    - jpay
+    - cellebrite
+    scope: title
+  incident:
+    group: incident
+    scope: blob
+  cyber:
+    group: cyber_context
+    scope: blob
+  listicle:
+    group: listicle
+    scope: title
+  condition: cyber and technology and incident and not listicle
+falsepositives:
+- EXPECTED, NOT YET MEASURED. Vendor product and funding announcements that name the vendor
+  in the headline and mention security in the body.
+- EXPECTED, NOT YET MEASURED. Privacy and policy stories about license plate readers or Flock
+  that carry the word 'breach' or 'data' without a cyber incident.
+note: 'Written 2026-09-30 to support the Alameda County Sheriff''s Office threat brief on 28
+  October 2026. It asks what KIND of technology is affected, consistent with the 2026-09-25
+  decision that a requirement never asks whether the audience owns the technology.'

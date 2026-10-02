@@ -1,0 +1,93 @@
+# ------------------------------------------------------------------------------
+#  SIR-2.5.1 · Reported cyber incident at a law enforcement, dispatch, court or corrections organization
+#
+#  `status:`, its precedence, and how to write one of these live once in
+#  requirements/_tree.yaml.
+# ------------------------------------------------------------------------------
+
+id: SIR-2.5.1
+title: Reported cyber incident at a law enforcement, dispatch, court or corrections organization
+status: draft
+modified: '2026-09-30'
+fact: 'A cyber incident, breach, data leak or ransomware claim at a sheriff''s office,
+  police department, 911 or dispatch center, court, prosecutor, probation department, jail
+  or prison, any geography. The organization is the victim, not the investigator.'
+logsource:
+  scope: any
+  kind: any
+detection:
+  # A PROPOSAL. This detector has not met the corpus. Measure it with
+  # tools/requirement_coverage.py --domain cti --sir SIR-2.5.1 over two
+  # windows and read the matched headlines before changing status.
+  #
+  # The organization is written INLINE because only this rule reads it. The
+  # shared `sector` group already carries sheriff's office, police department
+  # and superior court, and is read by tier 2, so widening it is a SCORING
+  # change and is not made here.
+  organization:
+    keywords:
+    - sheriff
+    - police
+    - law enforcement
+    - '911'
+    - dispatch center
+    - emergency communications
+    - public safety answering point
+    - psap
+    - jail
+    - detention center
+    - correctional
+    - department of corrections
+    - prison
+    - district attorney
+    - prosecutor
+    - probation
+    - superior court
+    - county court
+    - municipal court
+    - cjis
+    - clets
+    - ncic
+    scope: title
+  incident:
+    group: incident
+    scope: blob
+  cyber:
+    group: cyber_context
+    scope: blob
+  # LAW ENFORCEMENT AS THE ACTOR, NOT THE VICTIM. Headlines about police
+  # arresting, charging or seizing are the largest expected false positive
+  # class in a cyber corpus.
+  enforcement:
+    keywords:
+    - arrest
+    - charged
+    - charges
+    - indicted
+    - sentenced
+    - pleads guilty
+    - extradit
+    - seize
+    - takedown
+    - dismantle
+    - bust
+    - years in prison
+    - prison sentence
+    - months in prison
+    scope: title
+  listicle:
+    group: listicle
+    scope: title
+  condition: cyber and organization and incident and not enforcement and not listicle
+falsepositives:
+- EXPECTED, NOT YET MEASURED. Police or sheriffs warning the public about a scam or a breach
+  elsewhere. 'Police warn of phishing texts' names police in the headline and carries incident
+  words in the body.
+- FOUND IN A SESSION PROBE, 2026-09-30. 'Hacker gets five years in prison for breaching bank'
+  matched on `prison`. `years in prison`, `months in prison` and `prison sentence` are now in
+  the `enforcement` block; other sentence wordings may still get through.
+note: 'Written 2026-09-30 to support the Alameda County Sheriff''s Office threat brief on 28
+  October 2026. It asks what KIND of organization was hit, never whether it is the audience,
+  consistent with the 2026-09-25 decision. The Alameda County name is already read in the
+  headline by SIR-1.1.3 through the geo_ca library (bucket A); Oakland, Hayward, Dublin and
+  the other bucket C cities are not.'

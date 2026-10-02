@@ -270,10 +270,10 @@ def main():
     cfg = load_domain(domain="cti")
     live = cfg["requirements"]
     sirs = [s for p in live["pirs"] for i in p["indicators"] for s in i["sirs"]]
-    check("cti declares 27 requirements", len(sirs), 27)
+    check("cti declares 29 requirements", len(sirs), 29)
     with_det = [s for s in sirs if s.get("detection") is not None]
     blocked = [s for s in sirs if s.get("status") == "blocked"]
-    check("...18 of which carry a detection block", len(with_det), 18)
+    check("...20 of which carry a detection block", len(with_det), 20)
     check("...none is parked as undecidable any more",
           [s["id"] for s in sirs if "decidable" in s], [])
     # Four were reworded on 2026-09-25 from "does the audience own this" to

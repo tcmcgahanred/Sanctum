@@ -95,6 +95,14 @@ pirs:
     requirements:
     - SIR-2.4.1
     - SIR-2.4.2
+  - id: IND-2.5
+    statement: A law enforcement, dispatch, court or corrections organization, or the technology
+      it runs on, is under active targeting this window.
+    satisfied_by: any
+    status: DRAFT
+    requirements:
+    - SIR-2.5.1
+    - SIR-2.5.2
 - id: PIR-3
   name: Actively-exploited vulnerabilities in SLTT-common technology
   question: What in-the-wild or KEV vulnerabilities affect technology common in low-maturity
