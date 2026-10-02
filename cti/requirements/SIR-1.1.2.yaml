@@ -14,14 +14,11 @@
 id: SIR-1.1.2
 title: An extortion or leak-site post naming a California victim
 status: unsupported
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: Extortion or leak-site posts naming California victims.
 logsource:
   scope: national
   kind: leak_site
-sensor:
-  name: ransomware leak-site aggregator, CA-filtered
-  status: PENDING
 detection:
   california:
     group: geo

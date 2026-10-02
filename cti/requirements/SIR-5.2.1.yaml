@@ -13,14 +13,11 @@
 id: SIR-5.2.1
 title: A MITRE ATT&CK group identifier or vendor group name
 status: draft
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: A MITRE ATT&CK group identifier, or a vendor group name.
 logsource:
   scope: any
   kind: any
-sensor:
-  name: MITRE ATT&CK group library
-  status: ABSENT
 detection:
   group_identifier:
     pattern: \bG\d{4}\b

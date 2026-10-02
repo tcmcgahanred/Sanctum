@@ -14,14 +14,11 @@
 id: SIR-3.1.1
 title: A vulnerability added to the CISA known exploited catalogue
 status: stable
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: CISA KEV additions (CVE, date, exploitation status, ransomware-use flag).
 logsource:
   scope: national
   kind: exploitation_evidence
-sensor:
-  name: dedicated KEV feed
-  status: ABSENT
 detection:
   identifier:
     group: vuln_id

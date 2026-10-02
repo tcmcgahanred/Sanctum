@@ -14,14 +14,11 @@
 id: SIR-1.1.1
 title: A breach notification naming a California organization
 status: unsupported
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: Breach notifications affecting Californians (org, date, type, records).
 logsource:
   scope: regional
   kind: breach_registry
-sensor:
-  name: CA AG breach-registry scraper
-  status: PENDING
 detection:
   california:
     group: geo

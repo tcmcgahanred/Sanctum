@@ -13,15 +13,11 @@
 id: SIR-2.1.2
 title: A sector ISAC or agency advisory
 status: stable
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: Sector ISAC or agency advisories (WaterISAC, MS-ISAC, CISA sector alerts).
 logsource:
   scope: national
   kind: official
-sensor:
-  name: MS-ISAC + CISA (4 feeds)
-  status: ACTIVE
-  also: WaterISAC - PENDING
 detection:
   sector:
     group: sector

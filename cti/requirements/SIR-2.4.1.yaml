@@ -14,15 +14,12 @@
 id: SIR-2.4.1
 title: Reported targeting of election infrastructure
 status: draft
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: Reported attacks or targeting of election offices, election systems, or voter registration
   data, any geography.
 logsource:
   scope: any
   kind: any
-sensor:
-  name: national trusted feeds
-  status: ACTIVE
 detection:
   election:
     group: election

@@ -14,7 +14,7 @@
 id: SIR-1.1.4
 title: An official California advisory naming an affected entity
 status: stable
-modified: '2026-09-26'
+modified: '2026-10-02'
 fact: Official California advisories naming an affected California entity.
 # AN OFFICIAL ADVISORY COMES FROM AN OFFICIAL SOURCE, AND THAT IS A LOGSOURCE
 # QUESTION, NOT A WORD QUESTION. `kind: any` admitted all fourteen regional
@@ -26,10 +26,6 @@ fact: Official California advisories naming an affected California entity.
 logsource:
   scope: regional
   kind: official
-sensor:
-  name: Cal OES + CDT + MS-ISAC
-  status: ACTIVE
-  also: Cal-CSIC - PENDING
 detection:
   # Either list will do. `geo` on the body is the original test and holds the
   # state name and the California organisations, which is what an official

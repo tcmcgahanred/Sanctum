@@ -13,14 +13,11 @@
 id: SIR-5.1.1
 title: A MITRE ATT&CK technique identifier in the reporting
 status: draft
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: A MITRE ATT&CK technique identifier in the reporting.
 logsource:
   scope: any
   kind: any
-sensor:
-  name: MITRE ATT&CK technique library
-  status: ABSENT
 detection:
   technique_code:
     pattern: \bT\d{4}(\.\d{3})?\b

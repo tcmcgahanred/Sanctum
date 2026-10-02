@@ -13,6 +13,14 @@
 id: SIR-1.2.2
 title: Attribution status
 status: draft
-modified: '2026-09-24'
+modified: '2026-10-02'
 fact: 'Attribution status: confirmed, suspected, or unknown.'
+logsource:
+  # DECLARED EXPLICITLY 2026-10-02. Absent, the engine reads every
+  # article, because logsource_match strips `any` and returns true
+  # before it looks at the sensor. This states the existing
+  # behaviour rather than changing it: nothing about what this rule
+  # reads is different, it is now declared instead of implied.
+  scope: any
+  kind: any
 standard: Attribution discipline. Never state suspected as fact.

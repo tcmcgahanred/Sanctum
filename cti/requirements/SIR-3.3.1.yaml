@@ -17,7 +17,15 @@ blocked_by: The remediation deadline from the CISA Known Exploited Vulnerabiliti
   The whole catalogue is already fetched and cached on the collection host under reflists/,
   but core/reflist.py keeps only the identifier from each entry and discards every other field,
   the due date included. Letting a reference list carry a second field makes this a lookup.
-modified: '2026-09-24'
+modified: '2026-10-02'
 fact: Patch availability and KEV remediation deadline.
+logsource:
+  # DECLARED EXPLICITLY 2026-10-02. Absent, the engine reads every
+  # article, because logsource_match strips `any` and returns true
+  # before it looks at the sensor. This states the existing
+  # behaviour rather than changing it: nothing about what this rule
+  # reads is different, it is now declared instead of implied.
+  scope: any
+  kind: any
 standard: 'Actionability. Frame as a vendor-accountability ask: confirm your vendor or IT
   provider patched X.'

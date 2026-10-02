@@ -12,14 +12,11 @@
 id: SIR-4.1.1
 title: A national advisory or campaign with an SLTT nexus
 status: stable
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: National advisories or campaigns with an SLTT nexus.
 logsource:
   scope: national
   kind: official
-sensor:
-  name: national feeds
-  status: ACTIVE
 detection:
   infrastructure:
     group: ci

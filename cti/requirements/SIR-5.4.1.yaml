@@ -16,14 +16,11 @@ status: blocked
 blocked_by: The MITRE ATT&CK software list. The set has hundreds of entries and changes on
   MITRE's schedule, not ours, so it is pointed at rather than copied. A hand-written word
   list here would make the count look better and the answer worse.
-modified: '2026-09-24'
+modified: '2026-10-02'
 fact: A named tool used.
 logsource:
   scope: any
   kind: any
-sensor:
-  name: MITRE ATT&CK software library
-  status: ABSENT
 note: 'No detection yet. The fact is a named tool, which is a set membership test against
   the MITRE ATT&CK software list. A word list would be wrong here: the set has hundreds of
   entries and changes on MITRE''s schedule, not ours.'

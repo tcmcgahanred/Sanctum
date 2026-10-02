@@ -13,5 +13,13 @@
 id: SIR-5.4.3
 title: Assessed sophistication, skill level or modus operandi
 status: draft
-modified: '2026-09-24'
+modified: '2026-10-02'
 fact: Assessed sophistication, skill level, or modus operandi.
+logsource:
+  # DECLARED EXPLICITLY 2026-10-02. Absent, the engine reads every
+  # article, because logsource_match strips `any` and returns true
+  # before it looks at the sensor. This states the existing
+  # behaviour rather than changing it: nothing about what this rule
+  # reads is different, it is now declared instead of implied.
+  scope: any
+  kind: any

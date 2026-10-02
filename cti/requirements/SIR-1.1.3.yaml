@@ -14,16 +14,12 @@
 id: SIR-1.1.3
 title: Press reporting of an incident at a California organization
 status: stable
-modified: '2026-09-26'
+modified: '2026-10-02'
 fact: Regional or local press reports of incidents at California local government, school,
   utility or tribal entities.
 logsource:
   scope: regional
   kind: any
-sensor:
-  name: California news queries (11) + CA regional press
-  status: ACTIVE
-  also: curated CA regional press - PENDING
 detection:
   # A California NAME IN THE HEADLINE, from either list. `geo` is 49 hand-typed
   # terms and carries the state name and the California organisations; the

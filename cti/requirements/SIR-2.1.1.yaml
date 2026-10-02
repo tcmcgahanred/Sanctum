@@ -13,15 +13,11 @@
 id: SIR-2.1.1
 title: Reported targeting of a named SLTT sector
 status: stable
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: Reported attacks or targeting of a named SLTT sector, any geography.
 logsource:
   scope: national
   kind: press
-sensor:
-  name: national trusted feeds + StateScoop
-  status: ACTIVE
-  also: K-12 Dive, WaterISAC - PENDING; GovTech - REJECTED
 detection:
   sector:
     group: sector

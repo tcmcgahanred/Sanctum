@@ -14,15 +14,11 @@
 id: SIR-2.4.2
 title: An election-sector advisory
 status: draft
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: Election-sector advisories from CISA or the Elections Infrastructure ISAC.
 logsource:
   scope: national
   kind: any
-sensor:
-  name: CISA (4 feeds)
-  status: ACTIVE
-  also: EI-ISAC - PENDING
 detection:
   election:
     group: election

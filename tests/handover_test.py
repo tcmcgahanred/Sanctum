@@ -316,6 +316,39 @@ def run():
     check("every rule file's header PIR and indicator text matches "
           "requirements/_tree.yaml", drift, [])
 
+    # A REQUIREMENT DECLARES ITS SOURCE AND ITS DETECTOR, OR IT IS NOT A
+    # REQUIREMENT YET. The owner's rule, 2026-10-02: if those headings cannot
+    # sensibly be added, the SIR itself needs readdressing. Measured that day:
+    # 7 rules declared no logsource at all, which silently means "reads
+    # everything", and 38 declared no detection. Of those 38, 20 are
+    # `status: blocked` and legitimately have none, and all 20 named their
+    # missing input. The other 18 are `status: draft` with no detector, and
+    # that is the real gap.
+    no_ls, blocked_mute, draft_nodet = [], [], []
+    for dom in ("cti", "s2"):
+        for f in sorted((repo / dom / "requirements").glob("SIR-*.yaml")):
+            d = yaml.safe_load(f.read_text(encoding="utf-8"))
+            sid = f"{dom}/{d['id']}"
+            if "logsource" not in d:
+                no_ls.append(sid)
+            if "detection" in d:
+                continue
+            if d.get("status") == "blocked" and not d.get("blocked_by"):
+                blocked_mute.append(sid)
+            if d.get("status") == "draft":
+                draft_nodet.append(sid)
+    check("every requirement declares a logsource, even when it reads "
+          "everything", no_ls, [])
+    check("every blocked requirement with no detector names its missing "
+          "input in blocked_by", blocked_mute, [])
+    # A RATCHET, NOT A PASS. 18 draft requirements carry no detector as of
+    # 2026-10-02. The number may only go DOWN: give the rule a detector, or
+    # move it to `blocked` with a named input. A new skeleton rule pushes this
+    # over 18 and fails the commit, which is the point.
+    check("no NEW draft requirement arrives without a detector "
+          f"(18 as of 2026-10-02, these are: {' '.join(draft_nodet)})",
+          len(draft_nodet) <= 18, True)
+
     print()
     if FAILURES:
         print(f"FAIL — {len(FAILURES)} problem(s)")

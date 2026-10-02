@@ -14,13 +14,10 @@ id: SIR-5.4.2
 title: A named malware family
 status: blocked
 blocked_by: The MITRE ATT&CK software list, the same one SIR-5.4.1 waits on.
-modified: '2026-09-24'
+modified: '2026-10-02'
 fact: A named malware family.
 logsource:
   scope: any
   kind: any
-sensor:
-  name: MITRE ATT&CK software library
-  status: ABSENT
 note: 'No detection yet. Same as SIR-5.4.1: the malware families are the same ATT&CK software
   list, and it should be pointed at rather than copied.'

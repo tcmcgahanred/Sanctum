@@ -14,14 +14,11 @@
 id: SIR-3.1.2
 title: A vendor advisory confirming exploitation in the wild
 status: stable
-modified: '2026-09-25'
+modified: '2026-10-02'
 fact: Vendor PSIRT advisories confirming in-the-wild exploitation.
 logsource:
   scope: national
   kind: vendor_psirt
-sensor:
-  name: vendor PSIRTs (Cisco, Palo Alto, Fortinet)
-  status: ACTIVE
 detection:
   exploited:
     group: exploit_strong
