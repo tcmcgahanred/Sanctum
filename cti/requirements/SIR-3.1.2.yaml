@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 #  SIR-3.1.2 · A vendor advisory confirming exploitation in the wild
 #
+#  PIR-3: Actively-exploited vulnerabilities in SLTT-common technology (What
+#         in-the-wild or KEV vulnerabilities affect technology common in
+#         low-maturity SLTT environments?)
+#  IND-3.1: A vulnerability is under active exploitation in the wild this
+#           window.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

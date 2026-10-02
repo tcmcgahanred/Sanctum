@@ -2,6 +2,25 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-10-02] Every rule file carries its priority intelligence requirement and its indicator in its header, and a test guards the copy
+
+**The owner's request, and the reason is the one that matters: he was switching between a rule file and `requirements/_tree.yaml` to recover the association.** Each of the 72 rule files in both domains now opens with its parent priority intelligence requirement and its indicator, in the format he specified.
+
+```
+#  PIR-2: SLTT sector targeting anywhere (What threat activity is targeting
+#         SLTT-relevant sectors anywhere, as a leading indicator for
+#         California?)
+#  IND-2.5: A law enforcement, dispatch, court or corrections organization, or
+#           the technology it runs on, is under active targeting this window.
+```
+
+- **THIS IS A SECOND COPY OF TREE TEXT IN 72 FILES, WHICH IS THE PATTERN DELETED FROM SEVENTY FILES IN SEPTEMBER.** That removal took out 1,508 comment lines on the principle that a legend in seventy places is a legend nobody can correct. **The concern was raised once and the owner accepted the duplication for this case, because the lookup cost was real and recurring.** **So the copy is GUARDED rather than trusted.**
+- **`tests/handover_test.py` NOW FAILS THE COMMIT IF A HEADER DISAGREES WITH THE TREE.** It unwraps each file's `PIR-` and `IND-` comment lines back into single strings and compares them to `requirements/_tree.yaml`, for both domains. **A rule renamed in the tree and not in its header is a test failure, not a silent drift.** **That guard is inside the commit gate, which is what makes this different from the legend that was deleted.**
+- **THE HEADERS ARE GENERATED FROM THE TREE, not typed.** The generator wraps at 79 characters with the continuation aligned under the text. **`break_on_hyphens=False` is load-bearing: the first run split `low-maturity` across two lines as `low-` and `maturity`, and the guard caught it on all five PIR-3 rule files.** A guard that fails on its first real defect is a guard worth having.
+- **PROVED TO CHANGE NO DATA, by the method already on record for a comment-only edit.** The parsed content of all 74 files, the 72 rule files plus both `_tree.yaml` files, was captured from `origin/main` and from the working tree and compared: **zero differences.** Loaded counts are unchanged, `cti` at 5 priority intelligence requirements, 15 indicators, 29 requirements and 20 detection blocks, `s2` at 4, 14, 43 and 14.
+- **ALL 72 HEADERS WERE IDENTICAL IN SHAPE BEFORE THE EDIT**, seven lines apiece, measured before anything was rewritten. **That is why the header could be rebuilt wholesale instead of patched, and it was checked rather than assumed.**
+- **Verified:** all fourteen test files pass, `tests/diff_scores.py` passes, `domain_check` passes, and `tools/vocab_check.py --tracked-only` reports 0 errors and 3 warnings unchanged.
+
 ## [2026-10-02] Two criminal justice information systems move from the organization rule to the technology rule
 
 **`clets` and `ncic` leave `SIR-2.5.1`'s `organization:` block and join `SIR-2.5.2`'s `technology:` block.** The owner's call, and it is a correctness fix rather than a tuning change.

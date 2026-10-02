@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 #  SIR-2.1.2 · Density altitude, heat, or humidity conditions affecting lift margin or payload at
 #
+#  PIR-2: Environmental and basing factors degrading rotary-wing operations
+#         (What conditions in the AOR would degrade our ability to fly,
+#         sustain, or base rotary-wing aircraft?)
+#  IND-2.1: What environmental conditions degrade aircraft performance or
+#           availability?
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

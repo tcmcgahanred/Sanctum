@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-1.2.1 · Disruption confirmed against a primary source
 #
+#  PIR-1: Direct impact to California organizations (What incidents, breaches,
+#         or targeting have directly affected California-based organizations or
+#         entities?)
+#  IND-1.2: The reported impact is verified rather than merely claimed.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

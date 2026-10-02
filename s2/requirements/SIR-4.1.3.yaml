@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-4.1.3 · A system enters service with a unit type that would engage Army aviation specifically
 #
+#  PIR-4: Adversary capabilities that specifically threaten rotary-wing
+#         operations (What can the adversary field that would kill or degrade
+#         our helicopters?)
+#  IND-4.1: What systems have entered or are entering service?
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

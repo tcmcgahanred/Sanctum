@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-5.1.1 · A MITRE ATT&CK technique identifier in the reporting
 #
+#  PIR-5: Adversary behaviour SLTT defenders should detect or hunt for (What
+#         adversary behaviour should SLTT defenders detect or hunt for this
+#         cycle?)
+#  IND-5.1: Adversary behaviour is described specifically enough to act on.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

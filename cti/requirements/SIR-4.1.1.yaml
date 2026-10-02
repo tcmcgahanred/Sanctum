@@ -1,6 +1,10 @@
 # ------------------------------------------------------------------------------
 #  SIR-4.1.1 · A national advisory or campaign with an SLTT nexus
 #
+#  PIR-4: Broad or national threats with SLTT relevance (What national-scale
+#         threats carry material relevance to SLTT defenders?)
+#  IND-4.1: A national-scale threat materially affects SLTT defenders.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

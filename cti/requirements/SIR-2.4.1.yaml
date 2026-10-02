@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 #  SIR-2.4.1 · Reported targeting of election infrastructure
 #
+#  PIR-2: SLTT sector targeting anywhere (What threat activity is targeting
+#         SLTT-relevant sectors anywhere, as a leading indicator for
+#         California?)
+#  IND-2.4: Election infrastructure is being targeted somewhere in the United
+#           States.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 #  SIR-3.2.1 · The affected product is of a kind commonly deployed in low-maturity public-sector environments
 #
+#  PIR-3: Actively-exploited vulnerabilities in SLTT-common technology (What
+#         in-the-wild or KEV vulnerabilities affect technology common in
+#         low-maturity SLTT environments?)
+#  IND-3.2: The affected technology is present in low-maturity SLTT
+#           environments.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

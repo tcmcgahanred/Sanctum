@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-4.2.2 · Combat employment of a counter-air system against any rotary-wing target
 #
+#  PIR-4: Adversary capabilities that specifically threaten rotary-wing
+#         operations (What can the adversary field that would kill or degrade
+#         our helicopters?)
+#  IND-4.2: What capability has been demonstrated?
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-2.3.1 · Storm, seismic, or flood damage to an airfield or port in the AOR
 #
+#  PIR-2: Environmental and basing factors degrading rotary-wing operations
+#         (What conditions in the AOR would degrade our ability to fly,
+#         sustain, or base rotary-wing aircraft?)
+#  IND-2.3: What has degraded existing infrastructure?
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

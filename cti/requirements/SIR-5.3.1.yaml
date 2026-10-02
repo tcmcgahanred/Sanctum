@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-5.3.1 · A stated goal or an observed impact indicating objective
 #
+#  PIR-5: Adversary behaviour SLTT defenders should detect or hunt for (What
+#         adversary behaviour should SLTT defenders detect or hunt for this
+#         cycle?)
+#  IND-5.3: Adversary intent is identifiable from the reporting.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

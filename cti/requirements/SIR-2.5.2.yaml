@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 #  SIR-2.5.2 · The affected system is public safety or criminal justice technology
 #
+#  PIR-2: SLTT sector targeting anywhere (What threat activity is targeting
+#         SLTT-relevant sectors anywhere, as a leading indicator for
+#         California?)
+#  IND-2.5: A law enforcement, dispatch, court or corrections organization, or
+#           the technology it runs on, is under active targeting this window.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

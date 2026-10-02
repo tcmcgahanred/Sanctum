@@ -48,6 +48,7 @@ WHAT IS CHECKED
 
 import sys
 from pathlib import Path
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -269,6 +270,51 @@ def run():
                 unprintable.append(f"{f.name}:U+{ord(ch):04X}")
     check("no file under tests/ or tools/ holds a character the authoring "
           "console cannot encode", sorted(set(unprintable)), [])
+
+    # EVERY RULE FILE CARRIES ITS PIR AND INDICATOR IN ITS HEADER, 2026-10-02,
+    # at the owner's request: he was switching between the rule and the tree
+    # to recover the association. That IS a second copy of tree text in 72
+    # files, which is the pattern deleted from seventy files in September, so
+    # the copy is GUARDED here rather than trusted. A header that disagrees
+    # with requirements/_tree.yaml fails the commit.
+    import textwrap as _tw
+    drift = []
+    for dom in ("cti", "s2"):
+        tree = yaml.safe_load(
+            (repo / dom / "requirements" / "_tree.yaml")
+            .read_text(encoding="utf-8"))
+        want = {}
+        for pir in tree["pirs"]:
+            ptxt = (f"{pir['id']}: {pir.get('name', '')} "
+                    f"({pir.get('question', '')})")
+            for ind in pir["indicators"]:
+                itxt = f"{ind['id']}: {ind['statement']}"
+                for sid in (ind.get("requirements") or []):
+                    want[sid] = (ptxt, itxt)
+        for f in sorted((repo / dom / "requirements").glob("SIR-*.yaml")):
+            lines = f.read_text(encoding="utf-8").split("\n")
+            got = []
+            cur = None
+            for ln in lines:
+                if not ln.startswith("#"):
+                    break
+                s = ln[1:].strip()
+                if s.startswith(("PIR-", "IND-")):
+                    cur = [s]
+                    got.append(cur)
+                elif cur is not None and s and not s.startswith("`"):
+                    cur.append(s)
+                elif cur is not None:
+                    cur = None
+            flat = [" ".join(g) for g in got]
+            sid = f.name[:-5]
+            exp = want.get(sid)
+            if exp is None:
+                drift.append(f"{dom}/{sid}: not in the tree")
+            elif flat != [exp[0], exp[1]]:
+                drift.append(f"{dom}/{sid}")
+    check("every rule file's header PIR and indicator text matches "
+          "requirements/_tree.yaml", drift, [])
 
     print()
     if FAILURES:

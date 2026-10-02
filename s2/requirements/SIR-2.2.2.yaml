@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-2.2.2 · Access agreements, rotational basing, or host-nation basing changes
 #
+#  PIR-2: Environmental and basing factors degrading rotary-wing operations
+#         (What conditions in the AOR would degrade our ability to fly,
+#         sustain, or base rotary-wing aircraft?)
+#  IND-2.2: What basing constraints affect employment?
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

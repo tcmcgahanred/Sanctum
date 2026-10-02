@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-3.3.1 · Patch availability and remediation deadline
 #
+#  PIR-3: Actively-exploited vulnerabilities in SLTT-common technology (What
+#         in-the-wild or KEV vulnerabilities affect technology common in
+#         low-maturity SLTT environments?)
+#  IND-3.3: A remediation path exists that the audience can act on.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

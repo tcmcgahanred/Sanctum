@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-4.3.1 · Export, transfer, or licensed production of a counter-air system to a state in or
 #
+#  PIR-4: Adversary capabilities that specifically threaten rotary-wing
+#         operations (What can the adversary field that would kill or degrade
+#         our helicopters?)
+#  IND-4.3: Where are these systems proliferating?
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

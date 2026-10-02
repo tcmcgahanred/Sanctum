@@ -1,6 +1,10 @@
 # ------------------------------------------------------------------------------
 #  SIR-1.4.2 · New or expanded fuel, munitions, or logistics storage supporting air operations
 #
+#  PIR-1: Adversary posture and activity in the AOR (What shifts in adversary
+#         posture or activity have occurred in the AOR?)
+#  IND-1.4: What infrastructure change enables future operations?
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

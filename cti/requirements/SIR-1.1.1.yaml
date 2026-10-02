@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 #  SIR-1.1.1 · A breach notification naming a California organization
 #
+#  PIR-1: Direct impact to California organizations (What incidents, breaches,
+#         or targeting have directly affected California-based organizations or
+#         entities?)
+#  IND-1.1: A California SLTT or critical-infrastructure organization reported
+#           a cyber incident this window.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

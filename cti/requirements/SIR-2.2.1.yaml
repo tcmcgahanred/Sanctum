@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 #  SIR-2.2.1 · The targeted technology is of a kind commonly exposed in low-maturity public-sector environments
 #
+#  PIR-2: SLTT sector targeting anywhere (What threat activity is targeting
+#         SLTT-relevant sectors anywhere, as a leading indicator for
+#         California?)
+#  IND-2.2: The targeted technology or configuration is of a kind commonly
+#           exposed in low-maturity public-sector environments.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

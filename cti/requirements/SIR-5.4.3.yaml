@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-5.4.3 · Assessed sophistication, skill level or modus operandi
 #
+#  PIR-5: Adversary behaviour SLTT defenders should detect or hunt for (What
+#         adversary behaviour should SLTT defenders detect or hunt for this
+#         cycle?)
+#  IND-5.4: Adversary capability is identifiable from the reporting.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

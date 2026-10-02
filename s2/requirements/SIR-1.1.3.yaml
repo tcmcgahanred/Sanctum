@@ -1,6 +1,10 @@
 # ------------------------------------------------------------------------------
 #  SIR-1.1.3 · Naval or air movement through a named strait or chokepoint
 #
+#  PIR-1: Adversary posture and activity in the AOR (What shifts in adversary
+#         posture or activity have occurred in the AOR?)
+#  IND-1.1: What forces or systems have moved into, out of, or within the AOR?
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------

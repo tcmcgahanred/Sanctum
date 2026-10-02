@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
 #  SIR-2.1.1 · Reported targeting of a named SLTT sector
 #
+#  PIR-2: SLTT sector targeting anywhere (What threat activity is targeting
+#         SLTT-relevant sectors anywhere, as a leading indicator for
+#         California?)
+#  IND-2.1: An SLTT-relevant sector is under active targeting this window.
+#
 #  `status:`, its precedence, and how to write one of these live once in
 #  requirements/_tree.yaml.
 # ------------------------------------------------------------------------------
