@@ -95,6 +95,8 @@ pirs:
     requirements:
     - SIR-2.4.1
     - SIR-2.4.2
+    - SIR-2.4.3
+    - SIR-2.4.4
   - id: IND-2.5
     statement: A law enforcement, dispatch, court or corrections organization, or the technology
       it runs on, is under active targeting this window.

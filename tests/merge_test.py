@@ -180,11 +180,11 @@ manifest:
     # ADDED 2026-09-25. A rule pointing at a named list is the whole point of
     # that day's change, so a rule going back to carrying its own copy of a
     # list that already exists should be visible here.
-    check("...and only seven word lists are still written out inside a rule",
+    check("...and only nine word lists are still written out inside a rule",
           sum(1 for pir in cfg["requirements"]["pirs"]
               for i in pir["indicators"] for s in i["sirs"]
               for b in (s.get("detection") or {}).values()
-              if isinstance(b, dict) and isinstance(b.get("keywords"), list)), 7)
+              if isinstance(b, dict) and isinstance(b.get("keywords"), list)), 9)
     check("...and the identifier list is named for what it holds, not for CVE",
           sorted(cfg["scoring"]["groups"]["vuln_id"]),
           ["apsb2", "cisco-sa-", "cve-", "ghsa-", "vu#", "zdi-"])
@@ -196,7 +196,7 @@ manifest:
     # what a scoring rule claims in `serves_sir:`.
     check("...every requirement identifier is declared, not scraped",
           sum(len(i.get("sirs", [])) for p in cfg["requirements"]["pirs"]
-              for i in p["indicators"]), 29)
+              for i in p["indicators"]), 31)
     check("...no priority intelligence requirement carries a tier",
           [p["id"] for p in cfg["requirements"]["pirs"] if "tier" in p], [])
     check("...every indicator says whether its SIRs are components or routes",

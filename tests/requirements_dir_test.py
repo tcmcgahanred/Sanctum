@@ -266,7 +266,7 @@ def main():
         cfg = load_domain(domain="cti")
         live = cfg["requirements"]
         sirs = [s for p in live["pirs"] for i in p["indicators"] for s in i["sirs"]]
-        check("cti assembles 29 rules from files", len(sirs), 29)
+        check("cti assembles 31 rules from files", len(sirs), 31)
         check("...5 priority intelligence requirements", len(live["pirs"]), 5)
         check("...15 indicators",
               sum(len(p["indicators"]) for p in live["pirs"]), 15)

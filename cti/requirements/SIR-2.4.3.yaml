@@ -1,0 +1,72 @@
+# ------------------------------------------------------------------------------
+#  SIR-2.4.3 · Election results reporting is disrupted, defaced or taken offline
+#
+#  PIR-2: SLTT sector targeting anywhere (What threat activity is targeting
+#         SLTT-relevant sectors anywhere, as a leading indicator for
+#         California?)
+#  IND-2.4: Election infrastructure is being targeted somewhere in the United
+#           States.
+#
+#  `status:`, its precedence, and how to write one of these live once in
+#  requirements/_tree.yaml.
+# ------------------------------------------------------------------------------
+
+id: SIR-2.4.3
+title: Election results reporting is disrupted, defaced or taken offline
+status: draft
+modified: '2026-10-02'
+fact: 'An election night results website, a results reporting system or a public results
+  feed is disrupted, defaced, taken offline or degraded, any geography. This asks about
+  the REPORTING of results, not about the counting, and not about whether any result
+  changed.'
+logsource:
+  scope: any
+  kind: any
+detection:
+  # A PROPOSAL, AND A SESSION DRAFT RATHER THAN A WORK ORDER. Written
+  # 2026-10-02 from the owner's six-stage election attack surface, to cover
+  # stage 5, reporting results, which the measurement that day found had NO
+  # terms in the `election` group and NO matches in 5,051 articles over 45
+  # days. Measure it with tools/requirement_coverage.py --domain cti
+  # --sir SIR-2.4.3 over two windows and read the matched headlines before
+  # changing status.
+  #
+  # THE DISTINGUISHING TERM IS SCOPED TO THE TITLE ON PURPOSE. SIR-2.4.1's
+  # largest measured false positive class, three of ten, came from an election
+  # term and an incident term falling within 120 characters of each other
+  # somewhere in a BODY, on stories about China-linked infrastructure that had
+  # nothing to do with elections. A title scope is the lever that measurement
+  # points at.
+  reporting:
+    keywords:
+    - election night reporting
+    - election night results
+    - election results website
+    - election results site
+    - election results page
+    - results reporting system
+    - results website
+    - results portal
+    - unofficial results
+    - vote count website
+    scope: title
+  # Availability language lives in `incident_broad`, which is the union of
+  # `incident` and `targeting`. `incident` alone carries no outage wording, and
+  # an outage is the whole point of this requirement.
+  incident:
+    group: incident_broad
+    scope: blob
+  cyber:
+    group: cyber_context
+    scope: blob
+  listicle:
+    group: listicle
+    scope: title
+  condition: cyber and reporting and incident and not listicle
+note: 'SESSION DRAFT, 2026-10-02, not from a Planning and Direction work order. It exists
+  because the 45-day measurement found stage 5 of the election attack surface completely
+  unrepresented: no word-list terms and no matches. It is folded under IND-2.4 rather than
+  a new indicator, on the briefing chat''s recommendation, because IND-2.4 already asks
+  whether election infrastructure is being targeted and its two existing rules have never
+  been measured either. NO falsepositives: block yet, deliberately: that text is written
+  from what the detector actually matched, never in advance.'

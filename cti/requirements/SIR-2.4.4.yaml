@@ -1,0 +1,79 @@
+# ------------------------------------------------------------------------------
+#  SIR-2.4.4 · An election vendor, election official or election worker is the affected party
+#
+#  PIR-2: SLTT sector targeting anywhere (What threat activity is targeting
+#         SLTT-relevant sectors anywhere, as a leading indicator for
+#         California?)
+#  IND-2.4: Election infrastructure is being targeted somewhere in the United
+#           States.
+#
+#  `status:`, its precedence, and how to write one of these live once in
+#  requirements/_tree.yaml.
+# ------------------------------------------------------------------------------
+
+id: SIR-2.4.4
+title: An election vendor, election official or election worker is the affected party
+status: draft
+modified: '2026-10-02'
+fact: 'A cyber incident, breach, credential compromise or phishing campaign whose affected
+  party is an election technology vendor, an election official, or election staff, as
+  distinct from the election systems themselves. Any geography. The person or the company
+  is the victim here, not the voting equipment.'
+logsource:
+  scope: any
+  kind: any
+detection:
+  # A PROPOSAL, AND A SESSION DRAFT RATHER THAN A WORK ORDER. Written
+  # 2026-10-02 from the owner's six-stage election attack surface, to cover
+  # stage 6, everything around the process: the county network an election
+  # office shares, vendors and contractors, and election staff. The
+  # measurement that day found stage 6 with NO terms in the `election` group,
+  # and its only true matches arrived sideways through SIR-2.4.1. Measure it
+  # with tools/requirement_coverage.py --domain cti --sir SIR-2.4.4 over two
+  # windows and read the matched headlines before changing status.
+  #
+  # NO VENDOR NAMES ARE DECLARED, AND THAT IS DELIBERATE. The briefing chat's
+  # work order predicted a Dominion and Smartmatic false positive class of
+  # political, defamation and conspiracy content using "hacked" and "breach"
+  # with no cyber incident, and instructed that the class be written only if
+  # it shows up in a measurement. It did not appear in any of the 24 headlines
+  # read on 2026-10-02. Naming those companies here would manufacture the
+  # class the order said to wait for.
+  #
+  # TITLE SCOPE on the distinguishing term, for the reason recorded in
+  # SIR-2.4.3.
+  party:
+    keywords:
+    - election vendor
+    - election vendors
+    - election technology company
+    - election services
+    - election official
+    - election officials
+    - election worker
+    - election workers
+    - election staff
+    - election administrator
+    - election administrators
+    - election commission
+    - board of elections
+    - elections department
+    scope: title
+  incident:
+    group: incident
+    scope: blob
+  cyber:
+    group: cyber_context
+    scope: blob
+  listicle:
+    group: listicle
+    scope: title
+  condition: cyber and party and incident and not listicle
+note: 'SESSION DRAFT, 2026-10-02, not from a Planning and Direction work order. It exists
+  because the 45-day measurement found stage 6 of the election attack surface with no
+  dedicated vocabulary, while two of its three true incidents reached the product only
+  because a city government network happened to carry election words. Folded under IND-2.4
+  on the briefing chat''s recommendation. NO falsepositives: block yet, deliberately: that
+  text is written from what the detector actually matched. EXPECT the officials and workers
+  terms to pull in election administration politics and personnel stories, which is the
+  class that cost SIR-2.4.1 two of its ten, but do not pre-write it.'
