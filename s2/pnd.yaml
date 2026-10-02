@@ -40,9 +40,13 @@ manifest:
                                        # OVERRIDES this. Confirm it is unset or
                                        # both domains land in one directory and
                                        # this config is silently ignored.
+  # A BARE REMOTE NAME, NOT A PATH. See the matching note in cti/pnd.yaml:
+  # each collector host defines `s2-corpus:` in its own rclone.conf as an
+  # alias pointing at its own folder in the corpus account, so two hosts can
+  # collect in parallel without writing into each other's corpus.
   corpus:
     backend: rclone
-    rclone_remote: gdrive:ravenor-s2-corpus
+    rclone_remote: 's2-corpus:'
   staging:
     backend: rclone
     rclone_remote: gdrive:ravenor-s2-staging

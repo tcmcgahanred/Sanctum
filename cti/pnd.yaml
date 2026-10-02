@@ -35,9 +35,21 @@ manifest:
   #   backend: local   -> base_dir/corpus/<date>/
   #   backend: rclone  -> synced to rclone_remote, and rclone must be
   #                       configured on the collector host or collection fails.
+  #
+  # THE VALUE IS A BARE REMOTE NAME, NOT A PATH, and that is deliberate as of
+  # 2026-10-01. Each collector host defines `cti-corpus:` in its own
+  # rclone.conf as an alias pointing at ITS OWN folder in the corpus account,
+  # so Ravenor and Tricorn can collect in parallel without writing into each
+  # other's corpus. The repository therefore declares WHICH corpus, and the
+  # host declares WHOSE. Putting the folder in here instead would force one
+  # value to mean two different places on two machines, which is the drift
+  # that once had the collector running 82 sensors against the repo's 48.
+  #
+  # A host that has not defined the alias loses the PUSH, not the run: the
+  # push warns and the local copy under base_dir is untouched.
   corpus:
     backend: rclone
-    rclone_remote: gdrive:ravenor-corpus
+    rclone_remote: 'cti-corpus:'
   # EXTERNAL LISTS FETCHED AND CACHED at collection time, keyed by a pattern
   # found in the article. NOT wired into scoring — nothing here changes a score
   # today.
