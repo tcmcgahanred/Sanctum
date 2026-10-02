@@ -8,7 +8,7 @@
 id: SIR-2.5.1
 title: Reported cyber incident at a law enforcement, dispatch, court or corrections organization
 status: draft
-modified: '2026-09-30'
+modified: '2026-10-02'
 fact: 'A cyber incident, breach, data leak or ransomware claim at a sheriff''s office,
   police department, 911 or dispatch center, court, prosecutor, probation department, jail
   or prison, any geography. The organization is the victim, not the investigator.'
@@ -45,9 +45,14 @@ detection:
     - superior court
     - county court
     - municipal court
+    # `cjis` STAYS and `clets` and `ncic` LEFT, 2026-10-02. The FBI's Criminal
+    # Justice Information Services is a division as well as a policy, so the
+    # term can honestly name an organization. The California Law Enforcement
+    # Telecommunications System and the National Crime Information Center
+    # cannot: they are systems, and a headline naming either means the system
+    # or its data, not an office. They moved to SIR-2.5.2, which is the rule
+    # that asks what KIND of technology was affected.
     - cjis
-    - clets
-    - ncic
     scope: title
   incident:
     group: incident

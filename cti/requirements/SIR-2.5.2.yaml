@@ -8,12 +8,13 @@
 id: SIR-2.5.2
 title: The affected system is public safety or criminal justice technology
 status: draft
-modified: '2026-09-30'
+modified: '2026-10-02'
 fact: 'A breach, exposure, exploited vulnerability or outage affects a kind of technology
   used by law enforcement, dispatch or corrections: computer-aided dispatch, records management,
   license plate readers, body cameras, emergency notification, jail management or inmate
-  communications, or a vendor whose business is that technology. Whether any particular
-  agency runs it is not asked here.'
+  communications, a state or national criminal justice information system, or a vendor
+  whose business is that technology. Whether any particular agency runs it is not asked
+  here.'
 logsource:
   scope: any
   kind: any
@@ -37,6 +38,12 @@ detection:
     - emergency notification
     - ng911
     - next generation 911
+    # THE CRIMINAL JUSTICE INFORMATION SYSTEMS, moved here from SIR-2.5.1 on
+    # 2026-10-02. They were declared as organization names there, and they are
+    # not organizations: a headline naming either means the system or its data.
+    # `ncic` is four characters, so the engine word-boundaries it on its own.
+    - clets
+    - ncic
     - jail management
     - inmate phone
     - inmate tablet
