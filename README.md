@@ -4,11 +4,11 @@
 
 <h1 align="center">Sanctum</h1>
 
-<p align="center"><em>"Suspicion is not judgement."</em></p>
+<p align="center"><em>"Ave Omnissiah"</em></p>
 
-**Sanctum runs the first three steps of the intelligence cycle for any subject you point it at.** You write down what you care about; it collects against that, scores what it finds, and hands you a reviewable document. What the findings *mean* is your judgement, and that part stays yours.
+Sanctum runs the first three steps of the intelligence cycle for any subject you decide upon in Planning and Direction (pnd.yaml). It then uses a predefined set of sensors (opensource resources) to collect on that subject, scores what it finds, and hands you a reviewable document. You conduct Analysis and Production, Dissemination, and Feedback and Evaluation on your own, but the output of that work should inform Planning and Direction.
 
-The engine holds no knowledge of any subject. Everything specific to a topic — the sources, what matters and how much, the shape of the output — lives in one configuration file. Swap that file and the same code runs a different subject.
+The engine core of Sanctum is subject agnostic. Everything specific to a subject, the sources, what matters and how much, the shape of the output, all live in one configuration file (pnd.yaml). Swap that file and the same code runs on a different subject.
 
 All work is unclassified open-source material.
 

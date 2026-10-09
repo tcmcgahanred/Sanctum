@@ -2,6 +2,17 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-10-09] README opening text rewritten in the owner's words
+
+**The epigraph and the three opening paragraphs of `README.md` are replaced with text the owner wrote.** No other section changed, and nothing in `core/`, `tools/`, `tests/` or either domain file was touched.
+
+- **The epigraph is now "Ave Omnissiah", replacing "Suspicion is not judgement."** The old line is not preserved elsewhere. Doctrine tenet 6, "It stops at the vox", carries the same point in the body and is unchanged.
+- **The opening now names the intelligence cycle steps explicitly**, both the three Sanctum runs and the three the analyst runs: Analysis and Production, Dissemination, and Feedback and Evaluation. **It also states that the output of those three should feed back into Planning and Direction**, which the previous text left implicit.
+- **It names `pnd.yaml` twice, in place of the unnamed "one configuration file".** The file was already named in the Doctrine and "Choosing what it watches" sections; the opening did not name it.
+- **"The engine holds no knowledge of any subject" becomes "The engine core of Sanctum is subject agnostic."** Doctrine tenet 1 still reads "The engine knows nothing about any subject", which says the same thing.
+- **Two mechanical corrections to the supplied text, and nothing else:** "to collects on that subject" to "to collect on that subject", and a paragraph break before "All work is unclassified open-source material." so markdown does not join it to the paragraph above.
+- **One duplication is accepted rather than fixed.** The opening now says the analyst conducts the last three steps, and the "What it does" section still closes with "Then it stops. Assessment, distribution and feedback are yours." **Both are correct and the repetition is deliberate until the owner says otherwise.**
+
 ## [2026-10-02] Two election requirements for the two stages that had no vocabulary at all, folded under IND-2.4
 
 **`SIR-2.4.3` and `SIR-2.4.4` are added under the EXISTING `IND-2.4`, not under a new indicator.** The briefing chat recommended folding, the owner agreed, and `IND-2.4` already asks whether election infrastructure is being targeted. **Indicator count is unchanged at 15, which is the measurable proof that folding happened rather than a second election indicator appearing.**
