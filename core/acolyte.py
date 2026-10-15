@@ -18,8 +18,11 @@ import hashlib
 import json
 import logging
 import re
+import signal
 import socket
 import subprocess
+import threading
+from contextlib import contextmanager
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -34,7 +37,7 @@ try:
 except Exception:                       # pragma: no cover
     feedparser = None
 
-from core.fetch import (STATUS_OK, fetch_body, strip_html)
+from core.fetch import (STATUS_DEADLINE, STATUS_OK, fetch_body, strip_html)
 from core.pnd import load_domain, load_sensors
 
 DEFAULT_SUFFIX_SEPARATORS = (" - ", " | ", " — ")
@@ -186,6 +189,86 @@ def _load_titleset(path):
     return set(path.read_text(encoding="utf-8").split("\n")) - {""} if path.exists() else set()
 
 
+# -- a total time limit on every single request ------------------------------
+#
+# WHY THIS EXISTS. The 04:00 Pacific CTI run on 2026-10-14 hung for an hour on
+# www.bleepingcomputer.com/feed/ and the service start timeout killed it, so
+# that Wednesday's staging document was never written. systemd recorded 10.4
+# seconds of CPU in that hour: the process was waiting on the network, not
+# working. socket.setdefaulttimeout() below limits each single network wait,
+# not a whole download, so a server that keeps sending a few bytes resets it
+# for ever. Nothing limited how long one request could take in total.
+#
+# THE LIMIT IS PER REQUEST, NOT PER SENSOR. A sensor with many new articles
+# legitimately takes minutes, because every article gets its own body fetch.
+# A single request has no such excuse. The limit is three times the domain's
+# declared `fetch.timeout` (20 seconds declared, so 60), because one body fetch
+# can spend up to one timeout on each of three steps: resolving a Google News
+# wrapper, trafilatura, and the browser-fingerprint refetch. It derives from a
+# value both domains already declare, so no domain file changes.
+#
+# WHAT HAPPENS WHEN IT FIRES. The request is abandoned and named in the log as
+# DEADLINE, and the run carries on. A feed that stalls yields nothing this run
+# and is read again tomorrow. An article page that stalls is saved with its
+# feed summary and the fetch outcome `deadline`, exactly as a blocked page is.
+#
+# LINUX ONLY. It uses SIGALRM, which Windows does not have. On the laptop the
+# limit is simply absent and collection behaves as it did before. Ravenor is
+# where collection runs.
+
+DEADLINE_FACTOR = 3
+
+
+class RequestDeadline(BaseException):
+    """
+    Raised when one request runs past its total time limit.
+
+    A BaseException, deliberately: feedparser, trafilatura and core.fetch all
+    catch Exception internally, and any of them would swallow an ordinary
+    exception and carry on reading the same stalled socket.
+    """
+
+
+def request_deadline_seconds(fetch_opts):
+    """The total time one request may take, from the domain's declared timeout."""
+    return float((fetch_opts or {}).get("timeout", 20)) * DEADLINE_FACTOR
+
+
+def deadline_supported():
+    return (hasattr(signal, "SIGALRM")
+            and threading.current_thread() is threading.main_thread())
+
+
+@contextmanager
+def request_deadline(seconds):
+    """Raise RequestDeadline inside the block once `seconds` have passed."""
+    if not seconds or not deadline_supported():
+        yield
+        return
+
+    def _expire(signum, frame):
+        raise RequestDeadline(seconds)
+
+    previous = signal.signal(signal.SIGALRM, _expire)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous)
+
+
+def fetch_body_bounded(url, ctx, log):
+    """fetch_body() under the per-request time limit. Same return shape."""
+    limit = ctx.get("request_deadline")
+    try:
+        with request_deadline(limit):
+            return fetch_body(url, ctx["fetch"], log)
+    except RequestDeadline:
+        log.warning("DEADLINE %.0fs body fetch abandoned: %s", limit, url)
+        return "", STATUS_DEADLINE, url
+
+
 def process_feed(url, seen, seen_titles, run_dir, ctx, log):
     """
     Collect one feed. Returns a per-feed tally, or None if it is not a feed.
@@ -194,7 +277,14 @@ def process_feed(url, seen, seen_titles, run_dir, ctx, log):
     every run costs nothing (no request is made), whereas marking them seen
     would blacklist them permanently and make the age policy irreversible.
     """
-    parsed = feedparser.parse(url)
+    limit = ctx.get("request_deadline")
+    try:
+        with request_deadline(limit):
+            parsed = feedparser.parse(url)
+    except RequestDeadline:
+        log.warning("DEADLINE %.0fs feed read abandoned: %s", limit, url)
+        return {"saved": 0, "too_old": 0, "no_body": 0, "undated": 0,
+                "status": {STATUS_DEADLINE: 1}}
     if not parsed.entries:
         return None
     tally = {"saved": 0, "too_old": 0, "no_body": 0, "undated": 0, "status": {}}
@@ -218,7 +308,7 @@ def process_feed(url, seen, seen_titles, run_dir, ctx, log):
         if tkey and tkey in seen_titles:
             continue
 
-        text, status, final_url = fetch_body(link, ctx["fetch"], log)
+        text, status, final_url = fetch_body_bounded(link, ctx, log)
         body_source = "fetch"
         if not text:
             # The feed summary is a dek, not an article. It is kept because it
@@ -277,7 +367,7 @@ def process_page(url, seen, run_dir, ctx, log, record=None):
                     "whose contents change, declare `kind: page` on its sensor "
                     "record: %s", url)
 
-    text, status, final_url = fetch_body(url, ctx["fetch"], log)
+    text, status, final_url = fetch_body_bounded(url, ctx, log)
     if not text:
         log.warning("no text [%s] %s", status, url)
         return {"saved": 0, "too_old": 0, "no_body": 1, "undated": 0,
@@ -332,6 +422,7 @@ def main():
         "min_title_len": int(collection.get("min_title_len", DEFAULT_MIN_TITLE_LEN)),
         "max_age_days": float(max_age) if max_age else None,
         "fetch": collection.get("fetch", {}) or {},
+        "request_deadline": request_deadline_seconds(collection.get("fetch", {}) or {}),
         "seen_path": cfg["seen_path"],
         "seen_titles_path": cfg["seen_titles_path"],
     }

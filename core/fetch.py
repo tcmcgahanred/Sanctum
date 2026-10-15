@@ -128,6 +128,7 @@ STATUS_CHALLENGE = "challenge"      # bot check / consent interstitial
 STATUS_JS_SHELL = "js_shell"        # single-page app; no server-rendered text
 STATUS_REDIRECT_ONLY = "redirect_only"   # aggregator wrapper, unresolvable
 STATUS_ERROR = "error"              # the strategy raised
+STATUS_DEADLINE = "deadline"        # abandoned: one request ran past its total time limit
 
 
 # Why a body is missing, in the analyst's language. The distinction that
@@ -142,6 +143,7 @@ NOBODY_REASONS = {
     "js_shell": "page needs JavaScript; no server-rendered text — SENSOR PROBLEM",
     "empty": "fetched cleanly, but no article text was found",
     "error": "the fetch raised — SENSOR PROBLEM",
+    "deadline": "the fetch ran past its total time limit and was abandoned — SENSOR PROBLEM",
     "ok": "the article itself is genuinely short",
 }
 

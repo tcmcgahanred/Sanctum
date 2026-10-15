@@ -223,6 +223,92 @@ check("`where` keeps only the matching kind",
 check("...and a filter matching nothing yields nothing, never a crash",
       _read_cache(_mixed, dict(_ms, where={"type": "course-of-action"})), set())
 
+
+print("\n-- one request has a total time limit, not just a per-wait one --")
+# ADDED 2026-10-14. The 04:00 CTI run hung for an hour on
+# www.bleepingcomputer.com/feed/ with 10.4 seconds of CPU: waiting on the
+# network. socket.setdefaulttimeout() limits each wait, so a server that keeps
+# sending a few bytes is never cut off. These pin the total limit that stops it.
+import signal as _signal, socket as _socket, threading as _threading   # noqa: E402
+import time as _time                                                  # noqa: E402
+import core.acolyte as _acolyte                                       # noqa: E402
+from core.acolyte import (RequestDeadline, deadline_supported,        # noqa: E402
+                          fetch_body_bounded, request_deadline,
+                          request_deadline_seconds)
+from core.fetch import STATUS_DEADLINE                                # noqa: E402
+
+check("the limit is three times the declared timeout",
+      request_deadline_seconds({"timeout": 20}), 60.0)
+check("...and an undeclared timeout means the engine default of 20",
+      request_deadline_seconds({}), 60.0)
+check("the deadline is not an ordinary exception, so `except Exception` cannot swallow it",
+      issubclass(RequestDeadline, Exception), False)
+check("a deadline outcome has a plain-words reason",
+      nobody_reason({"fetch_status": STATUS_DEADLINE}).startswith("the fetch ran past"), True)
+
+if deadline_supported():
+    # THE FAILURE ITSELF: a peer that sends one byte every 50 ms. Each single
+    # wait finishes well inside its own 0.5 s timeout, so without the total
+    # limit this loop would read until the peer stopped, which it never does.
+    _a, _b = _socket.socketpair()
+    _a.settimeout(0.5)
+    _stop = _threading.Event()
+
+    def _drip():
+        while not _stop.is_set():
+            try:
+                _b.send(b"x")
+            except OSError:
+                return
+            _time.sleep(0.05)
+    _t = _threading.Thread(target=_drip, daemon=True)
+    _t.start()
+    _start = _time.monotonic()
+    _got = "no deadline"
+    try:
+        with request_deadline(0.4):
+            while True:
+                _a.recv(1)
+    except RequestDeadline:
+        _got = "deadline"
+    _took = _time.monotonic() - _start
+    _stop.set(); _a.close(); _b.close()
+    check("a slow-sending peer is cut off by the total limit", _got, "deadline")
+    check("...near the limit, not after it", _took < 1.5, True)
+
+    # The timer must not outlive the block, or it would fire somewhere else.
+    _prev = _signal.getsignal(_signal.SIGALRM)
+    with request_deadline(5):
+        pass
+    check("the timer is cleared when the block ends",
+          _signal.getitimer(_signal.ITIMER_REAL)[0], 0.0)
+    check("...and the previous signal handler is restored",
+          _signal.getsignal(_signal.SIGALRM) is _prev, True)
+
+    # A stalled body fetch is abandoned with the outcome `deadline`, the same
+    # shape as any other failed fetch, so the article keeps its feed summary.
+    class _Log:
+        def __init__(self):
+            self.lines = []
+
+        def warning(self, fmt, *a):
+            self.lines.append(fmt % a)
+    _orig = _acolyte.fetch_body
+    _acolyte.fetch_body = lambda url, opts, log: _time.sleep(5)
+    _log = _Log()
+    try:
+        _res = fetch_body_bounded("https://example.invalid/slow",
+                                  {"fetch": {}, "request_deadline": 0.3}, _log)
+    finally:
+        _acolyte.fetch_body = _orig
+    check("a stalled body fetch returns the deadline outcome",
+          _res, ("", STATUS_DEADLINE, "https://example.invalid/slow"))
+    check("...and it is named in the log as DEADLINE",
+          bool(_log.lines) and _log.lines[0].startswith("DEADLINE"), True)
+else:
+    print("  skip the timing checks: no SIGALRM on this platform, so the limit is "
+          "absent here by design")
+
 print()
 if FAILS:
     print("RESULT: FAIL — %d check(s)" % len(FAILS))
