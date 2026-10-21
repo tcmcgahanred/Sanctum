@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-#  SIR-4.4.2 · Electronic warfare, GPS denial, or spoofing capability affecting aviation navigation
+#  SIR-4.4.2 · Adversary electronic warfare, GPS denial, or spoofing capability affecting aviation navigation or datalinks
 #
 #  PIR-4: Adversary capabilities that specifically threaten rotary-wing
 #         operations (What can the adversary field that would kill or degrade
@@ -11,29 +11,55 @@
 # ------------------------------------------------------------------------------
 
 id: SIR-4.4.2
-title: 'Electronic warfare, GPS denial, or spoofing capability affecting aviation navigation'
+title: 'Adversary electronic warfare, GPS denial, or spoofing capability affecting aviation navigation or datalinks'
 status: draft
-modified: '2026-09-27'
-fact: 'Electronic warfare, GPS denial, or spoofing capability affecting aviation navigation or datalinks.'
+modified: '2026-10-20'
+fact: 'Adversary electronic warfare, GPS denial, or spoofing capability affecting aviation navigation or datalinks.'
 logsource:
   scope: any
   kind: any
 detection:
-  # Electronic warfare that touches AVIATION navigation, which is the narrowing
-  # this requirement asks for. The electronic warfare half is a declared group
-  # in two forms, designations and generic language; the aviation half is inline
-  # because no other requirement needs it in this shape.
+  # AN HONEST ZERO. Measured 2026-10-17 over 1,911 articles in 45 days, with
+  # the shipped rule as the control:
+  #
+  #   electronic warfare and aviation in the body, the rule this replaces  147
+  #   both in the title                                                      1
+  #   the same with an adversary required, this rule                         0
+  #
+  # All were read. The one title match was a market report on helicopter
+  # decoys. None of the 147 was the fact.
   ew:
     any:
-    - {group: threat_ew, scope: blob}
-    - {group: threat_ew_generic, scope: blob}
+    - {group: threat_ew, scope: title}
+    - {group: threat_ew_generic, scope: title}
   aviation:
     any:
-    - {group: platform_rotary_wing, scope: blob}
-    - {group: platform_fixed_wing, scope: blob}
-    - keywords: [aviation, aircraft, aircrew, flight operations, navigation,
-                 navigational, approach, airspace, air corridor, air route,
-                 GPS, GNSS, position navigation and timing, PNT]
-      scope: blob
-  condition: ew and aviation
-note: 'Scoring: Tier 2 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+    - {group: platform_rotary_wing, scope: title}
+    - {group: platform_fixed_wing, scope: title}
+    - keywords: [aviation, aircraft, airliner, airliners, flight, flights, pilot,
+                 pilots, airspace, airport, airports, GPS, GNSS, navigation]
+      scope: title
+  # THE ADVERSARY, decided 2026-10-20: PIR-4 asks what the ADVERSARY can field.
+  # Either a named adversary designation in the title (HQ-9, Pantsir and the like
+  # are in the designation groups) or an adversary as the first word of the
+  # title, written as a pattern because the rule language has no other way to
+  # say "at the start".
+  adversary:
+    any:
+    - {group: threat_manpads, scope: title}
+    - {group: threat_sam, scope: title}
+    - {group: threat_aaa_cuas, scope: title}
+    - {group: threat_ew, scope: title}
+    - {group: threat_uas_loitering, scope: title}
+    - {group: threat_sa_designations, scope: title}
+    - pattern:
+        match: '^(china|china''s|chinese|beijing|prc|pla|russia|russia''s|russian|moscow|kremlin|north korea|north korea''s|north korean|pyongyang|dprk|iran|iran''s|iranian|tehran|irgc)\b'
+        scope: title
+  condition: ew and aviation and adversary
+falsepositives:
+- NONE OBSERVED, because the rule matched nothing in its first measured window. The first
+  matches it produces must be read before the count is trusted.
+- FIXED BY THE TITLE SCOPING, recorded so it is not reintroduced - long articles naming a
+  jammer and an aircraft in different paragraphs, and 'Electronic Warfare Helicopter
+  Decoys Market To 2035', a market report.
+note: 'Scoring: Tier 2. MEASURED AND TIGHTENED 2026-10-17: 147 articles of 1,911 down to 0, none of the 147 was the fact. An honest zero. ADVERSARY REQUIRED 2026-10-20 by owner decision, and the title and fact now say so.'

@@ -13,26 +13,46 @@
 id: SIR-3.1.4
 title: 'Losses attributed to small arms or unguided fire rather than guided systems'
 status: draft
-modified: '2026-09-27'
+modified: '2026-10-17'
 fact: 'Losses attributed to small arms or unguided fire rather than guided systems.'
 logsource:
   scope: any
   kind: any
 detection:
-  # UNGUIDED fire, which is the whole point of this requirement: it exists to
-  # separate losses to small arms and anti-aircraft artillery from losses to
-  # guided systems, because the two carry different lessons for the reader.
+  # AN HONEST ZERO. Measured 2026-10-17 over 1,911 articles in 45 days, with the
+  # shipped rule as the control:
+  #
+  #   all three conjuncts in the body, the rule this replaces   32 articles
+  #   all three conjuncts in the title, this rule                 0 articles
+  #
+  # All 32 were read and NONE was the fact. They were long articles naming a
+  # helicopter, a gun and a war word in different paragraphs. No helicopter loss
+  # to small arms or unguided fire was reported in the window, so zero is the
+  # correct answer, and a nonzero count from the old rule was noise.
   unguided:
     any:
-    - {group: threat_small_arms, scope: blob}
-    - {group: threat_small_arms_generic, scope: blob}
-    - {group: threat_aaa_cuas, scope: blob}
-    - {group: threat_aaa_cuas_generic, scope: blob}
+    - {group: threat_small_arms, scope: title}
+    - {group: threat_small_arms_generic, scope: title}
+    - {group: threat_aaa_cuas, scope: title}
+    - keywords: [anti-aircraft gun, anti-aircraft artillery, antiaircraft gun,
+                 machine gun, ground fire, small arms, rifle fire, gunfire, RPG]
+      scope: title
   rotary:
     group: platform_rotary_wing
-    scope: blob
+    scope: title
   loss:
-    group: conflict_markers
-    scope: blob
-  condition: rotary and loss and unguided
-note: 'Scoring: Tier 3 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+    keywords: [shot down, shoot down, shoots down, shooting down, downed,
+               brought down, took it down, take down, takes down, taken out,
+               strike, struck, strikes, hits, hit by, destroyed, destroys,
+               destroy, crashed, friendly fire, hunts down, lost, losses]
+    scope: title
+  excl:
+    keywords: [strike group, strike groups]
+    scope: title
+  condition: rotary and loss and unguided and not excl
+falsepositives:
+- NONE OBSERVED, because the rule matched nothing in its first measured window. The first
+  matches it produces must be read before the count is trusted.
+- FIXED BY THE TITLE SCOPING, recorded so it is not reintroduced by a future widening - long
+  articles naming a helicopter, a gun and a war word in different paragraphs.
+note: 'Scoring: Tier 3. MEASURED AND TIGHTENED 2026-10-17: 32 articles of 1,911 down to 0, none of the 32 was the fact. An honest zero.'

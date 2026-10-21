@@ -13,23 +13,39 @@
 id: SIR-3.2.3
 title: 'Manned–unmanned teaming employed in an active conflict'
 status: draft
-modified: '2026-09-27'
+modified: '2026-10-17'
 fact: 'Manned–unmanned teaming employed in an active conflict.'
 logsource:
   scope: any
   kind: any
 detection:
-  # Manned-unmanned teaming is a named concept with a settled vocabulary, and it
-  # is only a finding for this domain when it happened in a real war rather than
-  # in a programme announcement - hence the conflict conjunct.
+  # AN HONEST ZERO. Measured 2026-10-17 over 1,911 articles in 45 days, with the
+  # shipped rule as the control:
+  #
+  #   teaming and conflict in the body, the rule this replaces   12 articles
+  #   teaming and conflict in the title, this rule                 0 articles
+  #
+  # All 12 were read and NONE was the fact. They were programme and trade-show
+  # articles about launched effects and loyal wingmen that mention a war
+  # elsewhere in the body. Manned-unmanned teaming is a named concept with a
+  # settled vocabulary, and it is only a finding for this domain when it
+  # happened in a real war rather than in a programme announcement.
   teaming:
     keywords: [manned-unmanned teaming, manned unmanned teaming, MUM-T, MUMT,
                air launched effects, air-launched effects, launched effects,
                drone wingman, loyal wingman, teamed with a drone,
                helicopter-drone team]
-    scope: blob
+    scope: title
   conflict:
-    group: conflict_markers
-    scope: blob
+    any:
+    - {group: conflict_markers, scope: title}
+    - keywords: [combat, in Ukraine, in Gaza, in Yemen, war, frontline,
+                 front line, battle]
+      scope: title
   condition: teaming and conflict
-note: 'Scoring: Tier 3 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+falsepositives:
+- NONE OBSERVED, because the rule matched nothing in its first measured window. The first
+  matches it produces must be read before the count is trusted.
+- FIXED BY THE TITLE SCOPING, recorded so it is not reintroduced by a future widening -
+  programme and trade-show articles about launched effects that mention a war in the body.
+note: 'Scoring: Tier 3. MEASURED AND TIGHTENED 2026-10-17: 12 articles of 1,911 down to 0, none of the 12 was the fact. An honest zero.'

@@ -2,6 +2,38 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-10-20] Thirteen second-domain detectors read their facts in the headline, and the PIR-4 detectors require an adversary
+
+**All 13 measured detectors in `s2/requirements/` are rewritten from a reading of what they matched.** Measured on Ravenor on 2026-10-17 over 45 days and 1,911 articles, with each shipped rule run beside its replacement as the control, and every match read.
+
+- **THE CAUSE WAS ONE DEFECT IN TWELVE RULES.** Every conjunct read the whole article, so long defence articles passed by naming a helicopter, a weapon and a war word in different paragraphs. **The fix is the same one the CTI rules took: the conjuncts that decide the fact are read in the title.** Where a fact is usually named only in the body, such as the weapon in a helicopter loss or the range figure in a test, that one conjunct stays in the body and the file says why.
+- **COUNTS, shipped rule first and this rule second:** `SIR-1.3.1` 26 to 20, `SIR-3.1.1` 111 to 22, `SIR-3.1.4` 32 to 0, `SIR-3.2.3` 12 to 0, `SIR-3.3.2` 30 to 2, `SIR-4.1.1` 109 to 4, `SIR-4.2.1` 94 to 4, `SIR-4.2.2` 115 to 3, `SIR-4.3.1` 77 to 1, `SIR-4.3.3` 35 to 0, `SIR-4.4.1` 33 to 3, `SIR-4.4.2` 147 to 0, `SIR-4.4.3` 265 to 10.
+- **FIVE HONEST ZEROS.** `SIR-3.1.4`, `SIR-3.2.3`, `SIR-4.3.3` and `SIR-4.4.2` had no true match among the shipped rule's matches, and `SIR-4.1.2` was already zero. **Not one is loosened to produce a number.**
+- **THE PIR-4 DETECTORS REQUIRE AN ADVERSARY, by owner decision 2026-10-20.** PIR-4 asks what the adversary can field, and before this change most PIR-4 matches were United States, allied and Ukrainian purchases and programmes. **Six rules now require a named adversary designation in the title, or China, Russia, North Korea or Iran as its first word:** `SIR-4.1.1`, `SIR-4.2.1`, `SIR-4.2.2`, `SIR-4.3.1`, `SIR-4.4.2` and `SIR-4.4.3`. **Their titles and fact lines now say "adversary".** One shared adversary list was chosen over one PIR per adversary, so the rule count stays at 12.
+- **`SIR-4.2.2` TESTS THE SHOOTER, NOT THE FIRST WORD.** On its 22 title matches the first-word test kept two, one wrong, and missed "Iran shot down Apache helicopter". A pattern wanting an adversary within two words before a firing word kept exactly the three adversary-fire items. **The 19 Ukrainian kills of Russian helicopters it drops still count under `SIR-3.1.1`.**
+- **`SIR-1.3.1` RECOVERS THE RECALL COST RECORDED ON 2026-09-27.** The adversary must now open the title, and bare `Xi` is in that pattern, so "Xi warns against war in Middle East and Gulf region" matches. **`actor_adversary` is not touched, so no score moves.** 12 of its 20 matches are not `ecns.cn`, against the three recorded on 2026-09-27.
+- **TWO ENGINE FINDINGS, recorded and NOT fixed here.** **One:** aggregated headlines end in " - Source Name", and a place in the source name satisfies a title conjunct, as "South China Morning Post" and "Vietnam.vn" did. **Two:** a bare `pattern:` ignores a sibling `scope:` and always reads the whole article; only the `{match, scope}` form honours scope. `SIR-4.2.1` used the bare form and now uses the other.
+- **No word list in `s2/pnd.yaml` changed, no tier changed, and no detector was added or removed.**
+
+## [2026-10-20] Computer-aided dispatch and records management products added to `SIR-2.5.2`
+
+**At the owner's request on 2026-10-13, the common computer-aided dispatch and records management system products are in the `technology:` block of `cti/requirements/SIR-2.5.2.yaml`, title scope.** First built on 2026-10-13 on `be57020` and never applied; rebuilt on `564015a`.
+
+- **Added:** `premierone`, `spillman`, `commandcentral`, `tritech`, `superion`, `zuercher`, `new world systems`, `hexagon`, `hxgn`, `intergraph`, `sun ridge systems`, `rims`, `caliber public safety`.
+- **Shortened to the form headlines use:** `motorola solutions` to `motorola`, `tyler technologies` to `tyler tech`. **Bare `tyler` was not used: it matches "Tyler, Texas city hall ransomware attack", which a synthetic probe confirmed `tyler tech` does not.**
+- **Not added:** `octave`, because the Hexagon spin-off under that name is not confirmed complete and the word also names GNU Octave.
+- **Applied by the owner's instruction, not by measurement.** `motorola`, `hexagon` and `rims` carry an unmeasured collision risk. The rule stays `status: draft`.
+
+## [2026-10-14] One request gets a total time limit, so one slow-sending server cannot stall a whole collection run
+
+**`564015a`. The Wednesday 14 October CTI run hung for an hour on `https://www.bleepingcomputer.com/feed/` and was killed by the service start timeout, so no staging document was produced and the 3a was rebuilt by hand.** Nothing limited how long one request could take: the socket timeout limits each single wait, and a server sending a byte at a time resets it indefinitely.
+
+- **Every feed parse and every article body fetch now runs under a total time limit of three times the declared `fetch.timeout`, so 60 seconds in both domains.** Three, because one body fetch can spend up to one timeout on each of three steps: the Google News wrapper, trafilatura, and the browser-fingerprint refetch. **Neither domain file changes.**
+- **The limit is on the REQUEST, not the sensor, which answers the owner's caveat that three minutes is long for a sensor:** a stalled request is cut, while a sensor with many new articles is never cut for being busy.
+- **When it fires, the request is abandoned and logged as `DEADLINE` with its URL, and the run carries on.** A stalled feed yields nothing that run; a stalled article page is saved with its feed summary and the new fetch outcome `deadline`.
+- **`RequestDeadline` is a `BaseException` on purpose**, because feedparser, trafilatura and `core/fetch.py` all catch `Exception` and would otherwise swallow it. Linux only; on Windows the limit is absent and behaviour is unchanged.
+- **Proved against the failure itself:** against a local server sending one byte every half second, real feedparser hung until killed without the limit, and returned in 3.0 seconds with a 3-second limit. Ten new checks in `tests/fetch_test.py`.
+
 ## [2026-10-09] README opening text rewritten in the owner's words
 
 **The epigraph and the three opening paragraphs of `README.md` are replaced with text the owner wrote.** No other section changed, and nothing in `core/`, `tools/`, `tests/` or either domain file was touched.

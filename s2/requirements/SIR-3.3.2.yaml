@@ -13,31 +13,45 @@
 id: SIR-3.3.2
 title: 'Loitering munition or FPV employment against parked or taxiing aircraft'
 status: draft
-modified: '2026-09-27'
+modified: '2026-10-17'
 fact: 'Loitering munition or FPV employment against parked or taxiing aircraft.'
 logsource:
   scope: any
   kind: any
 detection:
-  # A loitering munition or first-person-view drone, an aircraft, and the
-  # aircraft being ON THE GROUND. The third conjunct is what makes this
-  # different from an air-to-air engagement, and it has no group of its own
-  # because only this requirement asks for it - written inline, per the standing
-  # rule that one user means the words live in the rule.
+  # THE DRONE, THE GROUND AND THE HIT ARE READ IN THE TITLE. Measured 2026-10-17
+  # over 1,911 articles in 45 days, with the shipped rule as the control:
+  #
+  #   drone, aircraft and ground words in the body, the rule this replaces   30
+  #   drone, ground and hit words in the title, this rule                     2
+  #
+  # All 30 were read. The two this rule keeps are the fact: Ukrainian drones
+  # striking Russian airfields with Su-34 and Su-35 aircraft hit. The 28 it
+  # drops named a drone, an aircraft and an airbase in different paragraphs.
+  #
+  # The aircraft conjunct is DROPPED from the title on purpose. Airfield strike
+  # headlines often name the airfield and not the aircraft, and an airfield in
+  # the title with a drone and a hit is already the event this asks for.
   uas:
     any:
-    - {group: threat_uas_loitering, scope: blob}
-    - {group: threat_uas_loitering_generic, scope: blob}
-  aircraft:
-    any:
-    - {group: platform_rotary_wing, scope: blob}
-    - {group: platform_fixed_wing, scope: blob}
-  on_the_ground:
-    any:
-    - keywords: [parked, taxiing, taxied, on the ground, in the open, unsheltered,
-                 dispersal, revetment, hardened aircraft shelter, hangar,
-                 parking apron, ramp space, flight line, hardstand]
-      scope: blob
-    - {group: env_basing, scope: blob}
-  condition: uas and aircraft and on_the_ground
-note: 'Scoring: Tier 3 × first-occurrence DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+    - {group: threat_uas_loitering, scope: title}
+    - {group: threat_uas_loitering_generic, scope: title}
+    - keywords: [drone, drones, UAV, UAVs, unmanned aerial]
+      scope: title
+  ground:
+    keywords: [airfield, airfields, airbase, air base, airbases, air bases,
+               parked, taxiing, on the ground, hangar, hangars, flight line,
+               aircraft shelter, apron]
+    scope: title
+  hit:
+    keywords: [struck, strike, strikes, hit, hits, attack, attacks, attacked,
+               destroyed, destroys, damaged]
+    scope: title
+  condition: uas and ground and hit
+falsepositives:
+- AN AIRFIELD STRIKE IS NOT ALWAYS A STRIKE ON AIRCRAFT. A headline about drones hitting an
+  airfield's fuel or ammunition store matches. Both matches in the first window named
+  aircraft hit, but the rule does not require it.
+- FIXED BY THE TITLE SCOPING, recorded so it is not reintroduced by a future widening - long
+  articles naming a drone, an aircraft and an airbase in different paragraphs.
+note: 'Scoring: Tier 3 × first-occurrence. MEASURED AND TIGHTENED 2026-10-17: 30 articles of 1,911 down to 2, both the fact, with the reading and the false positives written into the detection block.'

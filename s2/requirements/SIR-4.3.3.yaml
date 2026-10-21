@@ -13,36 +13,51 @@
 id: SIR-4.3.3
 title: 'A system appearing with a non-state or irregular actor'
 status: draft
-modified: '2026-09-27'
+modified: '2026-10-17'
 fact: 'A system appearing with a non-state or irregular actor.'
 logsource:
   scope: any
   kind: any
 detection:
-  # A named system in the hands of an irregular actor. The actor words are
-  # generic on purpose: naming particular groups would be a collection decision
-  # about which ones matter, and that belongs to the owner rather than to a
-  # detector written on a Sunday.
+  # AN HONEST ZERO. Measured 2026-10-17 over 1,911 articles in 45 days, with the
+  # shipped rule as the control:
+  #
+  #   system and actor words in the body, the rule this replaces   35 articles
+  #   system and actor words in the title, this rule                0 articles
+  #
+  # All 35 were read and NONE was the fact. Most were United States and allied
+  # counter-drone stories that mention cartels or militants in the body.
+  #
+  # COUNTER-DRONE SYSTEMS ARE LEFT OUT on purpose. A counter-drone gun or jammer
+  # in a headline with "cartel" in it was, every time it was read, a government
+  # defending against the irregular actor, not the actor holding the system.
+  #
+  # The actor words are generic on purpose: naming particular groups would be a
+  # collection decision about which ones matter, and that belongs to the owner.
+  # Tested 2026-10-17 with Houthi, Hezbollah, Hamas and Taliban added: still
+  # zero, so leaving them out costs nothing measured.
   system:
     any:
-    - {group: threat_manpads, scope: blob}
-    - {group: threat_sam, scope: blob}
-    - {group: threat_aaa_cuas, scope: blob}
-    - {group: threat_ew, scope: blob}
-    - {group: threat_small_arms, scope: blob}
-    - {group: threat_uas_loitering, scope: blob}
-    - {group: threat_sa_designations, scope: blob}
-    - {group: threat_manpads_generic, scope: blob}
-    - {group: threat_sam_generic, scope: blob}
-    - {group: threat_aaa_cuas_generic, scope: blob}
-    - {group: threat_ew_generic, scope: blob}
-    - {group: threat_small_arms_generic, scope: blob}
-    - {group: threat_uas_loitering_generic, scope: blob}
+    - {group: threat_manpads, scope: title}
+    - {group: threat_sam, scope: title}
+    - {group: threat_aaa_cuas, scope: title}
+    - {group: threat_ew, scope: title}
+    - {group: threat_uas_loitering, scope: title}
+    - {group: threat_sa_designations, scope: title}
+    - {group: threat_manpads_generic, scope: title}
+    - {group: threat_sam_generic, scope: title}
+    - {group: threat_uas_loitering_generic, scope: title}
   irregular:
-    keywords: [non-state, nonstate, non-state actor, militia, militias,
-               insurgent, insurgents, insurgency, rebel, rebels, rebel group,
-               armed group, paramilitary, proxy force, proxy group, irregular
-               forces, separatist, separatists, smuggled, trafficked]
-    scope: blob
+    keywords: [non-state, nonstate, militia, militias, insurgent, insurgents,
+               insurgency, rebel, rebels, armed group, paramilitary, proxy,
+               proxies, separatist, separatists, smuggled, smuggling, trafficked,
+               cartel, cartels, militant, militants, terrorist, terrorists]
+    scope: title
   condition: system and irregular
-note: 'Scoring: Tier 2 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+falsepositives:
+- NONE OBSERVED, because the rule matched nothing in its first measured window. The first
+  matches it produces must be read before the count is trusted.
+- FIXED BY LEAVING OUT COUNTER-DRONE SYSTEMS, recorded so it is not reintroduced - 'US Army
+  tests counter-drone tech at Mexican border as cartel drone use rises' is a government
+  defending against the actor.
+note: 'Scoring: Tier 2. MEASURED AND TIGHTENED 2026-10-17: 35 articles of 1,911 down to 0, none of the 35 was the fact. An honest zero.'

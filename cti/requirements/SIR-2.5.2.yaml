@@ -14,7 +14,7 @@
 id: SIR-2.5.2
 title: The affected system is public safety or criminal justice technology
 status: draft
-modified: '2026-10-02'
+modified: '2026-10-20'
 fact: 'A breach, exposure, exploited vulnerability or outage affects a kind of technology
   used by law enforcement, dispatch or corrections: computer-aided dispatch, records management,
   license plate readers, body cameras, emergency notification, jail management or inmate
@@ -59,9 +59,9 @@ detection:
     - flock safety
     - axon
     - evidence.com
-    - motorola solutions
+    - motorola
     - centralsquare
-    - tyler technologies
+    - tyler tech
     - versaterm
     - carbyne
     - rapidsos
@@ -73,6 +73,28 @@ detection:
     - pay tel
     - jpay
     - cellebrite
+    # COMPUTER-AIDED DISPATCH AND RECORDS MANAGEMENT PRODUCTS, added 2026-10-13
+    # at the owner's request and shipped 2026-10-20. Written in the form
+    # headlines use, not full corporate form: `motorola solutions` became
+    # `motorola` and `tyler technologies` became `tyler tech`. Bare `tyler` was
+    # not used because it matches the city of Tyler, Texas. `octave` was not
+    # added: the Hexagon spin-off under that name is not confirmed complete and
+    # the word also names GNU Octave. UNMEASURED COLLISION RISK on three terms:
+    # `motorola` (phones), `hexagon` (industrial software advisories) and `rims`
+    # (the Risk and Insurance Management Society).
+    - premierone
+    - spillman
+    - commandcentral
+    - tritech
+    - superion
+    - zuercher
+    - new world systems
+    - hexagon
+    - hxgn
+    - intergraph
+    - sun ridge systems
+    - rims
+    - caliber public safety
     scope: title
   incident:
     group: incident

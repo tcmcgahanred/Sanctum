@@ -13,26 +13,44 @@
 id: SIR-4.4.1
 title: 'Air defence networking, sensor fusion, or IADS integration reporting'
 status: draft
-modified: '2026-09-27'
+modified: '2026-10-17'
 fact: 'Air defence networking, sensor fusion, or IADS integration reporting.'
 logsource:
   scope: any
   kind: any
 detection:
-  # Integrated air defence is a named concept with its own vocabulary, and the
-  # adversary or the theatre has to be in it, or this matches a NATO programme
-  # note that tells this reader nothing.
+  # BOTH HALVES ARE READ IN THE TITLE. Measured 2026-10-17 over 1,911 articles
+  # in 45 days, with the shipped rule as the control:
+  #
+  #   networking and adversary or theatre in the body, the rule this replaces  33
+  #   both in the title, this rule                                              3
+  #
+  # All 33 were read. Two of the three this rule keeps are the fact: a
+  # Chinese-origin FK-2000 air defence network in Turkmenistan, reported twice.
+  # The third is a false positive, below.
+  #
+  # The adjectives Chinese, Russian, North Korean and Iranian are written inline
+  # because `actor_adversary` holds only nouns, the same gap found in SIR-1.3.1.
   networking:
     keywords: [integrated air defence, integrated air defense, IADS,
                air defence network, air defense network, networked air defence,
                networked air defense, sensor fusion, data fusion,
-               common operating picture, early warning network, command and
-               control integration, kill chain integration, battle management,
-               layered air defence, layered air defense]
-    scope: blob
+               early warning network, kill chain, battle management,
+               layered air defence, layered air defense, air defence stack,
+               air-defence stack, air defense stack]
+    scope: title
   whose:
     any:
-    - {group: actor_adversary, scope: blob}
-    - {group: geo_indopacom, scope: blob}
+    - {group: actor_adversary, scope: title}
+    - {group: geo_indopacom, scope: title}
+    - keywords: [Chinese, Russian, North Korean, Iranian]
+      scope: title
   condition: networking and whose
-note: 'Scoring: Tier 2 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+falsepositives:
+- THE SOURCE NAME IS PART OF THE TITLE. Aggregated headlines end in ' - Source Name', and
+  'The US air defense network and interceptor missile resources in the Gulf region. -
+  Vietnam.vn' matched the theatre group on the source name alone. The rule language cannot
+  exclude the suffix.
+- FIXED BY THE TITLE SCOPING, recorded so it is not reintroduced by a future widening -
+  NATO and allied programme notes that mention China or Russia in the body.
+note: 'Scoring: Tier 2. MEASURED AND TIGHTENED 2026-10-17: 33 articles of 1,911 down to 3, two the fact, with the reading and the false positives written into the detection block.'

@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-#  SIR-4.2.2 · Combat employment of a counter-air system against any rotary-wing target
+#  SIR-4.2.2 · Combat employment of an adversary counter-air system against any rotary-wing target
 #
 #  PIR-4: Adversary capabilities that specifically threaten rotary-wing
 #         operations (What can the adversary field that would kill or degrade
@@ -11,19 +11,38 @@
 # ------------------------------------------------------------------------------
 
 id: SIR-4.2.2
-title: 'Combat employment of a counter-air system against any rotary-wing target'
+title: 'Combat employment of an adversary counter-air system against any rotary-wing target'
 status: draft
-modified: '2026-09-27'
-fact: 'Combat employment of a counter-air system against any rotary-wing target.'
+modified: '2026-10-20'
+fact: 'Combat employment of an adversary counter-air system against any rotary-wing target.'
 logsource:
   scope: any
   kind: any
 detection:
-  # EMPLOYMENT against a rotary-wing target, anywhere. This deliberately
-  # overlaps SIR-3.1.1: that one requires a confirmed LOSS with the system
-  # named, this one requires only that the system was used against a
-  # rotary-wing aircraft. An article can answer both, and two requirements
-  # answered by one article is not double counting - it is two facts.
+  # THE HELICOPTER, THE EMPLOYMENT AND THE SHOOTER ARE READ IN THE TITLE.
+  # Measured 2026-10-17 over 1,911 articles in 45 days, with the shipped rule as
+  # the control:
+  #
+  #   all conjuncts in the body, the rule this replaces              115
+  #   helicopter and employment in the title                           22
+  #   the same with the adversary as the SHOOTER, this rule             3
+  #
+  # All were read. The 22 are the same events as SIR-3.1.1, and 19 of them
+  # are Ukrainian drones killing Russian helicopters, where the adversary is
+  # the TARGET. Those still count under SIR-3.1.1. The three this rule keeps
+  # are the adversary firing: Iran's claimed Apache shoot-down, the Houthi
+  # Apache video, and Russian air defence shooting down its own Mi-8.
+  #
+  # THE SHOOTER TEST IS ITS OWN PATTERN, NOT THE ADVERSARY-FIRST TEST the other
+  # PIR-4 rules use. Tested 2026-10-17 on the 22: adversary-first kept two, one
+  # of them wrong ('Russia Gave Its Mi-28NM New Anti-Drone Defenses - A Ukrainian
+  # FPV Still Took It Down'), and missed 'Trump vows US response after saying
+  # Iran shot down Apache helicopter'. This pattern wants an adversary within
+  # two words BEFORE a firing word, and kept exactly the three. It was measured
+  # on those 22 headlines only, as an extra conjunct on a rule that matched 22.
+  #
+  # Irregular adversaries (Houthis, Hezbollah, Hamas) are in the shooter list
+  # because they are the ones firing at helicopters in this window.
   system:
     any:
     - {group: threat_manpads, scope: blob}
@@ -41,12 +60,30 @@ detection:
     - {group: threat_uas_loitering_generic, scope: blob}
   rotary:
     group: platform_rotary_wing
-    scope: blob
+    scope: title
   employment:
-    any:
-    - {group: conflict_markers, scope: blob}
-    - keywords: [fired at, fired on, engaged, engagement, shot at, launched at,
-                 targeted, targeting of, intercepted]
-      scope: blob
-  condition: system and rotary and employment
-note: 'Scoring: Tier 2 or Tier 3, whichever is higher DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+    keywords: [shot down, shoot down, shoots down, shooting down, downed,
+               brought down, took it down, take down, takes down, taken out,
+               strike, struck, strikes, hits, hit by, destroyed, destroys,
+               destroy, crashed, friendly fire, hunts down, lost, losses,
+               fired at, fired on, engaged, shot at, targeted, targets,
+               intercepted, intercepts, attacked]
+    scope: title
+  excl:
+    keywords: [strike group, strike groups]
+    scope: title
+  shooter:
+    pattern:
+      match: '\b(iran|iranian|houthi|houthis|hezbollah|hamas|russia|russian|russians|china|chinese|pla|north korea|north korean)\b(\s+[a-z'']+){0,2}\s+(shoot|shoots|shot|shooting|down|downs|downed|brings down|brought down|hits|hit|struck|strikes|destroy|destroys|destroyed|fired on|fired at|targets|targeted)\b'
+      scope: title
+  condition: system and rotary and employment and shooter and not excl
+falsepositives:
+- A CLAIM IS NOT A CONFIRMATION. 'Trump vows US response after saying Iran shot down
+  Apache helicopter' reports a claim, and the reader has to judge it.
+- FRIENDLY FIRE COUNTS. 'Russian troops shoot down own Mi-8' is an adversary system
+  employed against a helicopter, which is the fact, even though the helicopter is the
+  adversary's own.
+- FIXED BY THE SHOOTER TEST, recorded so it is not reintroduced - 19 headlines of
+  Ukrainian drones killing Russian helicopters, where the adversary is the target and not
+  the shooter.
+note: 'Scoring: Tier 2 or Tier 3, whichever is higher. MEASURED AND TIGHTENED 2026-10-17: 115 articles of 1,911 down to 3, every match read. ADVERSARY REQUIRED AS THE SHOOTER 2026-10-20 by owner decision, and the title and fact now say so.'

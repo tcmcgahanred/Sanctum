@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-#  SIR-4.4.3 · Counter-UAS capability that would defeat organic unmanned systems
+#  SIR-4.4.3 · Adversary counter-UAS capability that would defeat organic unmanned systems
 #
 #  PIR-4: Adversary capabilities that specifically threaten rotary-wing
 #         operations (What can the adversary field that would kill or degrade
@@ -11,31 +11,62 @@
 # ------------------------------------------------------------------------------
 
 id: SIR-4.4.3
-title: 'Counter-UAS capability that would defeat organic unmanned systems'
+title: 'Adversary counter-UAS capability that would defeat organic unmanned systems'
 status: draft
-modified: '2026-09-27'
-fact: 'Counter-UAS capability that would defeat organic unmanned systems.'
+modified: '2026-10-20'
+fact: 'Adversary counter-UAS capability that would defeat organic unmanned systems.'
 logsource:
   scope: any
   kind: any
 detection:
-  # Counter-unmanned capability AND an unmanned aircraft to defeat. Both halves
-  # are needed: the counter-UAS words alone match a procurement announcement
-  # with no aircraft in it, and the drone words alone match half the corpus.
+  # THE COUNTER-DRONE CAPABILITY AND THE ADVERSARY ARE READ IN THE TITLE.
+  # Measured 2026-10-17 over 1,911 articles in 45 days, with the shipped rule
+  # as the control:
+  #
+  #   counter-drone and drone words in the body, the rule this replaces   265
+  #   counter-drone words in the title                                    118
+  #   the same with an adversary required, this rule                       10
+  #
+  # All were read. The 118 were almost all United States, allied and
+  # Ukrainian purchases, contracts and trade shows. The ten this rule keeps
+  # are adversary counter-drone capability: PLA laser and microwave weapons
+  # (three reports), the layered PLA counter-drone drill, the PLA counter-drone
+  # network in Tibet, the 'Iron Triangle' test, the LD76 gun, Chinese MANPADS in
+  # Russian counter-drone use, anti-drone nets on Caspian Fleet ships, and the
+  # Mi-28NM anti-drone defences.
+  #
+  # The second conjunct of the old rule, an unmanned aircraft to defeat, is
+  # dropped: a counter-drone word in a headline already says what it defeats.
   counter_uas:
     any:
-    - {group: threat_aaa_cuas, scope: blob}
-    - {group: threat_aaa_cuas_generic, scope: blob}
+    - {group: threat_aaa_cuas_generic, scope: title}
     - keywords: [counter-unmanned, counter unmanned, anti-drone, drone defence,
                  drone defense, UAS defeat, drone jammer, net gun, laser
-                 dazzler, high-power microwave]
-      scope: blob
-  unmanned:
+                 dazzler, high-power microwave, drone interceptor,
+                 interceptor drone, interceptor drones]
+      scope: title
+  # THE ADVERSARY, decided 2026-10-20: PIR-4 asks what the ADVERSARY can field.
+  # Either a named adversary designation in the title (HQ-9, Pantsir and the like
+  # are in the designation groups) or an adversary as the first word of the
+  # title, written as a pattern because the rule language has no other way to
+  # say "at the start".
+  adversary:
     any:
-    - {group: threat_uas_loitering, scope: blob}
-    - {group: threat_uas_loitering_generic, scope: blob}
-    - keywords: [UAS, UAV, drone, drones, unmanned aircraft, unmanned aerial,
-                 quadcopter, fixed-wing drone, reconnaissance drone]
-      scope: blob
-  condition: counter_uas and unmanned
-note: 'Scoring: Tier 2 DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+    - {group: threat_manpads, scope: title}
+    - {group: threat_sam, scope: title}
+    - {group: threat_aaa_cuas, scope: title}
+    - {group: threat_ew, scope: title}
+    - {group: threat_uas_loitering, scope: title}
+    - {group: threat_sa_designations, scope: title}
+    - pattern:
+        match: '^(china|china''s|chinese|beijing|prc|pla|russia|russia''s|russian|moscow|kremlin|north korea|north korea''s|north korean|pyongyang|dprk|iran|iran''s|iranian|tehran|irgc)\b'
+        scope: title
+  condition: counter_uas and adversary
+falsepositives:
+- THE ADVERSARY'S DEFENCE FAILING STILL MATCHES. 'Russia Gave Its Mi-28NM New Anti-Drone
+  Defenses - A Ukrainian FPV Still Took It Down' is about Russian counter-drone
+  capability, which is the fact, and also about it failing.
+- FIXED BY REQUIRING THE ADVERSARY, recorded so it is not reintroduced - 'L3Harris
+  Delivers First VAMPIRE Counter-Drone Systems to U.S. Army', 'Kongsberg to build new
+  plant in Poland for counter-drone systems' and about a hundred more.
+note: 'Scoring: Tier 2. MEASURED AND TIGHTENED 2026-10-17: 265 articles of 1,911 down to 10, every match read. ADVERSARY REQUIRED 2026-10-20 by owner decision, and the title and fact now say so.'

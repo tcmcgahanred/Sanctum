@@ -12,7 +12,7 @@
 id: SIR-1.3.1
 title: 'A ministry, spokesman, or named leader states an intention, threat, warning, or red line'
 status: draft
-modified: '2026-09-27'
+modified: '2026-10-17'
 fact: 'A ministry, spokesman, or named leader states an intention, threat, warning, or red line.'
 logsource:
   scope: any
@@ -41,47 +41,48 @@ detection:
   # read as well: EIGHT were false positives and ONE was the fact. A rule that
   # buys one real answer for eight wrong ones is the wider rule, not the better.
   #
-  # THE RECALL COST IS KNOWN AND ACCEPTED. The one it gives up is "Xi warns
-  # against war in Middle East and Gulf region", because `actor_adversary` holds
-  # `Xi Jinping` and not bare `Xi`, so that headline carries no actor term at
-  # all. Adding bare `Xi` is a SCORING change, since tiers 1 and 2 read that
-  # group, and `Xi` collides with the Roman numeral XI and with a common
-  # surname. Measure it before touching it.
+  # THE SPEAKER COMES FIRST, added 2026-10-17. The adversary half now has to
+  # OPEN the title, as the subject of the sentence, and is written as a pattern
+  # because the rule language has no other way to say "at the start". Measured
+  # over 1,911 articles in 45 days with the shipped rule as the control:
   #
-  # A COLLECTION FINDING UNDER THE RULE, and the bigger of the two: 16 of the 19
-  # matches are `ecns.cn`, which was dropped from collection the same day. Only
-  # THREE non-`ecns.cn` articles in 45 days answer this requirement, so the
-  # western sensor set will answer it about once a fortnight at best. That is
-  # the cost of the western-only decision appearing as a number. DO NOT LOOSEN
-  # THIS RULE TO HIDE IT.
+  #   adversary anywhere in the title, the rule this replaces   26 articles
+  #   adversary at the start of the title, this rule            20 articles
+  #
+  # Every match was read. Of the 12 that are not `ecns.cn`, 10 are the fact:
+  # Xi's red lines (twice), "Xi warns against war", "China warns US space
+  # weapons", "China urges Japan" and four Iranian warnings of retaliation.
+  # The six it drops all had the adversary as the subject of someone else's
+  # sentence, which is the first false-positive class below.
+  #
+  # THE 2026-09-27 RECALL COST IS RECOVERED. Bare `Xi` is in the pattern, so
+  # "Xi warns against war in Middle East and Gulf region" now matches. It does
+  # NOT touch `actor_adversary`, so no score moves, and at the start of a title
+  # beside a declaration word it did not collide with the numeral or the surname
+  # in this window.
+  #
+  # The ecns.cn finding stands, but the western count is higher than recorded:
+  # 12 non-`ecns.cn` matches in 45 days, not three.
   declaration:
     group: declaration_terms
     scope: title
-  # THE ADJECTIVE IS MISSING FROM THE GROUP, found while testing this detector
-  # on 2026-09-27. `actor_adversary` declares 52 terms and every one is a noun:
-  # China, PRC, Beijing, PLA, Russian Federation, Korean People's Army. It holds
-  # no `Chinese`, no `Russian`, no `North Korean`, no bare `Iranian` - and
-  # `China` is in `word_boundary_terms`, so it cannot match inside `Chinese`
-  # either. A headline reading "Chinese defence ministry warned Taipei" matched
-  # NO adversary term at all.
-  #
-  # The adjectives are written INLINE HERE rather than added to the group on
-  # purpose: `actor_adversary` is read by tier 1 and tier 2, so adding four
-  # terms to it is a SCORING change and has to be measured against the corpus
-  # first. A detector moves no score, so it can be correct today while that
-  # measurement waits.
-  actor:
-    any:
-    - {group: actor_adversary, scope: title}
-    - keywords: [Chinese, Russian, North Korean, Iranian]
+  # The adjectives Chinese, Russian, North Korean and Iranian are in the pattern
+  # for the reason recorded on 2026-09-27: `actor_adversary` holds only nouns,
+  # and adding them there is a SCORING change that waits on a measurement.
+  speaker_first:
+    pattern:
+      match: '^(china|china''s|chinese|beijing|prc|pla|russia|russia''s|russian|moscow|kremlin|putin|lavrov|peskov|medvedev|north korea|north korean|pyongyang|kim jong un|kim yo jong|iran|iran''s|iranian|tehran|irgc|khamenei|araghchi|xi|xi jinping)\b'
       scope: title
-  condition: declaration and actor
+  condition: declaration and speaker_first
 falsepositives:
-- THE DECLARER IS NOT THE ADVERSARY, and the title scoping does NOT fix this class.
-  'Report - CIA warned Europe of Russian drone attack from vessels' and 'Trump Threatens
-  Canadian Jets At The Center Of Army Aerial Surveillance'. A warning verb beside an
-  adversary name does not mean the adversary is the one speaking, and separating speaker
-  from subject needs word order, which this rule language does not express.
+- THE DECLARER IS NOT THE ADVERSARY, NARROWED BUT NOT FIXED by the speaker-first pattern.
+  'Report - CIA warned Europe of Russian drone attack from vessels' no longer matches. 'Russia
+  is stepping up aggression towards Nato, Polish defence official warns' still does, because
+  the adversary opens the title and the speaker comes at the end.
+- STATE-WIRE ROUTINE STATEMENTS. 'China vows timely updates on mudslide situation' and
+  'China, U.S. maintain communication on AI' (a Foreign Ministry spokesperson) are a ministry
+  speaking, with no intention, threat, warning or red line. Eight of the 20 were this class,
+  all ecns.cn, which is no longer collected.
 - A COMPANY OR A DOMESTIC BODY RATHER THAN A MINISTRY, A SPOKESMAN OR A LEADER. 'DJI vows
   continued legal action after a US court order' is a manufacturer. 'Top anti-graft body
   vows more concrete measures' is a real state body making a real declaration, about
@@ -96,4 +97,4 @@ falsepositives:
   ('China's BDS installed on over 12 million commercial vehicles', 'Satellite-based farming
   demo cuts inputs, boosts rice yields', 'China-Central Asia meteorological cooperation forum
   opens in Urumqi').
-note: 'Scoring: any tier × declared intent. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. MEASURED AND TIGHTENED 2026-09-27: 277 articles of 1,576 down to 19, both halves now read in the title, with the reading and the false positives written into the detection block below. 16 of the 19 are ecns.cn, which is no longer collected, so only three non-ecns.cn articles in 45 days answer this requirement.'
+note: 'Scoring: any tier × declared intent. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. MEASURED AND TIGHTENED 2026-09-27: 277 articles of 1,576 down to 19, both halves now read in the title, with the reading and the false positives written into the detection block below. SPEAKER-FIRST 2026-10-17: 26 articles of 1,911 down to 20, the adversary now has to open the title; 12 are not ecns.cn and 10 of those are the fact.'

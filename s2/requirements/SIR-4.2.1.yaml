@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-#  SIR-4.2.1 · A test or live-fire event with stated range, altitude, or engagement performance
+#  SIR-4.2.1 · A test or live-fire event of an adversary counter-air system with stated range, altitude, or engagement performance
 #
 #  PIR-4: Adversary capabilities that specifically threaten rotary-wing
 #         operations (What can the adversary field that would kill or degrade
@@ -11,41 +11,79 @@
 # ------------------------------------------------------------------------------
 
 id: SIR-4.2.1
-title: 'A test or live-fire event with stated range, altitude, or engagement performance'
+title: 'A test or live-fire event of an adversary counter-air system with stated range, altitude, or engagement performance'
 status: draft
-modified: '2026-09-27'
-fact: 'A test or live-fire event with stated range, altitude, or engagement performance.'
+modified: '2026-10-20'
+fact: 'A test or live-fire event of an adversary counter-air system with stated range, altitude, or engagement performance.'
 logsource:
   scope: any
   kind: any
 detection:
-  # THREE CONJUNCTS AND ONE OF THEM IS A PATTERN, because the fact is not "a
-  # test happened" but "a test happened WITH A STATED FIGURE". A range, an
-  # altitude or an engagement envelope is a number beside a unit, which is an
-  # identifier-shaped thing rather than vocabulary, so it is matched as a
-  # pattern. Case is irrelevant to it: patterns are compiled IGNORECASE.
+  # THE SYSTEM, THE TEST AND THE ADVERSARY ARE READ IN THE TITLE; THE FIGURE
+  # STAYS IN THE BODY, because a headline rarely carries the number. Measured
+  # 2026-10-17 over 1,911 articles in 45 days, with the shipped rule as the
+  # control:
+  #
+  #   all three conjuncts in the body, the rule this replaces   94
+  #   system and test in the title                               6
+  #   the same with an adversary required, this rule             4
+  #
+  # All were read. The four this rule keeps are PLA tests: HQ-9 live fire in
+  # the Gobi, the HQ-9B redeployment drill, and the laser and microwave
+  # counter-drone drill (twice). The two it drops are a Taiwanese
+  # counter-drone drill.
+  #
+  # The figure is a pattern in the `{match, scope}` form ON PURPOSE. Written
+  # bare with a sibling `scope:`, the engine ignores the scope and reads the
+  # whole article, which was harmless here only because blob is the default.
   system:
     any:
-    - {group: threat_manpads, scope: blob}
-    - {group: threat_sam, scope: blob}
-    - {group: threat_aaa_cuas, scope: blob}
-    - {group: threat_ew, scope: blob}
-    - {group: threat_small_arms, scope: blob}
-    - {group: threat_uas_loitering, scope: blob}
-    - {group: threat_sa_designations, scope: blob}
-    - {group: threat_manpads_generic, scope: blob}
-    - {group: threat_sam_generic, scope: blob}
-    - {group: threat_aaa_cuas_generic, scope: blob}
-    - {group: threat_ew_generic, scope: blob}
-    - {group: threat_small_arms_generic, scope: blob}
-    - {group: threat_uas_loitering_generic, scope: blob}
+    - {group: threat_manpads, scope: title}
+    - {group: threat_sam, scope: title}
+    - {group: threat_aaa_cuas, scope: title}
+    - {group: threat_ew, scope: title}
+    - {group: threat_uas_loitering, scope: title}
+    - {group: threat_sa_designations, scope: title}
+    - {group: threat_manpads_generic, scope: title}
+    - {group: threat_sam_generic, scope: title}
+    - {group: threat_aaa_cuas_generic, scope: title}
+    - {group: threat_ew_generic, scope: title}
+    - {group: threat_uas_loitering_generic, scope: title}
+    - keywords: [air defense, air defence, air-defense, air-defence,
+                 anti-aircraft, antiaircraft, SAM, interceptor, anti-drone,
+                 counter-drone]
+      scope: title
   test_event:
-    keywords: [test, tested, testing, test-fired, test fired, test launch,
-               live-fire, live fire, firing test, trial, trials, proving
-               ground, flight test, intercept test]
-    scope: blob
+    keywords: [test, tests, tested, testing, test-fired, test fires, test-fires,
+               test launch, live-fire, live fire, firing test, trial, trials,
+               intercept test, demonstrates, demonstrated, demonstration,
+               exercise, drill, drills]
+    scope: title
   stated_figure:
-    pattern: \b\d{1,4}(\.\d+)?\s?(km|kilometre|kilometres|kilometer|kilometers|nm|nautical mile|nautical miles|mile|miles|m|metre|metres|meter|meters|ft|feet|mach)\b
-    scope: blob
-  condition: system and test_event and stated_figure
-note: 'Scoring: Tier 2 × first-occurrence. WESTERN-ONLY, 2026-09-27: this rule asked for the adversary vantage and now accepts any. Measured before the change - the adversary vantage matched 1 of the 7 declared sensors, china-arms.com, which returned 21 articles in 41 days. The owner decided not to pursue adversary primary sources, so this fact is collected from western reporting of adversary statements and activity instead. DETECTOR ADDED 2026-09-27 AND UNMEASURED: it has not met the corpus, so it is a proposal, not a finding. Read what it matches before trusting the coverage number, and write the false positives from that reading rather than from argument.'
+    pattern:
+      match: '\b\d{1,4}(\.\d+)?\s?(km|kilometre|kilometres|kilometer|kilometers|nm|nautical mile|nautical miles|mile|miles|m|metre|metres|meter|meters|ft|feet|mach)\b'
+      scope: blob
+  # THE ADVERSARY, decided 2026-10-20: PIR-4 asks what the ADVERSARY can field.
+  # Either a named adversary designation in the title (HQ-9, Pantsir and the like
+  # are in the designation groups) or an adversary as the first word of the
+  # title, written as a pattern because the rule language has no other way to
+  # say "at the start".
+  adversary:
+    any:
+    - {group: threat_manpads, scope: title}
+    - {group: threat_sam, scope: title}
+    - {group: threat_aaa_cuas, scope: title}
+    - {group: threat_ew, scope: title}
+    - {group: threat_uas_loitering, scope: title}
+    - {group: threat_sa_designations, scope: title}
+    - pattern:
+        match: '^(china|china''s|chinese|beijing|prc|pla|russia|russia''s|russian|moscow|kremlin|north korea|north korea''s|north korean|pyongyang|dprk|iran|iran''s|iranian|tehran|irgc)\b'
+        scope: title
+  condition: system and test_event and stated_figure and adversary
+falsepositives:
+- A FIGURE ANYWHERE IN THE BODY IS NOT A STATED PERFORMANCE FIGURE. The pattern matches
+  any number beside a unit, such as a distance travelled to the test site. The first four
+  matches were not checked for this.
+- FIXED BY REQUIRING THE ADVERSARY, recorded so it is not reintroduced - 'AIDC, Agency of
+  Corrections hold counter-drone drill' is a Taiwanese drill.
+note: 'Scoring: Tier 2 × first-occurrence. WESTERN-ONLY, 2026-09-27: this fact is collected from western reporting of adversary activity. MEASURED AND TIGHTENED 2026-10-17: 94 articles of 1,911 down to 4, every match read. ADVERSARY REQUIRED 2026-10-20 by owner decision, and the title and fact now say so.'
