@@ -67,8 +67,9 @@ detection:
     group: declaration_terms
     scope: title
   # The adjectives Chinese, Russian, North Korean and Iranian are in the pattern
-  # for the reason recorded on 2026-09-27: `actor_adversary` holds only nouns,
-  # and adding them there is a SCORING change that waits on a measurement.
+  # because this rule needs the adversary FIRST, which a group cannot say.
+  # `actor_adversary` gained `Chinese` on 2026-10-16 and still lacks the other
+  # three.
   speaker_first:
     pattern:
       match: '^(china|china''s|chinese|beijing|prc|pla|russia|russia''s|russian|moscow|kremlin|putin|lavrov|peskov|medvedev|north korea|north korean|pyongyang|kim jong un|kim yo jong|iran|iran''s|iranian|tehran|irgc|khamenei|araghchi|xi|xi jinping)\b'

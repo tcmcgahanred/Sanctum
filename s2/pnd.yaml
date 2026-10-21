@@ -425,6 +425,9 @@ scoring:
       weight: 8.0
       require:
         all:
+          - not:
+              group: non_military_context
+              scope: title
           - {group: actor_adversary, scope: title}
           - {group: geo_indopacom, scope: title}
 
@@ -629,6 +632,7 @@ scoring:
   # nothing. Rationale for each is in the vocab: block below.
   word_boundary_terms:
     - "China"
+    - "Favorit"
     - "Verba"
     - "Palau"
     - "Samoa"
@@ -647,6 +651,14 @@ scoring:
     - "Zapad"
 
   groups:
+    non_military_context:
+      - "panda"
+      - "zoo"
+      - "Climbing Champion"
+      - "box office"
+      - "tourism"
+      - "recipe"
+      - "toilet"
     # 19 groups. Terms live here and only here — the vocab: block records decisions
     # about them and never repeats them.
     #
@@ -892,8 +904,9 @@ scoring:
       - "People's Liberation Army"
       - "PLAAF"
       - "PLA Air Force"
-      - "PLAN"
       - "PLA Navy"
+      - "Liberation Army Navy"
+      - "Chinese"
       - "PLARF"
       - "PLA Rocket Force"
       - "PLAGF"
@@ -1650,6 +1663,10 @@ scoring:
 vocab:
   review_interval_days: 180
   groups:
+    non_military_context:
+      reviewed: 2026-10-16
+      review_interval_days: 180
+      role: exclusion
     geo_indopacom:
       reviewed: 2026-08-17
       review_interval_days: 365
