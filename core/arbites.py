@@ -35,6 +35,7 @@ from pathlib import Path
 
 from core.pnd import load_domain
 from core.fetch import nobody_reason
+from core.oldevent import PriorEditions, secondary_hit
 from core.rules import (score_article, matched_evidence, tier_requirement,
                         satisfied_elements,
                         compute_cycle_window, recency_tag, _parse_pub,
@@ -629,6 +630,32 @@ def main():
     surfaced = scored[:surfaced_n]
     dropped = scored[surfaced_n:]
 
+    # OLD EVENT, NEW COVERAGE — labels only, on every surfaced item that is
+    # printed as an entry (a group head or an ungrouped item). Nothing here
+    # moves a score or decides surface versus drop. See core/oldevent.py for
+    # what was measured and why "first seen in the corpus" was not built.
+    old_cfg = (annotations.get("old_event") or {}) if annotations else {}
+    old_labels = {}
+    if old_cfg:
+        sec_spec = old_cfg.get("secondary_coverage")
+        ed_spec = old_cfg.get("prior_editions")
+        prior = None
+        if ed_spec:
+            prior = PriorEditions(cfg["corpus_dir"],
+                                  cfg["domain_dir"] / str(ed_spec.get("dir", "editions")),
+                                  ed_spec, settings.get("grouping", {}) or {}, seps)
+        ref = cutoff if (recency_on and window_start is not None) else datetime.now(timezone.utc)
+        for idx in range(surfaced_n):
+            if idx in grouped_idx and idx not in child_of:
+                continue
+            art = scored[idx][3]
+            sh = secondary_hit(art, sec_spec)
+            ph = prior.hit(art.get("title", ""), ref) if prior else None
+            if sh or ph:
+                old_labels[idx] = (sh, ph)
+    secondary_count = sum(1 for v in old_labels.values() if v[0])
+    reported_count = sum(1 for v in old_labels.values() if v[1])
+
     # Annotation tallies over the SURFACED set only — the drop list is not
     # reviewed item by item, so counting it here would misreport the workload.
     surfaced_pre = [x for x in scored if x[5]]
@@ -655,6 +682,7 @@ def main():
                  f"{recency_note}"
                  f"{ann_note}"
                  f"{f' · {len(child_of)} event group(s)' if child_of else ''}"
+                 f"{f' · {secondary_count} SECONDARY COVERAGE · {reported_count} ALREADY REPORTED?' if old_cfg else ''}"
                  f"{f' · {dissolved_groups} oversized cluster(s) dissolved' if dissolved_groups else ''}.*")
     # ------------------------------------------------------------------
     # CYCLE DATES — the ICOD and the coverage span, stated once, at the top.
@@ -734,6 +762,14 @@ def main():
         lines.append("> **Suggested section** is a SUGGESTION for you to confirm or "
                      "override. A trailing `?` means it fell through to the default or the "
                      "item has no body, so the guess came from a headline.")
+    if old_cfg:
+        lines.append("> **[SECONDARY COVERAGE]** = the headline reports on an event after the "
+                     "fact (a lawsuit, a settlement, an investigation opened). The article may "
+                     "be new while the event is old. Verify the event date before treating it "
+                     "as this week's incident. A label only: nothing is dropped.")
+        lines.append("> **[ALREADY REPORTED?]** = the headline names the same organisation and "
+                     "incident as an entry in a recent edition; the entry is printed so a wrong "
+                     "match is obvious. Carry it only with a new development, or cut it.")
     lines.append("")
     if child_of:
         lines.append("> ⧉ = same event, reported separately. Grouped for review only — "
@@ -751,8 +787,14 @@ def main():
         tag = f" ⧉ {len(kids) + 1} reports" if kids else ""
         nb, sec, low = ann_by_id.get(id(a), (False, None, False))
         nb_mark = "[NO BODY] " if nb else ""
-        lines.append(f"### {mark}{nb_mark}[{s}] {a.get('title','(no title)')}{tag}")
+        sh, ph = old_labels.get(idx, (None, None))
+        old_mark = ("[SECONDARY COVERAGE] " if sh else "") + ("[ALREADY REPORTED?] " if ph else "")
+        lines.append(f"### {mark}{nb_mark}{old_mark}[{s}] {a.get('title','(no title)')}{tag}")
         lines.append(f"- **Source:** {source_name(a.get('source',''))} · {a.get('published','?')}")
+        if sh:
+            lines.append(f"- **Secondary coverage:** headline says \"{sh}\", so verify the event date")
+        if ph:
+            lines.append(f"- **Already reported?** {ph[0]}: {ph[1]}")
         if sec:
             lines.append(f"- **Suggested section:** {sec}{'?' if low else ''}")
         if nb:
@@ -837,6 +879,9 @@ def main():
             ("Surfaced with no usable body", nobody_count),
             ("In drop list", len(dropped)),
         ]
+        if old_cfg:
+            stats[-1:-1] = [("Labelled SECONDARY COVERAGE", secondary_count),
+                            ("Labelled ALREADY REPORTED?", reported_count)]
         comp_path = compliance_path(out_path)
         comp_path.write_text(
             build_compliance_report(cfg, annotations, stats, nobody_items, section_counts),

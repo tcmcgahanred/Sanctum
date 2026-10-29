@@ -1451,6 +1451,33 @@ production:
         scope: blob
     - name: NEWS
       when: always
+    # OLD EVENT, NEW COVERAGE. Labels on candidates in the staging document,
+    # never a score, a drop or a force-surface change. Briefing chat work order
+    # 2026-10-28, after the Crime Stoppers / P3 Global Intel (March 2026) and
+    # Frontline Education items were force-surfaced on new coverage and cut by
+    # hand. Measured over the CTI cycles 7 to 28 October 2026 with every label
+    # read before this was written:
+    #
+    #   secondary_coverage  21 labels, 20 about an older event. "confirms" was
+    #                       tested and REMOVED: the one item it labelled,
+    #                       the Burnaby schools attack, was current.
+    #                       "opens investigation" is what labels the Crime
+    #                       Stoppers lead headline.
+    #   prior_editions      10 labels, 7 correct. Misses Frontline Education,
+    #                       because bodies use "frontline" as an ordinary
+    #                       word, so it fails the name test. Sees only
+    #                       editions committed to cti/editions/.
+    #
+    # Whole words only, title only, so "lawsuits" and "settlements" do not
+    # match: that is exactly what was measured.
+    old_event:
+      secondary_coverage:
+        pattern:
+          match: '\b(lawsuit|class action|class-action|settlement|months after|investigation opened|opens investigation|sues|sued|settles)\b'
+          scope: title
+      prior_editions:
+        dir: editions
+        weeks: 6
     compliance_checklist:
     - Every entry written from the article BODY, never the headline (§6.2).
     - One event, one entry - same-event reports folded, each event placed once (§7).
