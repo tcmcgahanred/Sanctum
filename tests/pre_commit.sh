@@ -44,8 +44,18 @@ cd "$REPO_ROOT"
 
 STATUS=0
 
-if command -v python3 >/dev/null 2>&1; then
-    python3 "$REPO_ROOT/tests/domain_check.py" --staged || STATUS=1
+# RESOLVE THE INTERPRETER BY RUNNING IT, NOT BY FINDING IT. Since 2026-10-14
+# `python3` and `python` on the laptop run the Windows Store placeholder, which
+# `command -v` finds because it is a real file, and every commit was blocked or
+# needed --no-verify. The first candidate that can import PyYAML wins: `py` is
+# the Windows launcher, absent on Ravenor, where `python3` is used as before.
+PY=""
+for c in py python3 python; do
+    if "$c" -c "import sys, yaml" >/dev/null 2>&1; then PY="$c"; break; fi
+done
+
+if [ -n "$PY" ]; then
+    "$PY" "$REPO_ROOT/tests/domain_check.py" --staged || STATUS=1
     # Runs against every TRACKED domain, not just staged files: a vocabulary
     # defect is a property of the whole word list, and an edit to one group can
     # orphan a boundary entry in a file nobody touched this commit.
@@ -54,17 +64,17 @@ if command -v python3 >/dev/null 2>&1; then
     # the public repo, a stub that is not operational yet — cannot reach the
     # repo this gate protects, so it must not be able to block a commit. Run the
     # tool by hand, with no flag, to see those domains too.
-    python3 "$REPO_ROOT/tools/vocab_check.py" --tracked-only || STATUS=1
+    "$PY" "$REPO_ROOT/tools/vocab_check.py" --tracked-only || STATUS=1
     # Collection guards. Offline by design — a guard that needs the internet
     # is a guard that gets skipped on the day it matters.
-    python3 "$REPO_ROOT/tests/fetch_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/fetch_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/fetch_test.py failed; run it to see which check" >&2
         STATUS=1; }
     # Same class as fetch_test: engine behaviour, stdlib plus PyYAML, fails
     # closed. It guards the handover from stage 3a to 3b — the requirement, the
     # multiplier evidence, and the rule that an undeclared domain stays silent
     # rather than printing "Requirement met: None" on every candidate.
-    python3 "$REPO_ROOT/tests/handover_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/handover_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/handover_test.py failed; run it to see which check" >&2
         STATUS=1; }
     # The homonym gate. A shark breaching the ocean force-surfaced as a California
@@ -72,17 +82,17 @@ if command -v python3 >/dev/null 2>&1; then
     # so nothing downstream could have caught it. This holds the line in both
     # directions - the junk drops AND every genuine item an earlier attempt deleted
     # still surfaces.
-    python3 "$REPO_ROOT/tests/geo_classify_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/geo_classify_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/geo_classify_test.py failed; the geography table was hand-edited or a regeneration moved a known collision" >&2
         STATUS=1
     }
 
-    python3 "$REPO_ROOT/tests/cycle_dates_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/cycle_dates_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/cycle_dates_test.py failed; the staging document no longer states its own ICOD, so the vox cannot be dated" >&2
         STATUS=1
     }
 
-    python3 "$REPO_ROOT/tests/merge_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/merge_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/merge_test.py failed; a domain file declares something twice, or the one-file layout broke" >&2
         STATUS=1
     }
@@ -91,26 +101,26 @@ if command -v python3 >/dev/null 2>&1; then
     # a feed having a bad day is still collected once. Break either half and the
     # symptom is silence: a source that never reports again, or a corpus that
     # grows a record every run.
-    python3 "$REPO_ROOT/tests/page_recollect_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/page_recollect_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/page_recollect_test.py failed; a declared portal is no longer re-read, or a non-feed source is being re-collected when it should not be" >&2
         STATUS=1
     }
 
-    python3 "$REPO_ROOT/tests/requirements_dir_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/requirements_dir_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/requirements_dir_test.py failed; the requirements directory and its tree disagree, or a condition line no longer parses" >&2
         STATUS=1
     }
 
-    python3 "$REPO_ROOT/tests/detect_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/detect_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/detect_test.py failed; a requirement can no longer carry its own detector, or an untestable indicator is being reported as a miss" >&2
         STATUS=1
     }
 
-    python3 "$REPO_ROOT/tests/homonym_test.py" >/dev/null || {
+    "$PY" "$REPO_ROOT/tests/homonym_test.py" >/dev/null || {
         echo "pre-commit: BLOCKED — tests/homonym_test.py failed; run it to see which case" >&2
         STATUS=1; }
 else
-    echo "pre-commit: BLOCKED — python3 not found, cannot check domain files" >&2
+    echo "pre-commit: BLOCKED — no Python with PyYAML found (tried py, python3, python), cannot check domain files" >&2
     STATUS=1
 fi
 

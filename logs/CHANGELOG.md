@@ -2,6 +2,13 @@
 
 Notable changes to the Sanctum intelligence apparatus. **Git is the source of truth**; this file is the curated-highlights layer and `git log` is the full record. Brief editions (Vox) are keyed by distribution date (`vYYYYMMDD`), separate from code versioning.
 
+## [2026-10-31] The commit gate finds a Python that works
+
+**Since 2026-10-14 the laptop's `python3` and `python` run the Windows Store placeholder, so the gate blocked every commit and each one needed `--no-verify` behind an apply block.** `tests/pre_commit.sh` now resolves the interpreter by RUNNING each candidate, `py`, then `python3`, then `python`, and takes the first that can import PyYAML. `command -v` was the wrong test because the placeholder is a real file. On Ravenor there is no `py`, so `python3` is used as before.
+
+- **Tested in the session against a fake placeholder:** with `python3` and `python` exiting 9009 as the Store stub does and `py` working, the gate ran every check and passed; with no working Python at all it blocked and named the three it tried.
+- **The hook is a COPY.** Re-copy `tests/pre_commit.sh` to `.githooks/pre-commit` on both machines.
+
 ## [2026-10-31] Second-domain work order: four vocabulary and rule changes, and four engine fixes that reach both domains
 
 **Work order from the second-domain chat, 2026-10-29.** Every change below was measured on Ravenor against the shipped configuration as the control, over the whole second-domain corpus of 3,233 articles and, where the engine changed, the whole CTI corpus of 16,346. Probes `s2wo.py` and `s2wo2b.py`, reports in the Drive folder `sanctum-diagnostics`.
