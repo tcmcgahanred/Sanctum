@@ -588,14 +588,25 @@ scoring:
               - {group: threat_aaa_cuas_generic, scope: blob}
               - {group: threat_small_arms_generic, scope: blob}
               - {group: threat_uas_loitering_generic, scope: blob}
-          - {group: conflict_markers, scope: blob}
+          # THE CONFLICT WORD AND THE AIRCRAFT ARE READ IN THE TITLE, since
+          # 2026-10-31. With all three halves read in the body, long defence
+          # articles satisfied the rule by mentioning a weapon, a war word and
+          # an aircraft in different paragraphs. Measured over the whole corpus
+          # of 3,233 with the shipped rule as the control: it fired 220 times,
+          # and the 25 articles it lifted from below the cut were ALL wrong -
+          # business-jet missile protection, procurement news, market reports.
+          # Every real aircraft loss in the corpus, the Najran helicopter
+          # included, already scored 2.0 or more on its own. Title-scoped, it
+          # fires 13 times, 11 of them a real shoot-down (Mi-28, Mi-8, the
+          # Najran helicopter, the Iran Apache), and 1 is below the cut (the
+          # SPICE 1000 story, wrong). The threat half stays in the body.
+          - {group: conflict_markers, scope: title}
           # WIDENED 2026-08-19 to any aircraft, not rotary wing only. A fixed-wing
           # aircraft downed by a man-portable system tells you about the system,
-          # and that is worth guaranteed inclusion. Volume stays low because the
-          # conflict and threat conditions above still both have to hold.
+          # and that is worth guaranteed inclusion.
           - any:
-              - {group: platform_rotary_wing, scope: blob}
-              - {group: platform_fixed_wing, scope: blob}
+              - {group: platform_rotary_wing, scope: title}
+              - {group: platform_fixed_wing, scope: title}
 
   settings:
     # PROVISIONAL. Not measured against a real corpus. At 2.0 a bare Tier 4
@@ -606,9 +617,9 @@ scoring:
     empty_title: {score: 0.5, tier: 4, flag: "FLAG: empty title (feed artifact — verify source)"}
     recency:
       enabled: true
-      window_days: 7           # MUST track collection.window_days above, or
-                               # most of the corpus is flagged stale on every
-                               # run. Flags only; never drops.
+      window_days: 7           # MUST equal collection.window_days above;
+                               # core/pnd.py refuses the domain if it does not
+                               # (2026-10-31). Flags only; never drops.
       # THE SAME CYCLE AS cti, decided 2026-09-27. Was monday, 05:00, UTC.
       # THE TIMER DOES NOT MOVE: ravenor-s2.timer stays at 05:30 Pacific while
       # ravenor.timer fires at 04:00, because a cti run takes 36 minutes and the
@@ -649,6 +660,35 @@ scoring:
     - "Malabar"
     - "Vostok"
     - "Zapad"
+    # ADDED 2026-10-31. Each of these matched inside an unrelated, and often
+    # opposite, word. Found by scanning every term of five or more characters
+    # against the whole corpus for a letter on either side of the match:
+    # tested in contested 248 times, moved in removed 82, Hongqi in Chongqing
+    # 69, commissioned in decommissioned 14, Tinian in Palestinian 11, resumed
+    # in presumed 10, rammed and ramming in programmed and programming 17.
+    # Measured against the shipped list as the control: 53 articles move, 17
+    # stop surfacing, every one of the 17 a civilian story (Chongqing trade,
+    # airport guides, expos), and none newly surfaces. SIR-1.3.1 goes from 21
+    # matches to 19. "panda" is deliberately NOT here: boundaries would stop it
+    # matching "pandas" in the exclusion group.
+    - "tested"
+    - "moved"
+    - "Hongqi"
+    - "Tinian"
+    - "resumed"
+    - "rammed"
+    - "ramming"
+    - "lasing"
+    - "matting"
+    - "mobilised"
+    - "mobilized"
+    - "militarized"
+    - "activated"
+    - "hardened"
+    - "commissioned"
+    - "red line"
+    - "National Day"
+    - "EMS operations"
 
   groups:
     non_military_context:
@@ -659,6 +699,18 @@ scoring:
       - "tourism"
       - "recipe"
       - "toilet"
+      # ADDED 2026-10-31, owner's work order of 2026-10-29, after the Liu Wen
+      # Victoria's Secret story surfaced at 8.0 three cycles running. Measured
+      # over the whole corpus of 3,233: 17 tier-1 headlines lose tier 1 and 16
+      # stop surfacing, every one of them sport, travel, festivals or fashion.
+      # No military headline is touched. This group is read by tier 1 only.
+      - "fashion"
+      - "supermodel"
+      - "football"
+      - "medal"
+      - "olympic"
+      - "festival"
+      - "travel"
     # 19 groups. Terms live here and only here — the vocab: block records decisions
     # about them and never repeats them.
     #
@@ -942,6 +994,18 @@ scoring:
       - "IRGC"
       - "Islamic Revolutionary Guard Corps"
       - "Iranian Armed Forces"
+      # ADDED 2026-10-31, owner's work order of 2026-10-29: the Houthi
+      # attack-helicopter kill near Najran on 18 October had no adversary term
+      # at all. Measured over the whole corpus of 3,233 against the shipped
+      # list: 27 articles move, 4 newly surface. The Najran reports rise from
+      # 2.0-2.4 to 2.8-3.36 and the Houthi footage of the AH-6i loss surfaces.
+      # COST, read: 3 of the 4 newcomers are allied procurement stories that
+      # mention the Houthi threat in the body (the Dutch interceptor drones, the
+      # F125 frigates, the TRV-150). "Houthi" is a substring match, so it also
+      # catches "Houthis".
+      - "Houthi"
+      - "Ansar Allah"
+      - "Ansarallah"
     platform_fixed_wing:
       - "fighter jet"
       - "warplane"

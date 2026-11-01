@@ -873,7 +873,15 @@ def main():
         stats = [
             ("Articles scored in window", len(arts)),
             ("Surfaced candidates", len(surfaced_pre)),
-            ("Distinct events after grouping", len(surfaced_pre) - len(grouped_idx & set(range(surfaced_n)))),
+            # One event per ungrouped surfaced item, plus one per surfaced
+            # group. `grouped_idx` holds every member of every group, HEADS
+            # INCLUDED, so subtracting it alone counted only the ungrouped
+            # items and left every group out. Measured 2026-10-31 by replaying
+            # the s2 cycles: 21 Oct reported 83 and was 105, 28 Oct reported
+            # 67 and was 86.
+            ("Distinct events after grouping",
+             len(surfaced_pre) - len(grouped_idx & set(range(surfaced_n)))
+             + len(child_of)),
             ("Force-surfaced below the cut", forced_count),
             ("Flagged STALE", stale_count),
             ("Surfaced with no usable body", nobody_count),

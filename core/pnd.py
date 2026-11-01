@@ -429,6 +429,23 @@ def load_domain(domain=None, pnd_path=None, repo_root=None):
             f"Only `feed` (the default) and `page` exist. A page is re-read every "
             f"run and deduplicated on its content; a feed is walked for items.")
 
+    # TWO WINDOW SETTINGS, ONE VALUE. `manifest.collection.window_days` decides
+    # which articles are gathered; `scoring.settings.recency.window_days` decides
+    # where the cycle window opens for the STALE flag. Both domain files carried
+    # a comment saying they must track each other, and a comment is not a
+    # guard. A domain that declares both with different values is refused.
+    # `core/arbites.py --window-days` deliberately overrides only the first, for
+    # the daily differential: the cycle stays a week long while the pass
+    # gathers one day.
+    col_wd = (manifest.get("collection") or {}).get("window_days")
+    rec_wd = (((cfg.get("scoring") or {}).get("settings") or {})
+              .get("recency") or {}).get("window_days")
+    if col_wd is not None and rec_wd is not None and int(col_wd) != int(rec_wd):
+        raise ValueError(
+            f"[{domain}] manifest.collection.window_days is {col_wd} but "
+            f"scoring.settings.recency.window_days is {rec_wd}. They must be "
+            f"equal, or most of each cycle is flagged STALE or none of it is.")
+
     corpus_dir = base_dir / "corpus"
     result = {
         "manifest": manifest,

@@ -95,11 +95,30 @@ def make_matcher(word_boundary_terms):
 # ------------------------------------------------------------------
 # Scope helpers
 # ------------------------------------------------------------------
+# TYPOGRAPHIC PUNCTUATION IS FOLDED TO ASCII BEFORE ANY TERM IS COMPARED.
+# Declared terms are typed with a straight apostrophe and a plain hyphen; the
+# corpus carries what publishers typeset. Measured 2026-10-31 on the s2 corpus:
+# "People's Liberation Army" appears with a straight apostrophe in 30 articles
+# and with U+2019 in 112. Folding the TEXT, not the terms, is the same choice
+# the engine made for case on 2026-09-27: the domain file keeps the form a
+# reader writes, and the next term added with an apostrophe cannot reintroduce
+# the fault. En and em dashes are NOT folded: they separate, they do not join.
+# Measured before shipping against the shipped rules as the control: s2, 0 of
+# 3,233 scores moved; cti, 3 of 16,346 moved, and 2 newly surface - a
+# sheriff's office suspending Flock cameras over a data breach, and a breach of
+# jail medical records in Suffolk County.
+_PUNCT_FOLD = str.maketrans({chr(0x2019): "'", chr(0x2018): "'",
+                             chr(0x02BC): "'", chr(0x2010): "-",
+                             chr(0x2011): "-"})
+
+
 def _scopes(art):
-    title = str(art.get("title", "")).strip()
+    raw_title = str(art.get("title", "")).translate(_PUNCT_FOLD)
+    raw_text = str(art.get("text", "")).translate(_PUNCT_FOLD)
+    title = raw_title.strip()
     title_l = title.lower()
-    text_l = str(art.get("text", "")).lower()
-    blob = (title + "  " + str(art.get("text", ""))).lower()
+    text_l = raw_text.lower()
+    blob = (title + "  " + raw_text).lower()
     # `source` is the article's ORIGIN, not its content: feed URL plus source
     # label. It lets a rule require the authoritative publisher rather than any
     # article that mentions one - "CISA ordered a patch" in a trade write-up is

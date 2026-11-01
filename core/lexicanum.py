@@ -87,7 +87,15 @@ from core.rules import _scopes            # noqa: E402
 # possible at all. Same rules, exhaustive instead of short-circuiting.
 # ------------------------------------------------------------------
 def make_all_hits(word_boundary_terms):
-    wb = set(word_boundary_terms or [])
+    # CASE IS FOLDED ON BOTH SIDES, the same as make_matcher in core/rules.py.
+    # The text handed in is already lowercase (it comes from `_scopes`), and
+    # until 2026-10-31 the declared term was compared to it verbatim, so any
+    # term carrying a capital letter could never be found: `--term China`
+    # returned 0 against 1,361 for `--term china`, and the whole threat_sam
+    # group returned 0 while the corpus held "HQ-9" in 39 article texts. The
+    # boundary set is folded too, or `China` would lose its boundary
+    # protection. The DECLARED term is what is reported back.
+    wb = {str(w).strip().lower() for w in (word_boundary_terms or [])}
 
     def _all(text, terms):
         found = []
@@ -95,10 +103,11 @@ def make_all_hits(word_boundary_terms):
             t = t.strip()
             if not t:
                 continue
-            if len(t) <= 4 or t in wb:
-                if re.search(r"\b" + re.escape(t) + r"\b", text):
+            t_l = t.lower()
+            if len(t_l) <= 4 or t_l in wb:
+                if re.search(r"\b" + re.escape(t_l) + r"\b", text):
                     found.append(t)
-            elif t in text:
+            elif t_l in text:
                 found.append(t)
         return found
 
